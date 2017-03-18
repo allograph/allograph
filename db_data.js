@@ -46,7 +46,6 @@ DBData.prototype.readSchema = function (callback) {
       });
 
       writeToJSON(meta);
-
       callback(meta);
     });
   });  
