@@ -25,7 +25,7 @@ var graphQLData = function() {
 }
 
 var writeToSchemaFile = function(data) {
-  fs.writeFileSync('schema.js', data, 'utf-8');  
+  fs.writeFileSync('schema.js', data, 'utf-8');
 }
 
 var closingBrackets = function() {
@@ -41,21 +41,32 @@ const ` + tableName + ` = new GraphQLObjectType({
   name: '` + tableName + `',
   description: '` + description + `',
   fields: () => {
-    return {`  
+    return {`
 }
 
-var psqlTypeToGraphQLType = {
-    'character varying': 'GraphQLString',
-    'integer': 'GraphQLInt',
+var psqlTypeToGraphQLType = function(psqlType) {
+  var listType = psqlType.match(/list\[(\w+)\]/),
+      typeMap = {
+        'character varying': 'GraphQLString',
+        'integer': 'GraphQLInt'
+      }
+
+  if (listType) {
+    return 'GraphQLList(' + listType[1] + ')'
+  } else if (typeMap[psqlType]) {
+    return typeMap[psqlType]
+  } else {
+    return psqlType
   }
+}
 
 var columnData = function(column, property, psqlType) {
   return '\n      ' + column + `: {
-        type: ` + (psqlTypeToGraphQLType[psqlType] || 'GraphQLString') + `,
+        type: ` + psqlTypeToGraphQLType(psqlType) + `,
         resolve(` + property + `) {
           return ` + property + '.' + column + `;
         }
-      },`  
+      },`
 }
 
 var existingSchemaFileContents = function() {
@@ -70,7 +81,7 @@ var addToSchemaFile = function(newData) {
 var writeGraphQLObjectSchema = function(dbMetadata) {
   for (var property in dbMetadata.tables) {
     if (dbMetadata.tables.hasOwnProperty(property)) {
-      
+
       var tableName = formatTableName(property)
       var description = dbMetadata.tables[property].description
 
@@ -84,7 +95,7 @@ var writeGraphQLObjectSchema = function(dbMetadata) {
       newData += closingBrackets();
       addToSchemaFile(newData);
     };
-  };  
+  };
 }
 
 var writeGraphQLQuerySchema = function(dbMetadata) {
@@ -114,7 +125,7 @@ var writeGraphQLQuerySchema = function(dbMetadata) {
 
 var queryTableArgs = function(column, psqlType) {
   return `\n          ${column}: {
-            type: ` + (psqlTypeToGraphQLType[psqlType] || 'GraphQLString') + `
+            type: ` + psqlTypeToGraphQLType(psqlType) + `
           },`
 }
 

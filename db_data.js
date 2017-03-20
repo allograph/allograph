@@ -2,9 +2,9 @@ var pg = require('pg');
 var fs = require('fs');
 
 var connection = new pg.Client({
-  user: 'rachelminto',
-  database: 'relay',
-  password: 'postgres',
+  user: 'tingc',
+  database: 'blog',
+  password: 'tingc',
   host: 'localhost',
   port: 5432,
   max: 10, // max number of clients in the pool
@@ -132,12 +132,12 @@ INNER JOIN
 var writeRelation = function(meta, relations) {
   relations.forEach(function(relation) {
     meta.tables[relation["pk_table"]].fields[relation["fk_table"]] = {
-      data_type: "list"
+      data_type: "list[" + formatTableName(relation["fk_table"]) + "]"
     }
 
     delete meta.tables[relation["fk_table"]].fields[relation["fk_column"]]
     meta.tables[relation["fk_table"]].fields[relation["pk_table"]] = {
-      data_type: "object",
+      data_type: formatTableName(relation["pk_table"]),
       update_rule: relation["update_rule"],
       delete_rule: relation["delete_rule"]
     }
@@ -145,5 +145,9 @@ var writeRelation = function(meta, relations) {
 
   return meta;
 };
+
+var formatTableName = function(name) {
+  return name.charAt(0).toUpperCase() + name.slice(1).toLowerCase();
+}
 
 exports.DBData = new DBData();

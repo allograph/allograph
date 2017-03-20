@@ -7,96 +7,6 @@ import {
   GraphQLNonNull
 } from 'graphql'
 
-const Posts = new GraphQLObjectType({
-  name: 'Posts',
-  description: 'This is a table called posts',
-  fields: () => {
-    return {
-      id: {
-        type: GraphQLInt,
-        resolve(posts) {
-          return posts.id;
-        }
-      },
-      title: {
-        type: GraphQLString,
-        resolve(posts) {
-          return posts.title;
-        }
-      },
-      content: {
-        type: GraphQLString,
-        resolve(posts) {
-          return posts.content;
-        }
-      },
-      createdAt: {
-        type: GraphQLString,
-        resolve(posts) {
-          return posts.createdAt;
-        }
-      },
-      updatedAt: {
-        type: GraphQLString,
-        resolve(posts) {
-          return posts.updatedAt;
-        }
-      },
-      userId: {
-        type: GraphQLInt,
-        resolve(posts) {
-          return posts.userId;
-        }
-      },
-    };
-  }
-});
-
-const People = new GraphQLObjectType({
-  name: 'People',
-  description: 'This is a table called people',
-  fields: () => {
-    return {
-      id: {
-        type: GraphQLInt,
-        resolve(people) {
-          return people.id;
-        }
-      },
-      firstName: {
-        type: GraphQLString,
-        resolve(people) {
-          return people.firstName;
-        }
-      },
-      lastName: {
-        type: GraphQLString,
-        resolve(people) {
-          return people.lastName;
-        }
-      },
-      email: {
-        type: GraphQLString,
-        resolve(people) {
-          return people.email;
-        }
-      },
-      createdAt: {
-        type: GraphQLString,
-        resolve(people) {
-          return people.createdAt;
-        }
-      },
-      updatedAt: {
-        type: GraphQLString,
-        resolve(people) {
-          return people.updatedAt;
-        }
-      },
-    };
-  }
-});
-
 const Users = new GraphQLObjectType({
   name: 'Users',
   description: 'This is a table called users',
@@ -127,15 +37,78 @@ const Users = new GraphQLObjectType({
         }
       },
       createdAt: {
-        type: GraphQLString,
+        type: timestamp with time zone,
         resolve(users) {
           return users.createdAt;
         }
       },
       updatedAt: {
-        type: GraphQLString,
+        type: timestamp with time zone,
         resolve(users) {
           return users.updatedAt;
+        }
+      },
+      comments: {
+        type: GraphQLList(Comments),
+        resolve(users) {
+          return users.comments;
+        }
+      },
+      posts: {
+        type: GraphQLList(Posts),
+        resolve(users) {
+          return users.posts;
+        }
+      },
+    };
+  }
+});
+
+const Posts = new GraphQLObjectType({
+  name: 'Posts',
+  description: 'This is a table called posts',
+  fields: () => {
+    return {
+      id: {
+        type: GraphQLInt,
+        resolve(posts) {
+          return posts.id;
+        }
+      },
+      title: {
+        type: GraphQLString,
+        resolve(posts) {
+          return posts.title;
+        }
+      },
+      content: {
+        type: GraphQLString,
+        resolve(posts) {
+          return posts.content;
+        }
+      },
+      createdAt: {
+        type: timestamp with time zone,
+        resolve(posts) {
+          return posts.createdAt;
+        }
+      },
+      updatedAt: {
+        type: timestamp with time zone,
+        resolve(posts) {
+          return posts.updatedAt;
+        }
+      },
+      users: {
+        type: Users,
+        resolve(posts) {
+          return posts.users;
+        }
+      },
+      comments: {
+        type: GraphQLList(Comments),
+        resolve(posts) {
+          return posts.comments;
         }
       },
     };
@@ -160,27 +133,27 @@ const Comments = new GraphQLObjectType({
         }
       },
       createdAt: {
-        type: GraphQLString,
+        type: timestamp with time zone,
         resolve(comments) {
           return comments.createdAt;
         }
       },
       updatedAt: {
-        type: GraphQLString,
+        type: timestamp with time zone,
         resolve(comments) {
           return comments.updatedAt;
         }
       },
-      userId: {
-        type: GraphQLInt,
+      users: {
+        type: Users,
         resolve(comments) {
-          return comments.userId;
+          return comments.users;
         }
       },
-      postId: {
-        type: GraphQLInt,
+      posts: {
+        type: Posts,
         resolve(comments) {
-          return comments.postId;
+          return comments.posts;
         }
       },
     };
@@ -192,58 +165,6 @@ const Query = new GraphQLObjectType({
   description: 'Root query object',
   fields: () => {
     return {
-      Posts: {
-        type: new GraphQLList(Posts),
-        args: {
-          id: {
-            type: GraphQLInt
-          },
-          title: {
-            type: GraphQLString
-          },
-          content: {
-            type: GraphQLString
-          },
-          createdAt: {
-            type: GraphQLString
-          },
-          updatedAt: {
-            type: GraphQLString
-          },
-          userId: {
-            type: GraphQLInt
-          },
-        },
-        resolve (root, args) {
-          return Db.models.Posts.findAll({ where: args });
-        }
-      },
-      People: {
-        type: new GraphQLList(People),
-        args: {
-          id: {
-            type: GraphQLInt
-          },
-          firstName: {
-            type: GraphQLString
-          },
-          lastName: {
-            type: GraphQLString
-          },
-          email: {
-            type: GraphQLString
-          },
-          createdAt: {
-            type: GraphQLString
-          },
-          updatedAt: {
-            type: GraphQLString
-          },
-        },
-        resolve (root, args) {
-          return Db.models.People.findAll({ where: args });
-        }
-      },
       Users: {
         type: new GraphQLList(Users),
         args: {
@@ -260,14 +181,49 @@ const Query = new GraphQLObjectType({
             type: GraphQLString
           },
           createdAt: {
-            type: GraphQLString
+            type: timestamp with time zone
           },
           updatedAt: {
-            type: GraphQLString
+            type: timestamp with time zone
+          },
+          comments: {
+            type: GraphQLList(Comments)
+          },
+          posts: {
+            type: GraphQLList(Posts)
           },
         },
         resolve (root, args) {
           return Db.models.Users.findAll({ where: args });
+        }
+      },
+      Posts: {
+        type: new GraphQLList(Posts),
+        args: {
+          id: {
+            type: GraphQLInt
+          },
+          title: {
+            type: GraphQLString
+          },
+          content: {
+            type: GraphQLString
+          },
+          createdAt: {
+            type: timestamp with time zone
+          },
+          updatedAt: {
+            type: timestamp with time zone
+          },
+          users: {
+            type: Users
+          },
+          comments: {
+            type: GraphQLList(Comments)
+          },
+        },
+        resolve (root, args) {
+          return Db.models.Posts.findAll({ where: args });
         }
       },
       Comments: {
@@ -280,16 +236,16 @@ const Query = new GraphQLObjectType({
             type: GraphQLString
           },
           createdAt: {
-            type: GraphQLString
+            type: timestamp with time zone
           },
           updatedAt: {
-            type: GraphQLString
+            type: timestamp with time zone
           },
-          userId: {
-            type: GraphQLInt
+          users: {
+            type: Users
           },
-          postId: {
-            type: GraphQLInt
+          posts: {
+            type: Posts
           },
         },
         resolve (root, args) {
