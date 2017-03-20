@@ -186,3 +186,116 @@ const Comments = new GraphQLObjectType({
     };
   }
 });
+
+const Query = new GraphQLObjectType({
+  name: 'Query',
+  description: 'Root query object',
+  fields: () => {
+    return {
+      Posts: {
+        type: new GraphQLList(Posts),
+        args: {
+          id: {
+            type: GraphQLInt
+          },
+          title: {
+            type: GraphQLString
+          },
+          content: {
+            type: GraphQLString
+          },
+          createdAt: {
+            type: GraphQLString
+          },
+          updatedAt: {
+            type: GraphQLString
+          },
+          userId: {
+            type: GraphQLInt
+          },
+        },
+        resolve (root, args) {
+          return Db.models.Posts.findAll({ where: args });
+        }
+      },
+      People: {
+        type: new GraphQLList(People),
+        args: {
+          id: {
+            type: GraphQLInt
+          },
+          firstName: {
+            type: GraphQLString
+          },
+          lastName: {
+            type: GraphQLString
+          },
+          email: {
+            type: GraphQLString
+          },
+          createdAt: {
+            type: GraphQLString
+          },
+          updatedAt: {
+            type: GraphQLString
+          },
+        },
+        resolve (root, args) {
+          return Db.models.People.findAll({ where: args });
+        }
+      },
+      Users: {
+        type: new GraphQLList(Users),
+        args: {
+          id: {
+            type: GraphQLInt
+          },
+          firstName: {
+            type: GraphQLString
+          },
+          lastName: {
+            type: GraphQLString
+          },
+          email: {
+            type: GraphQLString
+          },
+          createdAt: {
+            type: GraphQLString
+          },
+          updatedAt: {
+            type: GraphQLString
+          },
+        },
+        resolve (root, args) {
+          return Db.models.Users.findAll({ where: args });
+        }
+      },
+      Comments: {
+        type: new GraphQLList(Comments),
+        args: {
+          id: {
+            type: GraphQLInt
+          },
+          content: {
+            type: GraphQLString
+          },
+          createdAt: {
+            type: GraphQLString
+          },
+          updatedAt: {
+            type: GraphQLString
+          },
+          userId: {
+            type: GraphQLInt
+          },
+          postId: {
+            type: GraphQLInt
+          },
+        },
+        resolve (root, args) {
+          return Db.models.Comments.findAll({ where: args });
+        }
+      },
+    };
+  }
+});
