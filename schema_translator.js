@@ -52,11 +52,11 @@ var psqlTypeToGraphQLType = function(psqlType) {
       }
 
   if (listType) {
-    return 'GraphQLList(' + listType[1] + ')'
+    return 'GraphQLList(' + listType[1] + ')';
   } else if (typeMap[psqlType]) {
-    return typeMap[psqlType]
+    return typeMap[psqlType];
   } else {
-    return psqlType
+    return 'GraphQLString';
   }
 }
 

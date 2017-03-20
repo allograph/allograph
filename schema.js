@@ -37,13 +37,13 @@ const Users = new GraphQLObjectType({
         }
       },
       createdAt: {
-        type: timestamp with time zone,
+        type: GraphQLString,
         resolve(users) {
           return users.createdAt;
         }
       },
       updatedAt: {
-        type: timestamp with time zone,
+        type: GraphQLString,
         resolve(users) {
           return users.updatedAt;
         }
@@ -88,19 +88,19 @@ const Posts = new GraphQLObjectType({
         }
       },
       createdAt: {
-        type: timestamp with time zone,
+        type: GraphQLString,
         resolve(posts) {
           return posts.createdAt;
         }
       },
       updatedAt: {
-        type: timestamp with time zone,
+        type: GraphQLString,
         resolve(posts) {
           return posts.updatedAt;
         }
       },
       users: {
-        type: Users,
+        type: GraphQLString,
         resolve(posts) {
           return posts.users;
         }
@@ -133,25 +133,25 @@ const Comments = new GraphQLObjectType({
         }
       },
       createdAt: {
-        type: timestamp with time zone,
+        type: GraphQLString,
         resolve(comments) {
           return comments.createdAt;
         }
       },
       updatedAt: {
-        type: timestamp with time zone,
+        type: GraphQLString,
         resolve(comments) {
           return comments.updatedAt;
         }
       },
       users: {
-        type: Users,
+        type: GraphQLString,
         resolve(comments) {
           return comments.users;
         }
       },
       posts: {
-        type: Posts,
+        type: GraphQLString,
         resolve(comments) {
           return comments.posts;
         }
@@ -181,10 +181,10 @@ const Query = new GraphQLObjectType({
             type: GraphQLString
           },
           createdAt: {
-            type: timestamp with time zone
+            type: GraphQLString
           },
           updatedAt: {
-            type: timestamp with time zone
+            type: GraphQLString
           },
           comments: {
             type: GraphQLList(Comments)
@@ -210,13 +210,13 @@ const Query = new GraphQLObjectType({
             type: GraphQLString
           },
           createdAt: {
-            type: timestamp with time zone
+            type: GraphQLString
           },
           updatedAt: {
-            type: timestamp with time zone
+            type: GraphQLString
           },
           users: {
-            type: Users
+            type: GraphQLString
           },
           comments: {
             type: GraphQLList(Comments)
@@ -236,16 +236,16 @@ const Query = new GraphQLObjectType({
             type: GraphQLString
           },
           createdAt: {
-            type: timestamp with time zone
+            type: GraphQLString
           },
           updatedAt: {
-            type: timestamp with time zone
+            type: GraphQLString
           },
           users: {
-            type: Users
+            type: GraphQLString
           },
           posts: {
-            type: Posts
+            type: GraphQLString
           },
         },
         resolve (root, args) {
