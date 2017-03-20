@@ -1,11 +1,12 @@
-import {
+const pg = require('pg');
+
+var {
   GraphQLObjectType,
-  GraphQLString,
   GraphQLInt,
-  GraphQLSchema,
   GraphQLList,
-  GraphQLNonNull
-} from 'graphql'
+  GraphQLString,
+  GraphQLSchema
+} = require('graphql');
 
 const Posts = new GraphQLObjectType({
   name: 'Posts',
@@ -215,7 +216,7 @@ const Query = new GraphQLObjectType({
           },
         },
         resolve (root, args) {
-          return Db.models.Posts.findAll({ where: args });
+          return Db.models.posts.findAll({ where: args });
         }
       },
       People: {
@@ -241,7 +242,7 @@ const Query = new GraphQLObjectType({
           },
         },
         resolve (root, args) {
-          return Db.models.People.findAll({ where: args });
+          return Db.models.people.findAll({ where: args });
         }
       },
       Users: {
@@ -267,7 +268,7 @@ const Query = new GraphQLObjectType({
           },
         },
         resolve (root, args) {
-          return Db.models.Users.findAll({ where: args });
+          return Db.models.users.findAll({ where: args });
         }
       },
       Comments: {
@@ -293,9 +294,15 @@ const Query = new GraphQLObjectType({
           },
         },
         resolve (root, args) {
-          return Db.models.Comments.findAll({ where: args });
+          return Db.models.comments.findAll({ where: args });
         }
       },
     };
   }
 });
+
+const Schema = new GraphQLSchema({
+  query: Query
+});
+
+module.exports = Schema;

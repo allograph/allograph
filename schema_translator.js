@@ -1,12 +1,15 @@
 var fs = require('fs');
+const graphQLServer = require('./server.js').GraphQLServer;
+
 var SchemaTranslator = function () {};
 
 SchemaTranslator.prototype.printMetadata = function(dbMetadata) {
   writeToSchemaFile(graphQLData());
   writeGraphQLObjectSchema(dbMetadata);
   writeGraphQLQuerySchema(dbMetadata);
+  writeGraphQLExport();
 
-  console.log("should start server here.")
+  graphQLServer.run();
 }
 
 var formatTableName = function(name) {
@@ -14,14 +17,15 @@ var formatTableName = function(name) {
 }
 
 var graphQLData = function() {
-  return `import {
+  return `const pg = require('pg');
+
+var {
   GraphQLObjectType,
-  GraphQLString,
   GraphQLInt,
-  GraphQLSchema,
   GraphQLList,
-  GraphQLNonNull
-} from 'graphql'`
+  GraphQLString,
+  GraphQLSchema
+} = require('graphql');`
 }
 
 var writeToSchemaFile = function(data) {
@@ -104,7 +108,7 @@ var writeGraphQLQuerySchema = function(dbMetadata) {
       newData += queryTableArgs(column, psqlType);
     }
 
-    newData += queryResolveFunction(tableName)
+    newData += queryResolveFunction(property)
   }
 
   newData += queryClosingBrackets();
@@ -137,6 +141,16 @@ var queryClosingBrackets = function() {
   return `\n    };
   }
 });`
+}
+
+var writeGraphQLExport = function() {
+  var newData = `\n\nconst Schema = new GraphQLSchema({
+  query: Query
+});
+
+module.exports = Schema;`
+
+  addToSchemaFile(newData);
 }
 
 exports.SchemaTranslator = new SchemaTranslator();
