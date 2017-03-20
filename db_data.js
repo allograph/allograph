@@ -15,9 +15,10 @@ var DBData = function () {};
 connection.connect();
 
 DBData.prototype.readSchema = function (callback) {
-  Promise.all([tableNamesQuery, dbNameQuery]).then(values => {
+  Promise.all([tableNamesQuery, dbNameQuery, relationQuery]).then(values => {
     var dbName = values[1].rows[0].catalog_name
     var tables = values[0].rows
+    var relations = values[2].rows
 
     var meta = {
       data: dbName,
