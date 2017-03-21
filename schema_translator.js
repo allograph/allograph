@@ -1,4 +1,5 @@
 var fs = require('fs');
+var lingo = require('lingo')
 var SchemaTranslator = function () {};
 const graphQLServer = require('./server.js').GraphQLServer;
 
@@ -12,12 +13,13 @@ SchemaTranslator.prototype.printMetadata = function(dbMetadata) {
 }
 
 var formatTableName = function(name) {
-  return name.charAt(0).toUpperCase() + name.slice(1).toLowerCase();
+  var singularName = lingo.en.singularize(name)
+  return lingo.capitalize(singularName);
+  // return name.charAt(0).toUpperCase() + name.slice(1).toLowerCase();
 }
 
 var graphQLData = function() {
-  return `import Sequelize from 'sequelize';
-import {
+  return `import {
   GraphQLObjectType,
   GraphQLString,
   GraphQLInt,
@@ -26,15 +28,11 @@ import {
   GraphQLNonNull
 } from 'graphql';
 
-const Db = new Sequelize(
-  'blog', //database name
-  'tingc', //username
-  'tingc', //password
-  {
-    dialect: 'postgres',
-    host: 'localhost'
-  }
-);`
+var knex = require('knex')({
+  client: 'pg',
+  connection: "postgresql://rachelminto:postgres@localhost/relay",
+  searchPath: 'knex,public'
+});`
 }
 
 var writeToSchemaFile = function(data) {
@@ -53,7 +51,7 @@ var objectDescription = function(tableName, description) {
 const ` + tableName + ` = new GraphQLObjectType({
   name: '` + tableName + `',
   description: '` + description + `',
-  fields: () => {
+  fields () => {
     return {`
 }
 
@@ -79,8 +77,24 @@ var psqlTypeToGraphQLType = function(psqlType) {
 var columnData = function(column, property, psqlType) {
   return '\n      ' + column + `: {
         type: ` + psqlTypeToGraphQLType(psqlType) + `,
-        resolve(` + property + `) {
-          return ` + property + '.' + column + `;
+        resolve (` + lingo.en.singularize(property) + `) {
+          return ` + lingo.en.singularize(property) + '.' + column + `;
+        }
+      },`
+}
+
+var foreignKeyColumnData = function(column, tableName) {
+  lowercaseTableName = tableName.toLowerCase();
+  singularLowercaseTableName = lingo.en.singularize(lowercaseTableName)
+  singularColumnName = lingo.en.singularize(column)
+  singularUppercaseColumnName = lingo.capitalize(singularColumnName)
+
+  return '\n      ' + column + `: {
+        type: ` + singularUppercaseColumnName + `,
+        resolve (` + lowercaseTableName + `) {
+          return knex('${column}').where({ id: ${lowercaseTableName}.${singularColumnName}_id }).then(${singularColumnName} => {;
+            return ${singularColumnName}[0];        
+          })
         }
       },`
 }
@@ -96,6 +110,7 @@ var addToSchemaFile = function(newData) {
 
 var writeGraphQLObjectSchema = function(dbMetadata) {
   for (var property in dbMetadata.tables) {
+
     if (dbMetadata.tables.hasOwnProperty(property)) {
 
       var tableName = formatTableName(property)
@@ -104,8 +119,13 @@ var writeGraphQLObjectSchema = function(dbMetadata) {
       var newData = objectDescription(tableName, description);
 
       for (var column in dbMetadata.tables[property].fields) {
-        var psqlType = dbMetadata.tables[property].fields[column].data_type
-        newData += columnData(column, property, psqlType);
+        if (dbMetadata.tables.hasOwnProperty(column)) {
+          // console.log(column, tableName)
+          newData += foreignKeyColumnData(column, tableName);
+        } else {
+          var psqlType = dbMetadata.tables[property].fields[column].data_type
+          newData += columnData(column, property, psqlType);
+        }
       }
 
       newData += closingBrackets();
@@ -147,16 +167,19 @@ var queryTableArgs = function(column, psqlType) {
 }
 
 var queryTableHeader = function(tableName) {
-  return `\n      ${tableName}: {
+  var lowercasePluralTableName = lingo.en.pluralize(tableName.toLowerCase());
+
+  return `\n      ${lowercasePluralTableName}: {
         type: new GraphQLList(${tableName}),
         args: {`
 }
 
 var queryResolveFunction = function(tableName) {
+  lowercasePluralTableName = lingo.en.pluralize(tableName.toLowerCase());
   return `
         },
         resolve (root, args) {
-          return Db.models.${tableName.toLowerCase()}.findAll({ where: args });
+          return knex('${lowercasePluralTableName}').where(args)
         }
       },`
 }

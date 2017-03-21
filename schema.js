@@ -9,14 +9,14 @@ import {
 
 var knex = require('knex')({
   client: 'pg',
-  connection: "postgresql://tingc:tingc@localhost/blog",
+  connection: "postgresql://rachelminto:postgres@localhost/relay",
   searchPath: 'knex,public'
 });
 
 const Post = new GraphQLObjectType({
   name: 'Post',
-  description: 'Blog post',
-  fields () {
+  description: 'This is a table called posts',
+  fields () => {
     return {
       id: {
         type: GraphQLInt,
@@ -36,30 +36,148 @@ const Post = new GraphQLObjectType({
           return post.content;
         }
       },
-      users: {
-        type: User,
+      createdAt: {
+        type: GraphQLString,
         resolve (post) {
-          return knex('users').where({ id: post.userId }).then(user => {
-            return user[0];
-          });
+          return post.createdAt;
+        }
+      },
+      updatedAt: {
+        type: GraphQLString,
+        resolve (post) {
+          return post.updatedAt;
         }
       },
       comments: {
-        type: new GraphQLList(Comment),
+        type: Comment,
         resolve (post) {
-          return knex('comments').where({ postId: post.id }).then(comments => {
-            return comments;
-          });;
+          return knex('comments').where({ id: post.comment_id }).then(comment => {;
+            return comment[0];        
+          })
         }
-      }
+      },
+      users: {
+        type: User,
+        resolve (post) {
+          return knex('users').where({ id: post.user_id }).then(user => {;
+            return user[0];        
+          })
+        }
+      },
+    };
+  }
+});
+
+const Person = new GraphQLObjectType({
+  name: 'Person',
+  description: 'This is a table called people',
+  fields () => {
+    return {
+      id: {
+        type: GraphQLInt,
+        resolve (person) {
+          return person.id;
+        }
+      },
+      firstName: {
+        type: GraphQLString,
+        resolve (person) {
+          return person.firstName;
+        }
+      },
+      lastName: {
+        type: GraphQLString,
+        resolve (person) {
+          return person.lastName;
+        }
+      },
+      email: {
+        type: GraphQLString,
+        resolve (person) {
+          return person.email;
+        }
+      },
+      createdAt: {
+        type: GraphQLString,
+        resolve (person) {
+          return person.createdAt;
+        }
+      },
+      updatedAt: {
+        type: GraphQLString,
+        resolve (person) {
+          return person.updatedAt;
+        }
+      },
+    };
+  }
+});
+
+const User = new GraphQLObjectType({
+  name: 'User',
+  description: 'This is a table called users',
+  fields () => {
+    return {
+      id: {
+        type: GraphQLInt,
+        resolve (user) {
+          return user.id;
+        }
+      },
+      first_name: {
+        type: GraphQLString,
+        resolve (user) {
+          return user.first_name;
+        }
+      },
+      last_name: {
+        type: GraphQLString,
+        resolve (user) {
+          return user.last_name;
+        }
+      },
+      email: {
+        type: GraphQLString,
+        resolve (user) {
+          return user.email;
+        }
+      },
+      created_at: {
+        type: GraphQLString,
+        resolve (user) {
+          return user.created_at;
+        }
+      },
+      updated_at: {
+        type: GraphQLString,
+        resolve (user) {
+          return user.updated_at;
+        }
+      },
+      comments: {
+        type: Comment,
+        resolve (user) {
+          return knex('comments').where({ id: user.comment_id }).then(comment => {;
+            return comment[0];        
+          })
+        }
+      },
+      posts: {
+        type: Post,
+        resolve (user) {
+          return knex('posts').where({ id: user.post_id }).then(post => {;
+            return post[0];        
+          })
+        }
+      },
     };
   }
 });
 
 const Comment = new GraphQLObjectType({
   name: 'Comment',
-  description: 'Blog comment',
-  fields () {
+  description: 'This is a table called comments',
+  fields () => {
     return {
       id: {
         type: GraphQLInt,
@@ -73,63 +191,22 @@ const Comment = new GraphQLObjectType({
           return comment.content;
         }
       },
-      post: {
+      posts: {
         type: Post,
         resolve (comment) {
-          return knex('posts').where({ id: comment.postId }).then(post => {
-            return post[0];
-          });
+          return knex('posts').where({ id: comment.post_id }).then(post => {;
+            return post[0];        
+          })
         }
       },
       users: {
         type: User,
         resolve (comment) {
-          return knex('users').where({ id: comment.userId }).then(user => {
-            return user[0];
-          });
-        }
-      }
-    };
-  }
-});
-
-const User = new GraphQLObjectType({
-  name: 'User',
-  description: 'Blog User',
-  fields: () => {
-    return {
-      id: {
-        type: GraphQLInt,
-        resolve (user) {
-          return user.id;
+          return knex('users').where({ id: comment.user_id }).then(user => {;
+            return user[0];        
+          })
         }
       },
-      firstName: {
-        type: GraphQLString,
-        resolve (user) {
-          return user.firstName;
-        }
-      },
-      lastName: {
-        type: GraphQLString,
-        resolve (user) {
-          return user.lastName;
-        }
-      },
-      email: {
-        type: GraphQLString,
-        resolve (user) {
-          return user.email;
-        }
-      },
-      posts: {
-        type: new GraphQLList(Post),
-        resolve (user) {
-          return knex('posts').where({ userId: user.id }).then(posts => {
-            return posts
-          });
-        }
-      }
     };
   }
 });
@@ -139,189 +216,111 @@ const Query = new GraphQLObjectType({
   description: 'Root query object',
   fields: () => {
     return {
-      users: {
-        type: new GraphQLList(User),
-        args: {
-          id: {
-            type: GraphQLInt
-          },
-          email: {
-            type: GraphQLString
-          }
-        },
-        resolve (root, args) {
-          return knex('users').where(args)
-        }
-      },
       posts: {
         type: new GraphQLList(Post),
         args: {
           id: {
             type: GraphQLInt
+          },
+          title: {
+            type: GraphQLString
+          },
+          content: {
+            type: GraphQLString
+          },
+          createdAt: {
+            type: GraphQLString
+          },
+          updatedAt: {
+            type: GraphQLString
+          },
+          comments: {
+            type: GraphQLList(Comments)
+          },
+          users: {
+            type: Users
           }
         },
         resolve (root, args) {
           return knex('posts').where(args)
         }
       },
-      comments: {
-        type: new GraphQLList(Comment),
-        resolve (root, args) {
-          return knex('comments').where(args)
-        }
-      }
-    };
-  }
-});
-
-const Mutation = new GraphQLObjectType({
-  name: 'Mutations',
-  description: 'Functions to set stuff',
-  fields () {
-    return {
-      addUser: {
-        type: User,
+      people: {
+        type: new GraphQLList(Person),
         args: {
+          id: {
+            type: GraphQLInt
+          },
           firstName: {
-            type: new GraphQLNonNull(GraphQLString)
+            type: GraphQLString
           },
           lastName: {
-            type: new GraphQLNonNull(GraphQLString)
+            type: GraphQLString
           },
           email: {
-            type: new GraphQLNonNull(GraphQLString)
-          }
-        },
-        resolve (source, args) {
-          return knex.returning('id').insert({
-            firstName: args.firstName,
-            lastName: args.lastName,
-            email: args.email.toLowerCase()
-          }).into('users').then(id => {
-            return knex('users').where({ id: id[0] }).then(user => {
-              return user[0];
-            });
-          });
-        }
-      },
-      addPost: {
-        type: Post,
-        args: {
-          title: {
-            type: new GraphQLNonNull(GraphQLString)
-          },
-          content: {
-            type: new GraphQLNonNull(GraphQLString)
-          },
-          userId: {
-            type: new GraphQLNonNull(GraphQLInt)
-          }
-        },
-        resolve (source, args) {
-          return knex.returning('id').insert({
-            title: args.title,
-            content: args.content,
-            userId: args.userId
-          }).into('posts').then(id => {
-            return knex('posts').where({ id: id[0] }).then(post => {
-              return post[0];
-            });
-          });
-        }
-      },
-      updatePost: {
-        type: Post,
-        args: {
-          title: {
             type: GraphQLString
           },
-          content: {
+          createdAt: {
             type: GraphQLString
           },
-          id: {
-            type: new GraphQLNonNull(GraphQLInt)
+          updatedAt: {
+            type: GraphQLString
           }
         },
-        resolve (source, args) {
-          return knex('posts').where({ id: args.id }).returning('id').update({
-            title: args.title,
-            content: args.content
-          }).then(id => {
-            return knex('posts').where({ id: id[0] }).then(post => {
-              return post[0];
-            });
-          });
+        resolve (root, args) {
+          return knex('people').where(args)
         }
       },
-      deletePost: {
-        type: Post,
+      users: {
+        type: new GraphQLList(User),
         args: {
           id: {
-            type: new GraphQLNonNull(GraphQLInt)
+            type: GraphQLInt
+          },
+          first_name: {
+            type: GraphQLString
+          },
+          last_name: {
+            type: GraphQLString
+          },
+          email: {
+            type: GraphQLString
+          },
+          created_at: {
+            type: GraphQLString
+          },
+          updated_at: {
+            type: GraphQLString
+          },
+          comments: {
+            type: GraphQLList(Comments)
+          },
+          posts: {
+            type: GraphQLList(Posts)
           }
         },
-        resolve (source, args) {
-          knex('posts').where({ id: args.id }).del().then(num => {
-            console.log("Number of deleted posts: " + num);
-          });
+        resolve (root, args) {
+          return knex('users').where(args)
         }
       },
-      addComment: {
-        type: Comment,
+      comments: {
+        type: new GraphQLList(Comment),
         args: {
-          content: {
-            type: new GraphQLNonNull(GraphQLString)
+          id: {
+            type: GraphQLInt
           },
-          userId: {
-            type: new GraphQLNonNull(GraphQLInt)
-          },
-          postId: {
-            type: new GraphQLNonNull(GraphQLInt)
-          }
-        },
-        resolve (source, args) {
-          return knex.returning('id').insert({
-            content: args.content,
-            userId: args.userId,
-            postId: args.postId
-          }).into('comments').then(id => {
-            return knex('comments').where({ id: id[0] }).then(comment => {
-              return comment[0];
-            });
-          });;
-        }
-      },
-      updateComment: {
-        type: Comment,
-        args: {
           content: {
             type: GraphQLString
           },
-          id: {
-            type: new GraphQLNonNull(GraphQLInt)
+          posts: {
+            type: Posts
+          },
+          users: {
+            type: Users
           }
         },
-        resolve (source, args) {
-          return knex('comments').where({ id: args.id }).returning('id').update({
-            content: args.content
-          }).then(id => {
-            return knex('comments').where({ id: id[0] }).then(comment => {
-              return comment[0];
-            });
-          });
-        }
-      },
-      deleteComment: {
-        type: Comment,
-        args: {
-          id: {
-            type: new GraphQLNonNull(GraphQLInt)
-          }
-        },
-        resolve (source, args) {
-          knex('comments').where({ id: args.id }).del().then(num => {
-            console.log("Number of deleted comments: " + num);
-          });
+        resolve (root, args) {
+          return knex('comments').where(args)
         }
       },
     };
@@ -329,6 +328,5 @@ const Mutation = new GraphQLObjectType({
 });
 
 exports.Schema = new GraphQLSchema({
-  query: Query,
-  mutation: Mutation
+  query: Query
 });

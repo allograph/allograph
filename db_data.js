@@ -2,9 +2,9 @@ var pg = require('pg');
 var fs = require('fs');
 
 var connection = new pg.Client({
-  user: 'tingc',
-  database: 'blog',
-  password: 'tingc',
+  user: 'rachelminto',
+  database: 'relay',
+  password: 'postgres',
   host: 'localhost',
   port: 5432,
   max: 10, // max number of clients in the pool
