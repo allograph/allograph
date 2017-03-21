@@ -7,15 +7,15 @@ SchemaTranslator.prototype.printMetadata = function(dbMetadata) {
   writeToSchemaFile(graphQLData());
   writeGraphQLObjectSchema(dbMetadata);
   writeGraphQLQuerySchema(dbMetadata);
+  writeGrpahQLMutationSchema(dbMetadata);
   writeGraphQLExport();
 
   graphQLServer.run();
 }
 
-var formatTableName = function(name) {
+var singularCapitalizedTableName = function(name) {
   var singularName = lingo.en.singularize(name)
   return lingo.capitalize(singularName);
-  // return name.charAt(0).toUpperCase() + name.slice(1).toLowerCase();
 }
 
 var graphQLData = function() {
@@ -113,7 +113,7 @@ var writeGraphQLObjectSchema = function(dbMetadata) {
 
     if (dbMetadata.tables.hasOwnProperty(property)) {
 
-      var tableName = formatTableName(property)
+      var tableName = singularCapitalizedTableName(property)
       var description = dbMetadata.tables[property].description
 
       var newData = objectDescription(tableName, description);
@@ -143,7 +143,7 @@ var writeGraphQLQuerySchema = function(dbMetadata) {
     return {`
 
   for (var property in dbMetadata.tables) {
-    var tableName = formatTableName(property)
+    var tableName = singularCapitalizedTableName(property)
 
     newData += queryTableHeader(tableName)
 
@@ -189,6 +189,72 @@ var queryClosingBrackets = function() {
   return `\n    };
   }
 });`
+}
+
+var mutationHeader = function() {
+  return `\n\nconst Mutation = new GraphQLObjectType({
+  name: 'Mutations',
+  description: 'Functions to set stuff',
+  fields () {
+    return {`
+}
+
+var writeGrpahQLMutationSchema = function(dbMetadata) {
+  newData = mutationHeader();
+  for (var property in dbMetadata.tables) {
+    if (dbMetadata.tables.hasOwnProperty(property)) {
+      newData += mutationAdd(property, dbMetadata.tables[property])
+    };
+  };
+  newData += closingBrackets();  
+  addToSchemaFile(newData);  
+};
+
+var mutationAdd = function(pluralLowercaseTableName, tableData) {
+  var singularLowercaseTableName = lingo.en.singularize(pluralLowercaseTableName)
+  var singularCapitalizedTableName = lingo.capitalize(singularLowercaseTableName)
+  var newData = `\n      add${singularCapitalizedTableName}: {
+        type: ${singularCapitalizedTableName},
+        args: {`
+
+  for (column in tableData.fields) {
+    var psqlType = psqlTypeToGraphQLType(tableData.fields[column].data_type)
+    if (tableData.fields[column].is_nullable === 'NO') {
+      newData += `\n          ${column}: {
+            type: new GraphQLNonNull(${psqlType})
+          },`
+    } else {
+      newData += `\n          ${column}: {
+            type: new ${stringOrIntegerType(psqlType)}
+          },`
+    }
+  }
+
+  newData += `\n        resolve (source, args) {
+          return knex.returning('id').insert({`
+
+  for (column in tableData.fields) {
+    newData += `\n            ${column}: args.${column},`
+  }            
+
+newData +=  `\n          }).into('${pluralLowercaseTableName}').then(id => {
+            return knex('${pluralLowercaseTableName}').where({ id: id[0] }).then(${singularLowercaseTableName} => {
+              return ${singularLowercaseTableName}[0];
+            });
+          };
+        }
+      },`
+
+  return newData
+}
+
+var stringOrIntegerType = function(psqlType) {
+  var typeMap = {
+    'character varying': 'GraphQLString',
+    'integer': 'GraphQLInt'
+  }
+
+  return typeMap[psqlType] || 'GraphQLString'
 }
 
 var writeGraphQLExport = function() {

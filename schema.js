@@ -327,6 +327,163 @@ const Query = new GraphQLObjectType({
   }
 });
 
+const Mutation = new GraphQLObjectType({
+  name: 'Mutations',
+  description: 'Functions to set stuff',
+  fields () {
+    return {
+      addPost: {
+        type: Post,
+        args: {
+          id: {
+            type: new GraphQLNonNull(GraphQLInt)
+          },
+          title: {
+            type: new GraphQLNonNull(GraphQLString)
+          },
+          content: {
+            type: new GraphQLNonNull(GraphQLString)
+          },
+          createdAt: {
+            type: new GraphQLNonNull(GraphQLString)
+          },
+          updatedAt: {
+            type: new GraphQLNonNull(GraphQLString)
+          },
+          comments: {
+            type: new GraphQLString
+          },
+          users: {
+            type: new GraphQLString
+          },
+        resolve (source, args) {
+          return knex.returning('id').insert({
+            id: args.id,
+            title: args.title,
+            content: args.content,
+            createdAt: args.createdAt,
+            updatedAt: args.updatedAt,
+            comments: args.comments,
+            users: args.users,
+          }).into('posts').then(id => {
+            return knex('posts').where({ id: id[0] }).then(post => {
+              return post[0];
+            });
+          };
+        }
+      },
+      addPerson: {
+        type: Person,
+        args: {
+          id: {
+            type: new GraphQLNonNull(GraphQLInt)
+          },
+          firstName: {
+            type: new GraphQLNonNull(GraphQLString)
+          },
+          lastName: {
+            type: new GraphQLNonNull(GraphQLString)
+          },
+          email: {
+            type: new GraphQLNonNull(GraphQLString)
+          },
+          createdAt: {
+            type: new GraphQLNonNull(GraphQLString)
+          },
+          updatedAt: {
+            type: new GraphQLNonNull(GraphQLString)
+          },
+        resolve (source, args) {
+          return knex.returning('id').insert({
+            id: args.id,
+            firstName: args.firstName,
+            lastName: args.lastName,
+            email: args.email,
+            createdAt: args.createdAt,
+            updatedAt: args.updatedAt,
+          }).into('people').then(id => {
+            return knex('people').where({ id: id[0] }).then(person => {
+              return person[0];
+            });
+          };
+        }
+      },
+      addUser: {
+        type: User,
+        args: {
+          id: {
+            type: new GraphQLNonNull(GraphQLInt)
+          },
+          first_name: {
+            type: new GraphQLNonNull(GraphQLString)
+          },
+          last_name: {
+            type: new GraphQLNonNull(GraphQLString)
+          },
+          email: {
+            type: new GraphQLString
+          },
+          created_at: {
+            type: new GraphQLNonNull(GraphQLString)
+          },
+          updated_at: {
+            type: new GraphQLNonNull(GraphQLString)
+          },
+          comments: {
+            type: new GraphQLString
+          },
+          posts: {
+            type: new GraphQLString
+          },
+        resolve (source, args) {
+          return knex.returning('id').insert({
+            id: args.id,
+            first_name: args.first_name,
+            last_name: args.last_name,
+            email: args.email,
+            created_at: args.created_at,
+            updated_at: args.updated_at,
+            comments: args.comments,
+            posts: args.posts,
+          }).into('users').then(id => {
+            return knex('users').where({ id: id[0] }).then(user => {
+              return user[0];
+            });
+          };
+        }
+      },
+      addComment: {
+        type: Comment,
+        args: {
+          id: {
+            type: new GraphQLNonNull(GraphQLInt)
+          },
+          content: {
+            type: new GraphQLNonNull(GraphQLString)
+          },
+          posts: {
+            type: new GraphQLString
+          },
+          users: {
+            type: new GraphQLString
+          },
+        resolve (source, args) {
+          return knex.returning('id').insert({
+            id: args.id,
+            content: args.content,
+            posts: args.posts,
+            users: args.users,
+          }).into('comments').then(id => {
+            return knex('comments').where({ id: id[0] }).then(comment => {
+              return comment[0];
+            });
+          };
+        }
+      },
+    };
+  }
+});
+
 exports.Schema = new GraphQLSchema({
   query: Query
 });
