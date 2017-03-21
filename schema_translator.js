@@ -51,7 +51,7 @@ var objectDescription = function(tableName, description) {
 const ` + tableName + ` = new GraphQLObjectType({
   name: '` + tableName + `',
   description: '` + description + `',
-  fields () => {
+  fields () {
     return {`
 }
 
@@ -64,7 +64,7 @@ var psqlTypeToGraphQLType = function(psqlType) {
       }
 
   if (listType) {
-    return 'GraphQLList(' + listType[1] + ')';
+    return 'GraphQLList(' + lingo.en.singularize(listType[1]) + ')';
   } else if (typeMap[psqlType]) {
     return typeMap[psqlType];
   } else if (timestamp) {
@@ -230,7 +230,8 @@ var mutationAdd = function(pluralLowercaseTableName, tableData) {
     }
   }
 
-  newData += `\n        resolve (source, args) {
+  newData += `\n        },
+        resolve (source, args) {
           return knex.returning('id').insert({`
 
   for (column in tableData.fields) {
@@ -241,7 +242,7 @@ newData +=  `\n          }).into('${pluralLowercaseTableName}').then(id => {
             return knex('${pluralLowercaseTableName}').where({ id: id[0] }).then(${singularLowercaseTableName} => {
               return ${singularLowercaseTableName}[0];
             });
-          };
+          });
         }
       },`
 

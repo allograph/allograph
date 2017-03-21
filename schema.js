@@ -16,7 +16,7 @@ var knex = require('knex')({
 const Post = new GraphQLObjectType({
   name: 'Post',
   description: 'This is a table called posts',
-  fields () => {
+  fields () {
     return {
       id: {
         type: GraphQLInt,
@@ -71,7 +71,7 @@ const Post = new GraphQLObjectType({
 const Person = new GraphQLObjectType({
   name: 'Person',
   description: 'This is a table called people',
-  fields () => {
+  fields () {
     return {
       id: {
         type: GraphQLInt,
@@ -116,7 +116,7 @@ const Person = new GraphQLObjectType({
 const User = new GraphQLObjectType({
   name: 'User',
   description: 'This is a table called users',
-  fields () => {
+  fields () {
     return {
       id: {
         type: GraphQLInt,
@@ -177,7 +177,7 @@ const User = new GraphQLObjectType({
 const Comment = new GraphQLObjectType({
   name: 'Comment',
   description: 'This is a table called comments',
-  fields () => {
+  fields () {
     return {
       id: {
         type: GraphQLInt,
@@ -235,7 +235,7 @@ const Query = new GraphQLObjectType({
             type: GraphQLString
           },
           comments: {
-            type: GraphQLList(Comments)
+            type: GraphQLList(Comment)
           },
           users: {
             type: Users
@@ -293,10 +293,10 @@ const Query = new GraphQLObjectType({
             type: GraphQLString
           },
           comments: {
-            type: GraphQLList(Comments)
+            type: GraphQLList(Comment)
           },
           posts: {
-            type: GraphQLList(Posts)
+            type: GraphQLList(Post)
           }
         },
         resolve (root, args) {
@@ -356,6 +356,7 @@ const Mutation = new GraphQLObjectType({
           users: {
             type: new GraphQLString
           },
+        },
         resolve (source, args) {
           return knex.returning('id').insert({
             id: args.id,
@@ -369,7 +370,7 @@ const Mutation = new GraphQLObjectType({
             return knex('posts').where({ id: id[0] }).then(post => {
               return post[0];
             });
-          };
+          });
         }
       },
       addPerson: {
@@ -393,6 +394,7 @@ const Mutation = new GraphQLObjectType({
           updatedAt: {
             type: new GraphQLNonNull(GraphQLString)
           },
+        },
         resolve (source, args) {
           return knex.returning('id').insert({
             id: args.id,
@@ -405,7 +407,7 @@ const Mutation = new GraphQLObjectType({
             return knex('people').where({ id: id[0] }).then(person => {
               return person[0];
             });
-          };
+          });
         }
       },
       addUser: {
@@ -435,6 +437,7 @@ const Mutation = new GraphQLObjectType({
           posts: {
             type: new GraphQLString
           },
+        },
         resolve (source, args) {
           return knex.returning('id').insert({
             id: args.id,
@@ -449,7 +452,7 @@ const Mutation = new GraphQLObjectType({
             return knex('users').where({ id: id[0] }).then(user => {
               return user[0];
             });
-          };
+          });
         }
       },
       addComment: {
@@ -467,6 +470,7 @@ const Mutation = new GraphQLObjectType({
           users: {
             type: new GraphQLString
           },
+        },
         resolve (source, args) {
           return knex.returning('id').insert({
             id: args.id,
@@ -477,7 +481,7 @@ const Mutation = new GraphQLObjectType({
             return knex('comments').where({ id: id[0] }).then(comment => {
               return comment[0];
             });
-          };
+          });
         }
       },
     };
