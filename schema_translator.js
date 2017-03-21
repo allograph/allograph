@@ -1,7 +1,6 @@
 var fs = require('fs');
-const graphQLServer = require('./server.js').GraphQLServer;
-
 var SchemaTranslator = function () {};
+const graphQLServer = require('./server.js').GraphQLServer;
 
 SchemaTranslator.prototype.printMetadata = function(dbMetadata) {
   writeToSchemaFile(graphQLData());
@@ -17,19 +16,29 @@ var formatTableName = function(name) {
 }
 
 var graphQLData = function() {
-  return `const pg = require('pg');
-
-var {
+  return `import Sequelize from 'sequelize';
+import {
   GraphQLObjectType,
-  GraphQLInt,
-  GraphQLList,
   GraphQLString,
-  GraphQLSchema
-} = require('graphql');`
+  GraphQLInt,
+  GraphQLSchema,
+  GraphQLList,
+  GraphQLNonNull
+} from 'graphql';
+
+const Db = new Sequelize(
+  'blog', //database name
+  'tingc', //username
+  'tingc', //password
+  {
+    dialect: 'postgres',
+    host: 'localhost'
+  }
+);`
 }
 
 var writeToSchemaFile = function(data) {
-  fs.writeFileSync('schema.js', data, 'utf-8');  
+  fs.writeFileSync('schema.js', data, 'utf-8');
 }
 
 var closingBrackets = function() {
@@ -45,21 +54,35 @@ const ` + tableName + ` = new GraphQLObjectType({
   name: '` + tableName + `',
   description: '` + description + `',
   fields: () => {
-    return {`  
+    return {`
 }
 
-var psqlTypeToGraphQLType = {
-    'character varying': 'GraphQLString',
-    'integer': 'GraphQLInt',
+var psqlTypeToGraphQLType = function(psqlType) {
+  var listType = psqlType.match(/list\[(\w+)\]/),
+      timestamp = psqlType.match(/^timestamp/),
+      typeMap = {
+        'character varying': 'GraphQLString',
+        'integer': 'GraphQLInt'
+      }
+
+  if (listType) {
+    return 'GraphQLList(' + listType[1] + ')';
+  } else if (typeMap[psqlType]) {
+    return typeMap[psqlType];
+  } else if (timestamp) {
+    return 'GraphQLString';
+  } else {
+    return psqlType;
   }
+}
 
 var columnData = function(column, property, psqlType) {
   return '\n      ' + column + `: {
-        type: ` + (psqlTypeToGraphQLType[psqlType] || 'GraphQLString') + `,
+        type: ` + psqlTypeToGraphQLType(psqlType) + `,
         resolve(` + property + `) {
           return ` + property + '.' + column + `;
         }
-      },`  
+      },`
 }
 
 var existingSchemaFileContents = function() {
@@ -74,7 +97,7 @@ var addToSchemaFile = function(newData) {
 var writeGraphQLObjectSchema = function(dbMetadata) {
   for (var property in dbMetadata.tables) {
     if (dbMetadata.tables.hasOwnProperty(property)) {
-      
+
       var tableName = formatTableName(property)
       var description = dbMetadata.tables[property].description
 
@@ -88,7 +111,7 @@ var writeGraphQLObjectSchema = function(dbMetadata) {
       newData += closingBrackets();
       addToSchemaFile(newData);
     };
-  };  
+  };
 }
 
 var writeGraphQLQuerySchema = function(dbMetadata) {
@@ -108,7 +131,8 @@ var writeGraphQLQuerySchema = function(dbMetadata) {
       newData += queryTableArgs(column, psqlType);
     }
 
-    newData += queryResolveFunction(property)
+    newData = newData.slice(0, -1);
+    newData += queryResolveFunction(tableName)
   }
 
   newData += queryClosingBrackets();
@@ -118,7 +142,7 @@ var writeGraphQLQuerySchema = function(dbMetadata) {
 
 var queryTableArgs = function(column, psqlType) {
   return `\n          ${column}: {
-            type: ` + (psqlTypeToGraphQLType[psqlType] || 'GraphQLString') + `
+            type: ` + psqlTypeToGraphQLType(psqlType) + `
           },`
 }
 
@@ -132,7 +156,7 @@ var queryResolveFunction = function(tableName) {
   return `
         },
         resolve (root, args) {
-          return Db.models.${tableName}.findAll({ where: args });
+          return Db.models.${tableName.toLowerCase()}.findAll({ where: args });
         }
       },`
 }
@@ -144,12 +168,9 @@ var queryClosingBrackets = function() {
 }
 
 var writeGraphQLExport = function() {
-  var newData = `\n\nconst Schema = new GraphQLSchema({
+  var newData = `\n\nexports.Schema = new GraphQLSchema({
   query: Query
-});
-
-module.exports = Schema;`
-
+});`
   addToSchemaFile(newData);
 }
 

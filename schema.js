@@ -1,102 +1,22 @@
-const pg = require('pg');
-
-var {
+import Sequelize from 'sequelize';
+import {
   GraphQLObjectType,
-  GraphQLInt,
-  GraphQLList,
   GraphQLString,
-  GraphQLSchema
-} = require('graphql');
+  GraphQLInt,
+  GraphQLSchema,
+  GraphQLList,
+  GraphQLNonNull
+} from 'graphql';
 
-const Posts = new GraphQLObjectType({
-  name: 'Posts',
-  description: 'This is a table called posts',
-  fields: () => {
-    return {
-      id: {
-        type: GraphQLInt,
-        resolve(posts) {
-          return posts.id;
-        }
-      },
-      title: {
-        type: GraphQLString,
-        resolve(posts) {
-          return posts.title;
-        }
-      },
-      content: {
-        type: GraphQLString,
-        resolve(posts) {
-          return posts.content;
-        }
-      },
-      createdAt: {
-        type: GraphQLString,
-        resolve(posts) {
-          return posts.createdAt;
-        }
-      },
-      updatedAt: {
-        type: GraphQLString,
-        resolve(posts) {
-          return posts.updatedAt;
-        }
-      },
-      userId: {
-        type: GraphQLInt,
-        resolve(posts) {
-          return posts.userId;
-        }
-      },
-    };
+const Db = new Sequelize(
+  'blog', //database name
+  'tingc', //username
+  'tingc', //password
+  {
+    dialect: 'postgres',
+    host: 'localhost'
   }
-});
-
-const People = new GraphQLObjectType({
-  name: 'People',
-  description: 'This is a table called people',
-  fields: () => {
-    return {
-      id: {
-        type: GraphQLInt,
-        resolve(people) {
-          return people.id;
-        }
-      },
-      firstName: {
-        type: GraphQLString,
-        resolve(people) {
-          return people.firstName;
-        }
-      },
-      lastName: {
-        type: GraphQLString,
-        resolve(people) {
-          return people.lastName;
-        }
-      },
-      email: {
-        type: GraphQLString,
-        resolve(people) {
-          return people.email;
-        }
-      },
-      createdAt: {
-        type: GraphQLString,
-        resolve(people) {
-          return people.createdAt;
-        }
-      },
-      updatedAt: {
-        type: GraphQLString,
-        resolve(people) {
-          return people.updatedAt;
-        }
-      },
-    };
-  }
-});
+);
 
 const Users = new GraphQLObjectType({
   name: 'Users',
@@ -138,7 +58,46 @@ const Users = new GraphQLObjectType({
         resolve(users) {
           return users.updatedAt;
         }
+      }
+    };
+  }
+});
+
+const Posts = new GraphQLObjectType({
+  name: 'Posts',
+  description: 'This is a table called posts',
+  fields: () => {
+    return {
+      id: {
+        type: GraphQLInt,
+        resolve(posts) {
+          return posts.id;
+        }
       },
+      title: {
+        type: GraphQLString,
+        resolve(posts) {
+          return posts.title;
+        }
+      },
+      content: {
+        type: GraphQLString,
+        resolve(posts) {
+          return posts.content;
+        }
+      },
+      createdAt: {
+        type: GraphQLString,
+        resolve(posts) {
+          return posts.createdAt;
+        }
+      },
+      updatedAt: {
+        type: GraphQLString,
+        resolve(posts) {
+          return posts.updatedAt;
+        }
+      }
     };
   }
 });
@@ -171,19 +130,7 @@ const Comments = new GraphQLObjectType({
         resolve(comments) {
           return comments.updatedAt;
         }
-      },
-      userId: {
-        type: GraphQLInt,
-        resolve(comments) {
-          return comments.userId;
-        }
-      },
-      postId: {
-        type: GraphQLInt,
-        resolve(comments) {
-          return comments.postId;
-        }
-      },
+      }
     };
   }
 });
@@ -193,58 +140,6 @@ const Query = new GraphQLObjectType({
   description: 'Root query object',
   fields: () => {
     return {
-      Posts: {
-        type: new GraphQLList(Posts),
-        args: {
-          id: {
-            type: GraphQLInt
-          },
-          title: {
-            type: GraphQLString
-          },
-          content: {
-            type: GraphQLString
-          },
-          createdAt: {
-            type: GraphQLString
-          },
-          updatedAt: {
-            type: GraphQLString
-          },
-          userId: {
-            type: GraphQLInt
-          },
-        },
-        resolve (root, args) {
-          return Db.models.posts.findAll({ where: args });
-        }
-      },
-      People: {
-        type: new GraphQLList(People),
-        args: {
-          id: {
-            type: GraphQLInt
-          },
-          firstName: {
-            type: GraphQLString
-          },
-          lastName: {
-            type: GraphQLString
-          },
-          email: {
-            type: GraphQLString
-          },
-          createdAt: {
-            type: GraphQLString
-          },
-          updatedAt: {
-            type: GraphQLString
-          },
-        },
-        resolve (root, args) {
-          return Db.models.people.findAll({ where: args });
-        }
-      },
       Users: {
         type: new GraphQLList(Users),
         args: {
@@ -265,10 +160,33 @@ const Query = new GraphQLObjectType({
           },
           updatedAt: {
             type: GraphQLString
-          },
+          }
         },
         resolve (root, args) {
           return Db.models.users.findAll({ where: args });
+        }
+      },
+      Posts: {
+        type: new GraphQLList(Posts),
+        args: {
+          id: {
+            type: GraphQLInt
+          },
+          title: {
+            type: GraphQLString
+          },
+          content: {
+            type: GraphQLString
+          },
+          createdAt: {
+            type: GraphQLString
+          },
+          updatedAt: {
+            type: GraphQLString
+          }
+        },
+        resolve (root, args) {
+          return Db.models.posts.findAll({ where: args });
         }
       },
       Comments: {
@@ -285,13 +203,7 @@ const Query = new GraphQLObjectType({
           },
           updatedAt: {
             type: GraphQLString
-          },
-          userId: {
-            type: GraphQLInt
-          },
-          postId: {
-            type: GraphQLInt
-          },
+          }
         },
         resolve (root, args) {
           return Db.models.comments.findAll({ where: args });
@@ -301,8 +213,6 @@ const Query = new GraphQLObjectType({
   }
 });
 
-const Schema = new GraphQLSchema({
+exports.Schema = new GraphQLSchema({
   query: Query
 });
-
-module.exports = Schema;
