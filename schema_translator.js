@@ -57,20 +57,17 @@ const ` + tableName + ` = new GraphQLObjectType({
 
 var psqlTypeToGraphQLType = function(psqlType) {
   var listType = psqlType.match(/list\[(\w+)\]/),
-      timestamp = psqlType.match(/^timestamp/),
       typeMap = {
         'character varying': 'GraphQLString',
         'integer': 'GraphQLInt'
       }
 
   if (listType) {
-    return 'GraphQLList(' + lingo.en.singularize(listType[1]) + ')';
+    return 'new GraphQLList(' + lingo.capitalize(listType[1]) + ')';
   } else if (typeMap[psqlType]) {
     return typeMap[psqlType];
-  } else if (timestamp) {
-    return 'GraphQLString';
   } else {
-    return psqlType;
+    return lingo.en.singularize(psqlType);
   }
 }
 
@@ -83,17 +80,24 @@ var columnData = function(column, property, psqlType) {
       },`
 }
 
-var foreignKeyColumnData = function(column, tableName, pk_column, fk_column) {
-  lowercaseTableName = tableName.toLowerCase();
-  singularLowercaseTableName = lingo.en.singularize(lowercaseTableName)
-  singularColumnName = lingo.en.singularize(column)
-  singularUppercaseColumnName = lingo.capitalize(singularColumnName)
+var foreignKeyColumnData = function(column, tableName, pk_column, fk_column, psqlType) {
+  var lowercaseTableName = tableName.toLowerCase();
+  var listType = psqlType.match(/list\[(\w+)\]/);
+  var args;
+  var retuenValue = `${column}`;
+
+  if (listType) {
+    args = `{ ${fk_column}: ${lowercaseTableName}.${pk_column} }`
+  } else {
+    args = `{ ${pk_column}: ${lowercaseTableName}.${fk_column} }`
+    retuenValue = `${column}[0]`
+  }
 
   return '\n      ' + column + `: {
-        type: new GraphQLList(` + singularUppercaseColumnName + `),
+        type: ` + psqlTypeToGraphQLType(psqlType) + `,
         resolve (` + lowercaseTableName + `) {
-          return knex('${column}').where({ ${fk_column}: ${lowercaseTableName}.${pk_column} }).then(${column} => {;
-            return ${column};        
+          return knex('${column}').where(` + args + `).then(${column} => {;
+            return ` + retuenValue + `;
           })
         }
       },`
@@ -113,18 +117,19 @@ var writeGraphQLObjectSchema = function(dbMetadata) {
 
     if (dbMetadata.tables.hasOwnProperty(property)) {
 
-      var tableName = singularCapitalizedTableName(property)
-      var description = dbMetadata.tables[property].description
+      var tableName = singularCapitalizedTableName(property);
+      var description = dbMetadata.tables[property].description;
 
       var newData = objectDescription(tableName, description);
 
       for (var column in dbMetadata.tables[property].fields) {
+        var psqlType = dbMetadata.tables[property].fields[column].data_type;
+
         if (dbMetadata.tables.hasOwnProperty(column)) {
           var fk_column = dbMetadata.tables[property].fields[column].fk_column
           var pk_column = dbMetadata.tables[property].fields[column].pk_column
-          newData += foreignKeyColumnData(column, tableName, pk_column, fk_column);
+          newData += foreignKeyColumnData(column, tableName, pk_column, fk_column, psqlType);
         } else {
-          var psqlType = dbMetadata.tables[property].fields[column].data_type
           newData += columnData(column, property, psqlType);
         }
       }
@@ -176,7 +181,7 @@ var queryTableHeader = function(tableName) {
 }
 
 var queryResolveFunction = function(tableName) {
-  lowercasePluralTableName = lingo.en.pluralize(tableName.toLowerCase());
+  var lowercasePluralTableName = lingo.en.pluralize(tableName.toLowerCase());
   return `
         },
         resolve (root, args) {
@@ -200,14 +205,14 @@ var mutationHeader = function() {
 }
 
 var writeGrpahQLMutationSchema = function(dbMetadata) {
-  newData = mutationHeader();
+  var newData = mutationHeader();
   for (var property in dbMetadata.tables) {
     if (dbMetadata.tables.hasOwnProperty(property)) {
       newData += mutationAdd(property, dbMetadata.tables[property])
     };
   };
-  newData += closingBrackets();  
-  addToSchemaFile(newData);  
+  newData += closingBrackets();
+  addToSchemaFile(newData);
 };
 
 var mutationAdd = function(pluralLowercaseTableName, tableData) {
@@ -217,7 +222,7 @@ var mutationAdd = function(pluralLowercaseTableName, tableData) {
         type: ${singularCapitalizedTableName},
         args: {`
 
-  for (column in tableData.fields) {
+  for (var column in tableData.fields) {
     var psqlType = psqlTypeToGraphQLType(tableData.fields[column].data_type)
     if (tableData.fields[column].is_nullable === 'NO') {
       newData += `\n          ${column}: {
@@ -234,9 +239,9 @@ var mutationAdd = function(pluralLowercaseTableName, tableData) {
         resolve (source, args) {
           return knex.returning('id').insert({`
 
-  for (column in tableData.fields) {
+  for (var column in tableData.fields) {
     newData += `\n            ${column}: args.${column},`
-  }            
+  }
 
 newData +=  `\n          }).into('${pluralLowercaseTableName}').then(id => {
             return knex('${pluralLowercaseTableName}').where({ id: id[0] }).then(${singularLowercaseTableName} => {
