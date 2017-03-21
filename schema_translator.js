@@ -83,17 +83,17 @@ var columnData = function(column, property, psqlType) {
       },`
 }
 
-var foreignKeyColumnData = function(column, tableName) {
+var foreignKeyColumnData = function(column, tableName, pk_column, fk_column) {
   lowercaseTableName = tableName.toLowerCase();
   singularLowercaseTableName = lingo.en.singularize(lowercaseTableName)
   singularColumnName = lingo.en.singularize(column)
   singularUppercaseColumnName = lingo.capitalize(singularColumnName)
 
   return '\n      ' + column + `: {
-        type: ` + singularUppercaseColumnName + `,
+        type: new GraphQLList(` + singularUppercaseColumnName + `),
         resolve (` + lowercaseTableName + `) {
-          return knex('${column}').where({ id: ${lowercaseTableName}.${singularColumnName}_id }).then(${singularColumnName} => {;
-            return ${singularColumnName}[0];        
+          return knex('${column}').where({ ${fk_column}: ${lowercaseTableName}.${pk_column} }).then(${column} => {;
+            return ${column};        
           })
         }
       },`
@@ -120,8 +120,9 @@ var writeGraphQLObjectSchema = function(dbMetadata) {
 
       for (var column in dbMetadata.tables[property].fields) {
         if (dbMetadata.tables.hasOwnProperty(column)) {
-          // console.log(column, tableName)
-          newData += foreignKeyColumnData(column, tableName);
+          var fk_column = dbMetadata.tables[property].fields[column].fk_column
+          var pk_column = dbMetadata.tables[property].fields[column].pk_column
+          newData += foreignKeyColumnData(column, tableName, pk_column, fk_column);
         } else {
           var psqlType = dbMetadata.tables[property].fields[column].data_type
           newData += columnData(column, property, psqlType);

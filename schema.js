@@ -49,18 +49,18 @@ const Post = new GraphQLObjectType({
         }
       },
       comments: {
-        type: Comment,
+        type: new GraphQLList(Comment),
         resolve (post) {
-          return knex('comments').where({ id: post.comment_id }).then(comment => {;
-            return comment[0];        
+          return knex('comments').where({ postId: post.id }).then(comments => {;
+            return comments;        
           })
         }
       },
       users: {
-        type: User,
+        type: new GraphQLList(User),
         resolve (post) {
-          return knex('users').where({ id: post.user_id }).then(user => {;
-            return user[0];        
+          return knex('users').where({ userId: post.id }).then(users => {;
+            return users;        
           })
         }
       },
@@ -155,18 +155,18 @@ const User = new GraphQLObjectType({
         }
       },
       comments: {
-        type: Comment,
+        type: new GraphQLList(Comment),
         resolve (user) {
-          return knex('comments').where({ id: user.comment_id }).then(comment => {;
-            return comment[0];        
+          return knex('comments').where({ userId: user.id }).then(comments => {;
+            return comments;        
           })
         }
       },
       posts: {
-        type: Post,
+        type: new GraphQLList(Post),
         resolve (user) {
-          return knex('posts').where({ id: user.post_id }).then(post => {;
-            return post[0];        
+          return knex('posts').where({ userId: user.id }).then(posts => {;
+            return posts;        
           })
         }
       },
@@ -192,18 +192,18 @@ const Comment = new GraphQLObjectType({
         }
       },
       posts: {
-        type: Post,
+        type: new GraphQLList(Post),
         resolve (comment) {
-          return knex('posts').where({ id: comment.post_id }).then(post => {;
-            return post[0];        
+          return knex('posts').where({ postId: comment.id }).then(posts => {;
+            return posts;        
           })
         }
       },
       users: {
-        type: User,
+        type: new GraphQLList(User),
         resolve (comment) {
-          return knex('users').where({ id: comment.user_id }).then(user => {;
-            return user[0];        
+          return knex('users').where({ userId: comment.id }).then(users => {;
+            return users;        
           })
         }
       },
