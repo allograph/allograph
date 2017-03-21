@@ -143,14 +143,18 @@ INNER JOIN
 var writeRelation = function(meta, relations) {
   relations.forEach(function(relation) {
     meta.tables[relation["pk_table"]].fields[relation["fk_table"]] = {
-      data_type: "list[" + formatTableName(relation["fk_table"]) + "]"
+      data_type: "list[" + formatTableName(relation["fk_table"]) + "]",
+      fk_column: relation["fk_column"],
+      pk_column: relation["pk_column"]
     }
 
     delete meta.tables[relation["fk_table"]].fields[relation["fk_column"]]
     meta.tables[relation["fk_table"]].fields[relation["pk_table"]] = {
       data_type: formatTableName(relation["pk_table"]),
       update_rule: relation["update_rule"],
-      delete_rule: relation["delete_rule"]
+      delete_rule: relation["delete_rule"],
+      fk_column: relation["fk_column"],
+      pk_column: relation["pk_column"]
     }
   });
 
