@@ -36,16 +36,20 @@ const Post = new GraphQLObjectType({
           return post.content;
         }
       },
-      author: {
+      users: {
         type: User,
         resolve (post) {
-          return post.getUser();
+          return knex('users').where({ id: post.userId }).then(user => {
+            return user[0];
+          });
         }
       },
       comments: {
         type: new GraphQLList(Comment),
         resolve (post) {
-          return post.getComments();
+          return knex('comments').where({ postId: post.id }).then(comments => {
+            return comments;
+          });;
         }
       }
     };
@@ -72,13 +76,17 @@ const Comment = new GraphQLObjectType({
       post: {
         type: Post,
         resolve (comment) {
-          return comment.getPost();
+          return knex('posts').where({ id: comment.postId }).then(post => {
+            return post[0];
+          });
         }
       },
-      author: {
+      users: {
         type: User,
         resolve (comment) {
-          return comment.getUser();
+          return knex('users').where({ id: comment.userId }).then(user => {
+            return user[0];
+          });
         }
       }
     };
@@ -117,7 +125,9 @@ const User = new GraphQLObjectType({
       posts: {
         type: new GraphQLList(Post),
         resolve (user) {
-          return user.getPosts();
+          return knex('posts').where({ userId: user.id }).then(posts => {
+            return posts
+          });
         }
       }
     };
@@ -188,7 +198,9 @@ const Mutation = new GraphQLObjectType({
             lastName: args.lastName,
             email: args.email.toLowerCase()
           }).into('users').then(id => {
-            return knex('users').where({ 'id': id[0] });
+            return knex('users').where({ id: id[0] }).then(user => {
+              return user[0];
+            });
           });
         }
       },
@@ -206,11 +218,15 @@ const Mutation = new GraphQLObjectType({
           }
         },
         resolve (source, args) {
-          return knex.insert({
+          return knex.returning('id').insert({
             title: args.title,
             content: args.content,
             userId: args.userId
-          }).into('posts');
+          }).into('posts').then(id => {
+            return knex('posts').where({ id: id[0] }).then(post => {
+              return post[0];
+            });
+          });
         }
       },
       updatePost: {
@@ -227,12 +243,12 @@ const Mutation = new GraphQLObjectType({
           }
         },
         resolve (source, args) {
-          return Db.models.post.find({
-            where: { id: args.id }
-          }).then(post => {
-            return post.update({
-              title: args.title,
-              content: args.content
+          return knex('posts').where({ id: args.id }).returning('id').update({
+            title: args.title,
+            content: args.content
+          }).then(id => {
+            return knex('posts').where({ id: id[0] }).then(post => {
+              return post[0];
             });
           });
         }
@@ -245,8 +261,8 @@ const Mutation = new GraphQLObjectType({
           }
         },
         resolve (source, args) {
-          Db.models.post.destroy({
-            where: { id: args.id }
+          knex('posts').where({ id: args.id }).del().then(num => {
+            console.log("Number of deleted posts: " + num);
           });
         }
       },
@@ -256,19 +272,23 @@ const Mutation = new GraphQLObjectType({
           content: {
             type: new GraphQLNonNull(GraphQLString)
           },
-          author_id: {
+          userId: {
             type: new GraphQLNonNull(GraphQLInt)
           },
-          post_id: {
+          postId: {
             type: new GraphQLNonNull(GraphQLInt)
           }
         },
         resolve (source, args) {
-          return knex.insert({
-            title: args.title,
+          return knex.returning('id').insert({
             content: args.content,
-            userId: args.userId
-          }).into('comments');
+            userId: args.userId,
+            postId: args.postId
+          }).into('comments').then(id => {
+            return knex('comments').where({ id: id[0] }).then(comment => {
+              return comment[0];
+            });
+          });;
         }
       },
       updateComment: {
@@ -282,11 +302,11 @@ const Mutation = new GraphQLObjectType({
           }
         },
         resolve (source, args) {
-          return Db.models.comment.find({
-            where: { id: args.id }
-          }).then(comment => {
-            return comment.update({
-              content: args.content
+          return knex('comments').where({ id: args.id }).returning('id').update({
+            content: args.content
+          }).then(id => {
+            return knex('comments').where({ id: id[0] }).then(comment => {
+              return comment[0];
             });
           });
         }
@@ -299,8 +319,8 @@ const Mutation = new GraphQLObjectType({
           }
         },
         resolve (source, args) {
-          Db.models.comment.destroy({
-            where: { id: args.id }
+          knex('comments').where({ id: args.id }).del().then(num => {
+            console.log("Number of deleted comments: " + num);
           });
         }
       },
