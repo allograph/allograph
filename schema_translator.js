@@ -30,7 +30,7 @@ var graphQLData = function() {
 
 var knex = require('knex')({
   client: 'pg',
-  connection: "postgresql://tingc:tingc@localhost/blog",
+  connection: "postgresql://rachelminto:postgres@localhost/relay",
   searchPath: 'knex,public'
 });`
 }
@@ -223,31 +223,38 @@ var writeGrpahQLMutationSchema = function(dbMetadata) {
 };
 
 var mutationAdd = function(pluralLowercaseTableName, tableData) {
-  var singularLowercaseTableName = lingo.en.singularize(pluralLowercaseTableName)
-  var singularCapitalizedTableName = lingo.capitalize(singularLowercaseTableName)
+  var singularLowercaseTableName = lingo.en.singularize(pluralLowercaseTableName);
+  var singularCapitalizedTableName = lingo.capitalize(singularLowercaseTableName);
+
   var newData = `\n      add${singularCapitalizedTableName}: {
         type: ${singularCapitalizedTableName},
-        args: {`
+        args: {`;
 
   for (var column in tableData.fields) {
-    var psqlType = psqlTypeToGraphQLType(tableData.fields[column].data_type)
-    if (tableData.fields[column].is_nullable === 'NO') {
-      newData += `\n          ${column}: {
-            type: new GraphQLNonNull(${psqlType})
-          },`
-    } else {
-      newData += `\n          ${column}: {
-            type: new ${stringOrIntegerType(psqlType)}
-          },`
+    var psqlType = tableData.fields[column].data_type;
+    if (validForMutation(psqlType) && column !== 'id') {
+      var graphQLType = psqlTypeToGraphQLType(psqlType);
+      if (tableData.fields[column].is_nullable === 'NO') {
+        newData += `\n          ${column}: {
+            type: new GraphQLNonNull(${graphQLType})
+          },`;
+      } else {
+        newData += `\n          ${column}: {
+            type: new ${graphQLType}
+          },`;
+      }
     }
   }
 
   newData += `\n        },
         resolve (source, args) {
-          return knex.returning('id').insert({`
+          return knex.returning('id').insert({`;
 
   for (var column in tableData.fields) {
-    newData += `\n            ${column}: args.${column},`
+    var psqlType = tableData.fields[column].data_type;
+    if (validForMutation(psqlType)) {
+      newData += `\n            ${column}: args.${column},`;
+    }
   }
 
 newData +=  `\n          }).into('${pluralLowercaseTableName}').then(id => {
@@ -261,13 +268,12 @@ newData +=  `\n          }).into('${pluralLowercaseTableName}').then(id => {
   return newData
 }
 
-var stringOrIntegerType = function(psqlType) {
+var validForMutation = function(psqlType) {
   var typeMap = {
-    'character varying': 'GraphQLString',
-    'integer': 'GraphQLInt'
-  }
-
-  return typeMap[psqlType] || 'GraphQLString'
+        'character varying': 'GraphQLString',
+        'integer': 'GraphQLInt'
+      };
+  return !!typeMap[psqlType];
 }
 
 var writeGraphQLExport = function() {
