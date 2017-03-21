@@ -30,7 +30,7 @@ var graphQLData = function() {
 
 var knex = require('knex')({
   client: 'pg',
-  connection: "postgresql://rachelminto:postgres@localhost/relay",
+  connection: "postgresql://tingc:tingc@localhost/blog",
   searchPath: 'knex,public'
 });`
 }
@@ -63,7 +63,7 @@ var psqlTypeToGraphQLType = function(psqlType) {
       }
 
   if (listType) {
-    return 'new GraphQLList(' + lingo.capitalize(listType[1]) + ')';
+    return 'new GraphQLList(' + lingo.capitalize(lingo.en.singularize(listType[1])) + ')';
   } else if (typeMap[psqlType]) {
     return typeMap[psqlType];
   } else {
@@ -153,8 +153,15 @@ var writeGraphQLQuerySchema = function(dbMetadata) {
     newData += queryTableHeader(tableName)
 
     for (var column in dbMetadata.tables[property].fields) {
-      var psqlType = dbMetadata.tables[property].fields[column].data_type
-      newData += queryTableArgs(column, psqlType);
+      var psqlType = dbMetadata.tables[property].fields[column].data_type;
+      var typeMap = {
+            'character varying': 'GraphQLString',
+            'integer': 'GraphQLInt'
+          };
+
+      if (typeMap[psqlType]) {
+        newData += queryTableArgs(column, psqlType);
+      }
     }
 
     newData = newData.slice(0, -1);
