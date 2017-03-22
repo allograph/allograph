@@ -30,7 +30,7 @@ var graphQLData = function() {
 
 var knex = require('knex')({
   client: 'pg',
-  connection: "postgresql://rachelminto:postgres@localhost/relay",
+  connection: "postgresql://tingc:tingc@localhost/blog",
   searchPath: 'knex,public'
 });`
 }
@@ -215,9 +215,12 @@ var writeGrpahQLMutationSchema = function(dbMetadata) {
   var newData = mutationHeader();
   for (var property in dbMetadata.tables) {
     if (dbMetadata.tables.hasOwnProperty(property)) {
-      newData += mutationAdd(property, dbMetadata.tables[property])
+      newData += mutationAdd(property, dbMetadata.tables[property]);
+      newData += mutationUpdate(property, dbMetadata.tables[property]);
+      newData += mutationDelete(property, dbMetadata.tables[property]);
     };
   };
+  newData = newData.slice(0, -1);
   newData += closingBrackets();
   addToSchemaFile(newData);
 };
@@ -232,6 +235,8 @@ var mutationAdd = function(pluralLowercaseTableName, tableData) {
 
   for (var column in tableData.fields) {
     var psqlType = tableData.fields[column].data_type;
+    var pk_datatype = tableData.fields[column].pk_datatype;
+
     if (validForMutation(psqlType) && column !== 'id') {
       var graphQLType = psqlTypeToGraphQLType(psqlType);
       if (tableData.fields[column].is_nullable === 'NO') {
@@ -240,20 +245,32 @@ var mutationAdd = function(pluralLowercaseTableName, tableData) {
           },`;
       } else {
         newData += `\n          ${column}: {
-            type: new ${graphQLType}
+            type: ${graphQLType}
           },`;
       }
+    } else if (pk_datatype) {
+      var pk_graphQLType = psqlTypeToGraphQLType(pk_datatype);
+      var fk_column = tableData.fields[column].fk_column;
+
+      newData += `\n          ${fk_column}: {
+            type: new GraphQLNonNull(${pk_graphQLType})
+          },`;
     }
   }
-
+  newData = newData.slice(0, -1);
   newData += `\n        },
         resolve (source, args) {
           return knex.returning('id').insert({`;
 
   for (var column in tableData.fields) {
+    var pk_datatype = tableData.fields[column].pk_datatype;
     var psqlType = tableData.fields[column].data_type;
-    if (validForMutation(psqlType)) {
+    var fk_column = tableData.fields[column].fk_column;
+
+    if (validForMutation(psqlType) && column !== 'id') {
       newData += `\n            ${column}: args.${column},`;
+    } else if (pk_datatype) {
+      newData += `\n            ${fk_column}: args.${fk_column},`;
     }
   }
 
@@ -261,6 +278,87 @@ newData +=  `\n          }).into('${pluralLowercaseTableName}').then(id => {
             return knex('${pluralLowercaseTableName}').where({ id: id[0] }).then(${singularLowercaseTableName} => {
               return ${singularLowercaseTableName}[0];
             });
+          });
+        }
+      },`
+
+  return newData
+}
+
+var mutationUpdate = function(pluralLowercaseTableName, tableData) {
+  var singularLowercaseTableName = lingo.en.singularize(pluralLowercaseTableName);
+  var singularCapitalizedTableName = lingo.capitalize(singularLowercaseTableName);
+
+  var newData = `\n      update${singularCapitalizedTableName}: {
+        type: ${singularCapitalizedTableName},
+        args: {`;
+
+  for (var column in tableData.fields) {
+    var psqlType = tableData.fields[column].data_type;
+    if (validForMutation(psqlType)) {
+      var graphQLType = psqlTypeToGraphQLType(psqlType);
+      if (tableData.fields[column].is_nullable === 'NO') {
+        newData += `\n          ${column}: {
+            type: new GraphQLNonNull(${graphQLType})
+          },`;
+      } else {
+        newData += `\n          ${column}: {
+            type: ${graphQLType}
+          },`;
+      }
+    }
+  }
+  newData = newData.slice(0, -1);
+  newData += `\n        },
+        resolve (source, args) {
+          return knex('${pluralLowercaseTableName}').where({ id: arg.id }).returning('id').update({`;
+
+  for (var column in tableData.fields) {
+    var psqlType = tableData.fields[column].data_type;
+    if (validForMutation(psqlType) && column !== 'id') {
+      newData += `\n            ${column}: args.${column},`;
+    }
+  }
+
+newData +=  `\n          }).then(id => {
+            return knex('${pluralLowercaseTableName}').where({ id: id[0] }).then(${singularLowercaseTableName} => {
+              return ${singularLowercaseTableName}[0];
+            });
+          });
+        }
+      },`
+
+  return newData
+}
+
+var mutationDelete = function(pluralLowercaseTableName, tableData) {
+  var singularLowercaseTableName = lingo.en.singularize(pluralLowercaseTableName);
+  var singularCapitalizedTableName = lingo.capitalize(singularLowercaseTableName);
+
+  var newData = `\n      delete${singularCapitalizedTableName}: {
+        type: ${singularCapitalizedTableName},
+        args: {`;
+
+  for (var column in tableData.fields) {
+    var psqlType = tableData.fields[column].data_type;
+    if (validForMutation(psqlType) && column === 'id') {
+      var graphQLType = psqlTypeToGraphQLType(psqlType);
+      if (tableData.fields[column].is_nullable === 'NO') {
+        newData += `\n          ${column}: {
+            type: new GraphQLNonNull(${graphQLType})
+          },`;
+      } else {
+        newData += `\n          ${column}: {
+            type: ${graphQLType}
+          },`;
+      }
+    }
+  }
+  newData = newData.slice(0, -1);
+  newData += `\n        },
+        resolve (source, args) {
+          knex('${pluralLowercaseTableName}').where({ id: arg.id }).del().then(numberOfDeletedItems => {
+            console.log('Number of deleted ${pluralLowercaseTableName}: ' + numberOfDeletedItems);
           });
         }
       },`
@@ -278,7 +376,8 @@ var validForMutation = function(psqlType) {
 
 var writeGraphQLExport = function() {
   var newData = `\n\nexports.Schema = new GraphQLSchema({
-  query: Query
+  query: Query,
+  mutation: Mutation
 });`
   addToSchemaFile(newData);
 }

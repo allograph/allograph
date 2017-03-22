@@ -154,7 +154,9 @@ var writeRelation = function(meta, relations) {
       update_rule: relation["update_rule"],
       delete_rule: relation["delete_rule"],
       fk_column: relation["fk_column"],
-      pk_column: relation["pk_column"]
+      pk_column: relation["pk_column"],
+      pk_datatype: meta.tables[relation["pk_table"]]
+                       .fields[relation["pk_column"]]["data_type"]
     }
   });
 

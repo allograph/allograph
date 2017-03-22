@@ -18,5 +18,5 @@ GraphQLServer.prototype.run = function() {
   app.listen(3000, () => console.log('Now browse to localhost:3000/graphql'));
 }
 
-new GraphQLServer().run();
-// exports.GraphQLServer = new GraphQLServer();
+// new GraphQLServer().run();
+exports.GraphQLServer = new GraphQLServer();
