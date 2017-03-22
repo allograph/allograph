@@ -53,6 +53,7 @@ const ` + tableName + ` = new GraphQLObjectType({
 
 var psqlTypeToGraphQLType = function(psqlType) {
   var listType = psqlType.match(/list\[(\w+)\]/),
+      timestamp = psqlType.match(/^timestamp/),
       typeMap = {
         'character varying': 'GraphQLString',
         'integer': 'GraphQLInt'
@@ -62,6 +63,8 @@ var psqlTypeToGraphQLType = function(psqlType) {
     return 'new GraphQLList(' + lingo.capitalize(lingo.en.singularize(listType[1])) + ')';
   } else if (typeMap[psqlType]) {
     return typeMap[psqlType];
+  } else if (timestamp) {
+    return 'GraphQLString';
   } else {
     return lingo.en.singularize(psqlType);
   }
