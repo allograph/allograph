@@ -1,13 +1,8 @@
 var pg = require('pg');
 var fs = require('fs');
+var knex = require('./db_connection')
 
 var DBData = function () {};
-
-var knex = require('knex')({
-  client: 'pg',
-  connection: 'postgres://rachelminto:postgres@localhost:5432/relay',
-  searchPath: 'knex,public'
-});
 
 DBData.prototype.readSchema = function (callback) {
   knex.raw("SELECT * FROM information_schema.tables WHERE table_schema = 'public'")
@@ -75,7 +70,6 @@ var columnData = function(field) {
 
 var writeToJSON = function(meta) {
   fs.writeFile('schema.json', JSON.stringify(meta), 'utf8', function(result) {
-    console.log("Wrote to json file.")
   });
 };
 

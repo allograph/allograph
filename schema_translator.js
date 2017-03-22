@@ -8,8 +8,8 @@ SchemaTranslator.prototype.printMetadata = function(dbMetadata) {
   writeGraphQLObjectSchema(dbMetadata);
   writeGraphQLQuerySchema(dbMetadata);
   writeGrpahQLMutationSchema(dbMetadata);
-  writeGraphQLExport();
 
+  writeGraphQLExport();
   graphQLServer.run();
 }
 
@@ -28,11 +28,7 @@ var graphQLData = function() {
   GraphQLNonNull
 } from 'graphql';
 
-var knex = require('knex')({
-  client: 'pg',
-  connection: "postgresql://tingc:tingc@localhost/blog",
-  searchPath: 'knex,public'
-});`
+var knex = require('./db_connection')`
 }
 
 var writeToSchemaFile = function(data) {
