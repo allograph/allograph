@@ -1,44 +1,42 @@
 var pg = require('pg');
 var fs = require('fs');
 
-var connection = new pg.Client({
-  user: 'rachelminto',
-  database: 'relay',
-  password: 'postgres',
-  host: 'localhost',
-  port: 5432,
-  max: 10, // max number of clients in the pool
-  idleTimeoutMillis: 3000, // how long a client is allowed to remain idle
-});
-
-connection.connect();
-
 var DBData = function () {};
 
-function queryAsync(query, arg=[]) {
-  return new Promise(function(resolve,reject) {
-    (connection.query(query, arg, function(err, data) {
-      if (err !== null) return reject(err);
-      resolve(data);
-    }));
-  });
-}
+var knex = require('knex')({
+  client: 'pg',
+  connection: 'postgres://rachelminto:postgres@localhost:5432/relay',
+  searchPath: 'knex,public'
+});
 
 DBData.prototype.readSchema = function (callback) {
-  Promise.all([queryAsync(tableNamesQuery), queryAsync(dbNameQuery), queryAsync(relationQuery)]).then(values => {
-    var dbName = values[1].rows[0].catalog_name;
-    var tables = values[0].rows.map(function(row) {
+  knex.raw("SELECT * FROM information_schema.tables WHERE table_schema = 'public'")
+  .then(function(result) {
+    var dbName = result.rows[0].table_catalog;
+    var tables = result.rows.map(function(row) {
                     return row.table_name;
-                  });
-    var relations = values[2].rows;
+                  });  
+
     var meta = {
       data: dbName,
       tables: {}
-    };
+    };  
 
-    var tableInfoPromises = promisesFor(tables);
+    var promisesFor = function(tables) {
+      var promises = []
+      tables.forEach(function(tableName) {
+        promises.push(knex.raw(`SELECT column_name, data_type, is_nullable, table_name,
+      column_default FROM information_schema.columns WHERE table_name = ?::text`, [tableName]))
+      });
 
-    Promise.all(tableInfoPromises).then(values => {
+      promises.push(relationQuery)
+      return promises;
+    }
+
+    Promise.all(promisesFor(tables)).then(values => {
+      var relations_results = values.pop();
+      var relations = relations_results.rows;
+
       values.forEach(function(result) {
         var results = result.rows;
         var tableName = results[0].table_name;
@@ -57,39 +55,13 @@ DBData.prototype.readSchema = function (callback) {
         meta.tables[tableName] = table
       });
 
-      writeRelation(meta, relations);
-      writeToJSON(meta);
-      callback(meta);
-    });
+      var metaWithRelations = writeRelation(meta, relations);
+      writeToJSON(metaWithRelations);
+
+      callback(meta);    
+    })
   });
-};
-
-var writeToJSON = function(meta) {
-  fs.writeFile('schema.json', JSON.stringify(meta), 'utf8', function(result) {
-    console.log("Wrote to json file.")
-  });
-};
-
-var tableNamesQuery = `SELECT * FROM information_schema.tables
-  WHERE table_schema = 'public'`;
-
-function tableInfo(tableName) {
-  return queryAsync(`SELECT column_name, data_type, is_nullable, table_name,
-    column_default FROM information_schema.columns WHERE table_name = $1::text`, [tableName]);
 }
-
-function promisesFor(tableNames) {
-  var tablesPromises = []
-
-    tableNames.forEach(function(tableName) {
-      tablesPromises.push(tableInfo(tableName));
-    });
-
-  return tablesPromises;
-}
-
-var dbNameQuery = `SELECT * FROM
-  information_schema.information_schema_catalog_name;`;
 
 var columnData = function(field) {
   var data = {
@@ -101,7 +73,13 @@ var columnData = function(field) {
   return data;
 };
 
-var relationQuery = `
+var writeToJSON = function(meta) {
+  fs.writeFile('schema.json', JSON.stringify(meta), 'utf8', function(result) {
+    console.log("Wrote to json file.")
+  });
+};
+
+var relationQuery = knex.raw(`
 SELECT
   fk.table_name AS FK_Table,
   cu.column_name AS FK_Column,
@@ -138,7 +116,7 @@ INNER JOIN
   ) AS pt
   ON
     pt.table_name = pk.table_name
-`;
+`);
 
 var writeRelation = function(meta, relations) {
   relations.forEach(function(relation) {
