@@ -1,42 +1,49 @@
 var pg = require('pg');
 var fs = require('fs');
 
-var connection = new pg.Client({
-  user: 'tingc',
-  database: 'blog',
-  password: 'tingc',
-  host: 'localhost',
-  port: 5432,
-  max: 10, // max number of clients in the pool
-  idleTimeoutMillis: 3000, // how long a client is allowed to remain idle
-});
+var knex = require('./db_connection')
 
 var DBData = function () {};
-connection.connect();
 
 DBData.prototype.readSchema = function (callback) {
-  Promise.all([tableNamesQuery, dbNameQuery, relationQuery]).then(values => {
-    var dbName = values[1].rows[0].catalog_name
-    var tables = values[0].rows
-    var relations = values[2].rows
+
+  knex.raw("SELECT * FROM information_schema.tables WHERE table_schema = 'public'")
+  .then(function(result) {
+    var dbName = result.rows[0].table_catalog;
+    var tables = result.rows.map(function(row) {
+                    return row.table_name;
+                  });  
+
 
     var meta = {
       data: dbName,
       tables: {}
+    };  
+
+    var promisesFor = function(tables) {
+      var promises = []
+      tables.forEach(function(tableName) {
+        promises.push(knex.raw(`SELECT column_name, data_type, is_nullable, table_name,
+      column_default FROM information_schema.columns WHERE table_name = ?::text`, [tableName]))
+      });
+
+      promises.push(relationQuery)
+      return promises;
     }
 
-    var tableInfoFunctions = functionsFor(tables);
+    Promise.all(promisesFor(tables)).then(values => {
+      var relations_results = values.pop();
+      var relations = relations_results.rows;
 
-    Promise.all(tableInfoFunctions).then(values => {
       values.forEach(function(result) {
-        var results = result.rows
-        var tableName = results[0].table_name
+        var results = result.rows;
+        var tableName = results[0].table_name;
 
         var table = {
           name: tableName,
           description: "This is a table called " + tableName,
           fields: {}
-        }
+        };
 
         for (result in results) {
           var columnName = results[result].column_name
@@ -46,39 +53,14 @@ DBData.prototype.readSchema = function (callback) {
         meta.tables[tableName] = table
       });
 
-      writeRelation(meta, relations);
-      writeToJSON(meta);
-      callback(meta);
-    });
-  });
-};
+      var metaWithRelations = writeRelation(meta, relations);
+      writeToJSON(metaWithRelations);
 
-var writeToJSON = function(meta) {
-  fs.writeFile('schema.json', JSON.stringify(meta), 'utf8', function(result) {
-    console.log("Wrote to json file.")
+
+      callback(meta);    
+    })
   });
 }
-
-var tableNamesQuery = connection.query(`SELECT * FROM information_schema.tables
-  WHERE table_schema = 'public'`)
-
-function tableInfo(tableName) {
-  return connection.query(`SELECT column_name, data_type, is_nullable, table_name,
-    column_default FROM information_schema.columns WHERE table_name = $1`, [tableName])
-}
-
-function functionsFor(tables) {
-  var tableFunctions = []
-
-    for (table in tables) {
-      tableFunctions.push(tableInfo(tables[table].table_name));
-    }
-
-  return tableFunctions
-}
-
-var dbNameQuery = connection.query(`SELECT * FROM
-  information_schema.information_schema_catalog_name;`)
 
 var columnData = function(field) {
   var data = {
@@ -90,7 +72,12 @@ var columnData = function(field) {
   return data;
 };
 
-var relationQuery = connection.query(`
+var writeToJSON = function(meta) {
+  fs.writeFile('schema.json', JSON.stringify(meta), 'utf8', function(result) {
+  });
+};
+
+var relationQuery = knex.raw(`
 SELECT
   fk.table_name AS FK_Table,
   cu.column_name AS FK_Column,
@@ -132,14 +119,20 @@ INNER JOIN
 var writeRelation = function(meta, relations) {
   relations.forEach(function(relation) {
     meta.tables[relation["pk_table"]].fields[relation["fk_table"]] = {
-      data_type: "list[" + formatTableName(relation["fk_table"]) + "]"
+      data_type: "list[" + formatTableName(relation["fk_table"]) + "]",
+      fk_column: relation["fk_column"],
+      pk_column: relation["pk_column"]
     }
 
     delete meta.tables[relation["fk_table"]].fields[relation["fk_column"]]
     meta.tables[relation["fk_table"]].fields[relation["pk_table"]] = {
       data_type: formatTableName(relation["pk_table"]),
       update_rule: relation["update_rule"],
-      delete_rule: relation["delete_rule"]
+      delete_rule: relation["delete_rule"],
+      fk_column: relation["fk_column"],
+      pk_column: relation["pk_column"],
+      pk_datatype: meta.tables[relation["pk_table"]]
+                       .fields[relation["pk_column"]]["data_type"]
     }
   });
 
@@ -148,6 +141,6 @@ var writeRelation = function(meta, relations) {
 
 var formatTableName = function(name) {
   return name.charAt(0).toUpperCase() + name.slice(1).toLowerCase();
-}
+};
 
 exports.DBData = new DBData();
