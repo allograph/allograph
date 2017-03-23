@@ -309,7 +309,7 @@ var mutationUpdate = function(pluralLowercaseTableName, tableData) {
   newData = newData.slice(0, -1);
   newData += `\n        },
         resolve (source, args) {
-          return knex('${pluralLowercaseTableName}').where({ id: arg.id }).returning('id').update({`;
+          return knex('${pluralLowercaseTableName}').where({ id: args.id }).returning('id').update({`;
 
   for (var column in tableData.fields) {
     var psqlType = tableData.fields[column].data_type;
@@ -355,7 +355,7 @@ var mutationDelete = function(pluralLowercaseTableName, tableData) {
   newData = newData.slice(0, -1);
   newData += `\n        },
         resolve (source, args) {
-          knex('${pluralLowercaseTableName}').where({ id: arg.id }).del().then(numberOfDeletedItems => {
+          knex('${pluralLowercaseTableName}').where({ id: args.id }).del().then(numberOfDeletedItems => {
             console.log('Number of deleted ${pluralLowercaseTableName}: ' + numberOfDeletedItems);
           });
         }
