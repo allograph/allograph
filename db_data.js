@@ -42,7 +42,8 @@ DBData.prototype.readSchema = function (callback) {
         var table = {
           name: tableName,
           description: "This is a table called " + tableName,
-          fields: {}
+          fields: {},
+          relations: { has_many: [], has_one: []}
         };
 
         for (result in results) {
@@ -117,11 +118,29 @@ INNER JOIN
 `);
 
 var writeRelation = function(meta, relations) {
+  var relationTables = relations.map(function(relation) {
+    return relation.fk_table;
+  })
+
   relations.forEach(function(relation) {
     meta.tables[relation["pk_table"]].fields[relation["fk_table"]] = {
       data_type: "list[" + formatTableName(relation["fk_table"]) + "]",
       fk_column: relation["fk_column"],
       pk_column: relation["pk_column"]
+    }
+
+    if (isJunctionTable(relation.fk_table, relationTables, meta)) {
+      var pkTableNames = pkTablesRefByJunction(relation.fk_table, relation.pk_table, relations)
+
+      for (var pkTable of pkTableNames) {
+        meta.tables[pkTable].relations.has_many.push(relation.pk_table)    
+      }
+
+      meta.tables[relation.fk_table].relations.has_one.push(relation.pk_table)
+      meta.tables[relation.pk_table].relations.has_many.push(relation.fk_table)
+    } else {
+      meta.tables[relation.pk_table].relations.has_many.push(relation.fk_table)
+      meta.tables[relation.fk_table].relations.has_one.push(relation.pk_table)
     }
 
     delete meta.tables[relation["fk_table"]].fields[relation["fk_column"]]
@@ -138,6 +157,34 @@ var writeRelation = function(meta, relations) {
 
   return meta;
 };
+
+var pkTablesRefByJunction = function(tableName, pkTable, relations) {
+  var relationTables = relations.filter(function(relation) {
+    return relation.fk_table == tableName && relation.pk_table != pkTable
+  })
+
+  var relationTableNames = relationTables.map(function(relationTable) {
+    return relationTable.pk_table
+  })
+
+  return relationTableNames
+}
+
+var isJunctionTable = function(tableName, tableNames, meta) {
+  if (Object.keys(meta.tables[tableName].fields).length != 3) {
+    return false;
+  }
+
+  var count = 0;
+
+  for(var i = 0; i < tableNames.length; ++i){
+    if(tableNames[i] == tableName) {
+      count++;
+    }
+  }
+
+  return !!(count > 1)
+}
 
 var formatTableName = function(name) {
   return name.charAt(0).toUpperCase() + name.slice(1).toLowerCase();
