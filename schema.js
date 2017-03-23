@@ -52,6 +52,7 @@ const Post = new GraphQLObjectType({
   }
 });
 
+
 const User = new GraphQLObjectType({
   name: 'User',
   description: 'This is a table called users',
@@ -75,7 +76,7 @@ const User = new GraphQLObjectType({
           return user.last_name;
         }
       },
-      email: {
+      createdAt: {
         type: GraphQLString,
         resolve (user) {
           return user.email;
@@ -274,7 +275,7 @@ const Mutation = new GraphQLObjectType({
           last_name: {
             type: new GraphQLNonNull(GraphQLString)
           },
-          email: {
+          content: {
             type: GraphQLString
           }
         },

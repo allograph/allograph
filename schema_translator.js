@@ -115,7 +115,6 @@ var writeGraphQLObjectSchema = function(dbMetadata) {
   for (var property in dbMetadata.tables) {
 
     if (dbMetadata.tables.hasOwnProperty(property)) {
-
       var tableName = singularCapitalizedTableName(property);
       var description = dbMetadata.tables[property].description;
 

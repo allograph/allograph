@@ -1,16 +1,19 @@
 var pg = require('pg');
 var fs = require('fs');
+
 var knex = require('./db_connection')
 
 var DBData = function () {};
 
 DBData.prototype.readSchema = function (callback) {
+
   knex.raw("SELECT * FROM information_schema.tables WHERE table_schema = 'public'")
   .then(function(result) {
     var dbName = result.rows[0].table_catalog;
     var tables = result.rows.map(function(row) {
                     return row.table_name;
                   });  
+
 
     var meta = {
       data: dbName,
@@ -52,6 +55,7 @@ DBData.prototype.readSchema = function (callback) {
 
       var metaWithRelations = writeRelation(meta, relations);
       writeToJSON(metaWithRelations);
+
 
       callback(meta);    
     })
