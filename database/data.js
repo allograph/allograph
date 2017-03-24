@@ -5,8 +5,7 @@ var knex = require('./connection')
 
 var DBData = function () {};
 
-DBData.prototype.readSchema = function (callback) {
-
+DBData.prototype.readSchema = function (callback, skipModelCreation) {
   knex.raw("SELECT * FROM information_schema.tables WHERE table_schema = 'public' AND NOT (table_name = 'knex_migrations' OR table_name = 'knex_migrations_lock')")
   .then(function(result) {
     var dbName = result.rows[0].table_catalog;
@@ -57,7 +56,7 @@ DBData.prototype.readSchema = function (callback) {
       writeToJSON(metaWithRelations);
 
 
-      callback(meta);    
+      callback(meta, skipModelCreation);    
     })
   });
 }

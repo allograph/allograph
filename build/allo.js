@@ -6,6 +6,9 @@ const knex = require('../database/connection.js')
 
 program
   .version('0.0.1')
+  .option('-n, --no_models', 'The user to authenticate as')  
+
+program
   .command('server')
   .description('Start Allograph server')
   .action(function(req,optional){
@@ -13,15 +16,14 @@ program
   });
 
 program
-  .version('0.0.1')
   .command('generate:graphql')
   .description('Inspect DB schema and generate GraphQL schema.js file')
-  .action(function(req,optional){
-    dbTranslator.translate();
+  .action(function(){
+    var skipModelCreation = (program.no_models === true)
+    dbTranslator.translate(skipModelCreation);
   });
 
 program
-  .version('0.0.1')
   .command('migrate')
   .description("Runs all migrations that have not yet been run.")
   .action(function(req,optional){
@@ -29,7 +31,6 @@ program
   });
 
 program
-  .version('0.0.1')
   .command('migrate:rollback')
   .description("Rolls back the latest migration group.")
   .action(function(req,optional){
@@ -37,20 +38,18 @@ program
   });
 
 program
-  .version('0.0.1')
   .command('create:model')
   .description("Creates Bookshelf model. Note: does not automatically create a table in db.")
   .action(function(req,optional){
     knex.migrate.rollback({directory: "./migrations"});
   });  
 
-program
-  .version('0.0.1')
-  .command('create:migration')
-  .description("Creates migration file. Can be modified by supplying options.")
-  .action(function(req,optional){
-    knex.migrate.make(name, [config]);
-  });  
+// program
+//   .command('create:migration')
+//   .description("Creates migration file. Can be modified by supplying options.")
+//   .action(function(req,optional){
+//     knex.migrate.make(name, [config]);
+//   });  
 
 program.parse(process.argv);   
 
@@ -80,8 +79,6 @@ program.parse(process.argv);
 
 // **Models and Tables**
 
-// Q: Should we do model:create or create:model or a different format?
-
 // "allo create:model <modelName>"
 //     description: Creates Bookshelf model. Does not automatically create a table in db. Is this useful?
 //     options: 
@@ -98,7 +95,6 @@ program.parse(process.argv);
 
 // "allo db:seed" to seed data.
 
-// 15 min:
 
 // "allo drop:table <tableName>"
 //     description: Creates table migration to drop table. Must run "allo migrate" to persist change to db.

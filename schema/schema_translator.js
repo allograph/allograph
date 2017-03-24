@@ -3,14 +3,17 @@ var lingo = require('lingo')
 var SchemaTranslator = function () {};
 var Bookshelf = require('../bookshelf/bookshelf.js').Bookshelf
 
-SchemaTranslator.prototype.printMetadata = function(dbMetadata) {
+SchemaTranslator.prototype.printMetadata = function(dbMetadata, skipModelCreation) {
   writeToSchemaFile(graphQLData());
   writeGraphQLObjectSchema(dbMetadata);
   writeGraphQLQuerySchema(dbMetadata);
   writeGrpahQLMutationSchema(dbMetadata);
 
   writeGraphQLExport();
-  Bookshelf.createUserModels(dbMetadata);
+
+  if (skipModelCreation == false) {
+    Bookshelf.createUserModels(dbMetadata);    
+  }
 }
 
 var singularCapitalizedTableName = function(name) {
