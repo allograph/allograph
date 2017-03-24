@@ -5,7 +5,7 @@ const app = express();
 var GraphQLServer = function () {};
 
 GraphQLServer.prototype.run = function() {
-  const schema = require("./schema.js").Schema;
+  const schema = require("./schema/schema.js").Schema;
   
   app.use('/graphql', graphHTTP({
     schema: schema,
