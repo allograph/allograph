@@ -9,12 +9,16 @@
   },
   "author": "Ting Chou and Rachel Minto",
   "license": "ISC",
+  "bin": {
+    "allo": "build/allo.js"
+  },
   "dependencies": {
     "babel": "^6.23.0",
     "babel-core": "^6.4.5",
     "babel-polyfill": "^6.3.14",
     "babel-preset-node6": "^11.0.0",
     "babel-register": "^6.24.0",
+    "commander": "^2.9.0",
     "express": "^4.13.4",
     "express-graphql": "^0.4.4",
     "graphiql": "^0.9.3",
