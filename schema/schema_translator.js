@@ -1,6 +1,7 @@
 var fs = require('fs');
 var lingo = require('lingo')
 var SchemaTranslator = function () {};
+var Bookshelf = require('../bookshelf/bookshelf.js').Bookshelf
 
 SchemaTranslator.prototype.printMetadata = function(dbMetadata) {
   writeToSchemaFile(graphQLData());
@@ -9,6 +10,7 @@ SchemaTranslator.prototype.printMetadata = function(dbMetadata) {
   writeGrpahQLMutationSchema(dbMetadata);
 
   writeGraphQLExport();
+  Bookshelf.createUserModels(dbMetadata);
 }
 
 var singularCapitalizedTableName = function(name) {
