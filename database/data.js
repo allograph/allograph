@@ -1,19 +1,18 @@
 var pg = require('pg');
 var fs = require('fs');
 
-var knex = require('./db_connection')
+var knex = require('./connection')
 
 var DBData = function () {};
 
 DBData.prototype.readSchema = function (callback) {
 
-  knex.raw("SELECT * FROM information_schema.tables WHERE table_schema = 'public'")
+  knex.raw("SELECT * FROM information_schema.tables WHERE table_schema = 'public' AND NOT (table_name = 'knex_migrations' OR table_name = 'knex_migrations_lock')")
   .then(function(result) {
     var dbName = result.rows[0].table_catalog;
     var tables = result.rows.map(function(row) {
                     return row.table_name;
                   });  
-
 
     var meta = {
       data: dbName,
@@ -74,7 +73,7 @@ var columnData = function(field) {
 };
 
 var writeToJSON = function(meta) {
-  fs.writeFile('schema.json', JSON.stringify(meta), 'utf8', function(result) {
+  fs.writeFile('./schema/schema.json', JSON.stringify(meta), 'utf8', function(result) {
   });
 };
 

@@ -26,11 +26,11 @@ var graphQLData = function() {
   GraphQLNonNull
 } from 'graphql';
 
-var knex = require('./db_connection')`
+var knex = require('../database/connection')`
 }
 
 var writeToSchemaFile = function(data) {
-  fs.writeFileSync('schema.js', data, 'utf-8');
+  fs.writeFileSync('./schema/schema.js', data, 'utf-8');
 }
 
 var closingBrackets = function() {
@@ -101,7 +101,7 @@ var foreignKeyColumnData = function(column, tableName, pk_column, fk_column, psq
 }
 
 var existingSchemaFileContents = function() {
-  return fs.readFileSync('schema.js', 'utf-8');
+  return fs.readFileSync('./schema/schema.js', 'utf-8');
 }
 
 var addToSchemaFile = function(newData) {

@@ -7,7 +7,7 @@ import {
   GraphQLNonNull
 } from 'graphql';
 
-var knex = require('./db_connection')
+var knex = require('../database/connection')
 
 const User = new GraphQLObjectType({
   name: 'User',
