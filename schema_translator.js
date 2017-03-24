@@ -1,7 +1,6 @@
 var fs = require('fs');
 var lingo = require('lingo')
 var SchemaTranslator = function () {};
-const graphQLServer = require('./server.js').GraphQLServer;
 
 SchemaTranslator.prototype.printMetadata = function(dbMetadata) {
   writeToSchemaFile(graphQLData());
@@ -10,7 +9,6 @@ SchemaTranslator.prototype.printMetadata = function(dbMetadata) {
   writeGrpahQLMutationSchema(dbMetadata);
 
   writeGraphQLExport();
-  graphQLServer.run();
 }
 
 var singularCapitalizedTableName = function(name) {
