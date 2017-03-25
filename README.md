@@ -74,7 +74,8 @@ Tables in your database can be modified using the migration system, which harnes
 ## Benefits
 
 ### Relation Detection
-    The relation detection feature allows for creation of bookshelf models that are already set up with has one and has many relationships whenever they can be detected based on the database structure itself. Allograph's database inspector identifies any table with three columns, two of which are foreign keys, as a junction table. The two tables that are referenced by the foreign keys in the junction tables will each be given Has Many references to each other. 
+
+The relation detection feature allows for creation of bookshelf models that are already set up with has one and has many relationships whenever they can be detected based on the database structure itself. Allograph's database inspector identifies any table with three columns, two of which are foreign keys, as a junction table. The two tables that are referenced by the foreign keys in the junction tables will each be given Has Many references to each other. 
 
 ### Command Line Tools
 
