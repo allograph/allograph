@@ -4,11 +4,12 @@
 |
 ├── build
 |   └── allo.js           # cli file
-├── migration
+├── migrations
 ├── server.js
 ├── index.js
 ├── database
 |   ├── connection.js
+|   ├── migration_generator.js
 |   └── data.js
 ├── schema
 |   ├── schema.graphql    # generated from schema_translator.js
@@ -26,3 +27,72 @@
 ├── .babelrc
 └── README.md
 ```
+
+# Allograph
+
+*A GraphQL framework that automatically generates a GraphQL schema from inspecting a PostgreSQL database and allows for easy configuration and modification.*
+
+## Usage
+    To begin, clone this repo and run 'npm install' and then 'npm link' from your terminal. 
+
+    If you have an existing database that you would like to use with Allograph, update the database/connection.js file with your postgres database credentials (change username, password, and database in the example below, and the 5432 port if necessary). 
+    Eg: 'postgres://username:password@localhost:5432/database'
+
+    Once your credentials have been saved, you can run 'allo generate:graphql' from your terminal to automatically create a 'schema/schema.js' file, which contains your GraphQL schema, a schema/schema.json file for your information, and bookshelf/models/[tablename] for each of your tables. If you do not wish to use Bookshelf (an ORM), you can run 'allo generate:graphql -n' instead, which will create the GraphQL schema without bookshelf models.
+
+    At this point you're GraphQL server can be run with the command 'allo server'. Looking at 'http://localhost:3000/graphql' in your browser will show you the GraphiQL interface. Assuming you have a table 'users' with a column 'first_name', a GraphQL query can be entered in the lefthand pane:
+
+    ```
+    query {
+        users {
+            first_name
+        }
+    }
+    ```
+
+    Which will return the following result when you click the triangle "Execute Query" button if you have three users in your users table:
+
+    ```
+    {
+  "data": {
+    "users": [
+      {
+        "first_name": "michael"
+      },
+      {
+        "first_name": "marcia"
+      },
+      {
+        "first_name": "wally"
+      }
+    ]
+  }
+}
+```
+
+Consult send_request.js for ideas on how you can utilize your fully-funtioning GraphQL server to make requests by copying and pasting the query from your g]GraphiQL interface into your code base once you're happy with the result.
+
+Tables in your database can be modified using the migration system, which harnesses the power of Knex.js. To generate a new migration, use 'allo create:migration <name>' in your command line. The name you provide along with a timestamp will be used to name your migration file, which can be found in the /migrations folder. You also have the option of customizing the migration to be for creating a new table with 'allo create:migration <name> -c <tableName>'. After you're happy with the migration file, you can run 'allo migrate' to persist your change to the database. The migration can be rolled back with 'allo migrate:rollback'. See the section for Command Line Tools below for more information on using Allograph's CLI, and see the [Knex.js API](http://knexjs.org/#Migrations-CLI) for more information on using knex migrations. 
+
+## Benefits
+
+### Relation Detection
+    The relation detection feature allows for creation of bookshelf models that are already set up with has one and has many relationships whenever they can be detected based on the database structure itself. Allograph's database inspector identifies any table with three columns, two of which are foreign keys, as a junction table. The two tables that are referenced by the foreign keys in the junction tables will each be given Has Many references to each other. 
+
+### Command Line Tools
+
+'allo server': Start your Allograph server
+
+'allo generate:graphql': Inspect DB schema and generate GraphQL schema.js file as well as Bookshelf.js (an ORM) models. 
+    Optional flag: '-n' or '--no_models'. No bookshelf models will be generated.
+
+'allo migrate': Runs all migrations that have not yet been run.
+
+'allo migrate:rollback': Rolls back the latest migration group.
+
+'allo create:model <modelName>': Creates Bookshelf model. Note: does not automatically create a table in db!
+
+'allo create:migration <name>': Creates migration file in /migrations folder.
+    Optional flag: '-c, --create_table <tableName>'. Creates migration file that for adding a table of the tableName provided. Automatically provides a column for an incrementing primary key; additional columns can be added in the migration file.
+
+
