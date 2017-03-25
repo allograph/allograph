@@ -33,27 +33,27 @@
 *A GraphQL framework that automatically generates a GraphQL schema from inspecting a PostgreSQL database and allows for easy configuration and modification.*
 
 ## Usage
-    To begin, clone this repo and run 'npm install' and then 'npm link' from your terminal. 
 
-    If you have an existing database that you would like to use with Allograph, update the database/connection.js file with your postgres database credentials (change username, password, and database in the example below, and the 5432 port if necessary). 
-    Eg: 'postgres://username:password@localhost:5432/database'
+To begin, clone this repo and run 'npm install' and then 'npm link' from your terminal. 
 
-    Once your credentials have been saved, you can run 'allo generate:graphql' from your terminal to automatically create a 'schema/schema.js' file, which contains your GraphQL schema, a schema/schema.json file for your information, and bookshelf/models/[tablename] for each of your tables. If you do not wish to use Bookshelf (an ORM), you can run 'allo generate:graphql -n' instead, which will create the GraphQL schema without bookshelf models.
+If you have an existing database that you would like to use with Allograph, update the database/connection.js file with your postgres database credentials (change username, password, and database in the example below, and the 5432 port if necessary). 
+Eg: 'postgres://username:password@localhost:5432/database'
 
-    At this point you're GraphQL server can be run with the command 'allo server'. Looking at 'http://localhost:3000/graphql' in your browser will show you the GraphiQL interface. Assuming you have a table 'users' with a column 'first_name', a GraphQL query can be entered in the lefthand pane:
+Once your credentials have been saved, you can run 'allo generate:graphql' from your terminal to automatically create a 'schema/schema.js' file, which contains your GraphQL schema, a schema/schema.json file for your information, and bookshelf/models/[tablename] for each of your tables. If you do not wish to use Bookshelf (an ORM), you can run 'allo generate:graphql -n' instead, which will create the GraphQL schema without bookshelf models.
 
-    ```
-    query {
-        users {
-            first_name
-        }
-    }
-    ```
+At this point you're GraphQL server can be run with the command 'allo server'. Looking at 'http://localhost:3000/graphql' in your browser will show you the GraphiQL interface. Assuming you have a table 'users' with a column 'first_name', a GraphQL query can be entered in the lefthand pane:
 
-    Which will return the following result when you click the triangle "Execute Query" button if you have three users in your users table:
+```javascript
+query {
+ users {
+  first_name
+  }
+}
+```
+Which will return the following result when you click the triangle "Execute Query" button if you have two users in your users table:
 
-    ```
-    {
+```javascript
+{
   "data": {
     "users": [
       {
@@ -61,9 +61,6 @@
       },
       {
         "first_name": "marcia"
-      },
-      {
-        "first_name": "wally"
       }
     ]
   }
