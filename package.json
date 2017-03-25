@@ -18,6 +18,7 @@
     "babel-polyfill": "^6.3.14",
     "babel-preset-node6": "^11.0.0",
     "babel-register": "^6.24.0",
+    "bookshelf": "^0.10.3",
     "commander": "^2.9.0",
     "express": "^4.13.4",
     "express-graphql": "^0.4.4",
@@ -31,3 +32,4 @@
   "devDependencies": {
     "babel-cli": "^6.24.0"
   }
+}
