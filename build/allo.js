@@ -3,10 +3,13 @@ const program = require('commander');
 const graphQLServer = require('../server.js').GraphQLServer;
 const dbTranslator = require('../index.js').DBTranslator;
 const knex = require('../database/connection.js')
+const migrationGenerator = require('../database/migration_generator.js').MigrationGenerator
+const bookshelf = require('../bookshelf/bookshelf.js').Bookshelf
 
 program
   .version('0.0.1')
-  .option('-n, --no_models', 'The user to authenticate as')  
+  .option('-n, --no_models', 'No models will be generated.')
+  .option('-c, --create_table <tableName>', 'Sets up migration to create table')
 
 program
   .command('server')
@@ -38,18 +41,22 @@ program
   });
 
 program
-  .command('create:model')
+  .command('create:model <modelName>')
   .description("Creates Bookshelf model. Note: does not automatically create a table in db.")
-  .action(function(req,optional){
-    knex.migrate.rollback({directory: "./migrations"});
+  .action(function(modelName){
+    bookshelf.createModel(modelName)
   });  
 
-// program
-//   .command('create:migration')
-//   .description("Creates migration file. Can be modified by supplying options.")
-//   .action(function(req,optional){
-//     knex.migrate.make(name, [config]);
-//   });  
+program
+  .command('create:migration <name>')
+  .description("Creates migration file.")
+  .action(function(name){
+    if (program.create_table) {
+      migrationGenerator.createTable(name, program.create_table)
+    } else {
+      migrationGenerator.generic(name)
+    }
+  });  
 
 program.parse(process.argv);   
 
