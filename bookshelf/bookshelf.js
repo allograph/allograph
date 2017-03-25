@@ -1,11 +1,11 @@
-var knex = require('../database/connection')
+var knex = require('../database/connection');
 var fs = require('fs');
 var bookshelf = require('bookshelf')(knex);
-var lingo = require('lingo')
+var lingo = require('lingo');
 
 var Bookshelf = function () {};
 
-Bookshelf.prototype.createUserModels = function(meta) {
+Bookshelf.prototype.createUserModels = function(meta) {  // Need to rename this function!
   for (var property in meta.tables) {
     if (meta.tables.hasOwnProperty(property)) {
       var fileName = __dirname + '/models/' + property + '.js'
@@ -14,6 +14,22 @@ Bookshelf.prototype.createUserModels = function(meta) {
       fs.writeFileSync(fileName, data, 'utf-8');
     }
   }
+}
+
+Bookshelf.prototype.createModel = function(modelName) {
+  var data = requireBookshelf();
+  data += modelTemplate(modelName)
+
+  var fileName = __dirname + '/models/' + modelName + '.js'
+  fs.writeFileSync(fileName, data, 'utf-8');
+}
+
+var modelTemplate = function(modelName) {
+  var singularTableName = lingo.en.singularize(modelName)
+  var singularCapitalizedTableName = lingo.capitalize(singularTableName)
+
+  return `\n\nvar ${singularCapitalizedTableName} = bookshelf.Model.extend({
+});`
 }
 
 var requireBookshelf = function() {
@@ -31,7 +47,7 @@ var modelInformation = function(tableInfo) {
 
     data += `\n  ${relation}: function() {
     return this.hasMany(${capitalizedRelationName});
-  }`
+  },`
     }
 
   for (var relation of tableInfo.relations.has_one) {
@@ -40,7 +56,7 @@ var modelInformation = function(tableInfo) {
 
     data += `\n  ${singularRelationName}: function() {
     return this.hasOne(${singularCapitalizedRelationName});
-  }`
+  },`
     }    
   
   data += `\n});`
