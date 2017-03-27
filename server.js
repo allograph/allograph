@@ -5,8 +5,8 @@ const app = express();
 var GraphQLServer = function () {};
 
 GraphQLServer.prototype.run = function() {
-  const schema = require("./schema/schema.js").Schema;
-  
+  const schema = require("./schema.js").Schema;
+
   app.use('/graphql', graphHTTP({
     schema: schema,
     pretty: true,
@@ -15,5 +15,5 @@ GraphQLServer.prototype.run = function() {
 
   app.listen(3000, () => console.log('Now browse to localhost:3000/graphql'));
 }
-
-exports.GraphQLServer = new GraphQLServer();
+new GraphQLServer().run();
+// exports.GraphQLServer = new GraphQLServer();

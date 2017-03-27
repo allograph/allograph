@@ -1,9 +1,9 @@
 const dbData = require('./database/data.js').DBData;
-const schemaTranslator = require('./schema/schema_translator.js').SchemaTranslator;
+const graphqlGenerator = require('./schema/graphql_generator.js').GraphqlGenerator;
 var DBTranslator = function () {};
 
-DBTranslator.prototype.translate = function(skipModelCreation) {
-  dbData.readSchema(schemaTranslator.printMetadata, skipModelCreation);
+DBTranslator.prototype.generate = function() {
+  dbData.readSchema(graphqlGenerator.printMetadata);
 }
-
-exports.DBTranslator = new DBTranslator();
+new DBTranslator().generate();
+// exports.DBTranslator = new DBTranslator();

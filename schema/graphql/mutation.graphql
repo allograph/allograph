@@ -1,0 +1,12 @@
+# Functions to set stuff
+type Mutation {
+  addUser(firstName: String!, lastName: String!, email: String): User
+  updateUser(id: Int!, firstName: String!, lastName: String!, email: String): User
+  deleteUser(id: Int!): String
+  addPost(title: String!, content: String!): Post
+  updatePost(id: Int!, title: String!, content: String!): Post
+  deletePost(id: Int!): String
+  addComment(content: String!): Comment
+  updateComment(id: Int!, content: String!): Comment
+  deleteComment(id: Int!): String
+}

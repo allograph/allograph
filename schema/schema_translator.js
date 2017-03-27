@@ -12,7 +12,7 @@ SchemaTranslator.prototype.printMetadata = function(dbMetadata, skipModelCreatio
   writeGraphQLExport();
 
   if (skipModelCreation == false) {
-    Bookshelf.createUserModels(dbMetadata);    
+    Bookshelf.createUserModels(dbMetadata);
   }
 }
 
@@ -206,7 +206,7 @@ var queryClosingBrackets = function() {
 
 var mutationHeader = function() {
   return `\n\nconst Mutation = new GraphQLObjectType({
-  name: 'Mutations',
+  name: 'Mutation',
   description: 'Functions to set stuff',
   fields () {
     return {`
@@ -240,7 +240,7 @@ var mutationAdd = function(pluralLowercaseTableName, tableData) {
 
     if (validForMutation(psqlType) && column !== 'id') {
       var graphQLType = psqlTypeToGraphQLType(psqlType);
-      if (tableData.fields[column].is_nullable === 'NO') {
+      if (!tableData.fields[column].is_nullable) {
         newData += `\n          ${column}: {
             type: new GraphQLNonNull(${graphQLType})
           },`;
@@ -298,7 +298,7 @@ var mutationUpdate = function(pluralLowercaseTableName, tableData) {
     var psqlType = tableData.fields[column].data_type;
     if (validForMutation(psqlType)) {
       var graphQLType = psqlTypeToGraphQLType(psqlType);
-      if (tableData.fields[column].is_nullable === 'NO') {
+      if (!tableData.fields[column].is_nullable) {
         newData += `\n          ${column}: {
             type: new GraphQLNonNull(${graphQLType})
           },`;
@@ -337,14 +337,14 @@ var mutationDelete = function(pluralLowercaseTableName, tableData) {
   var singularCapitalizedTableName = lingo.capitalize(singularLowercaseTableName);
 
   var newData = `\n      delete${singularCapitalizedTableName}: {
-        type: ${singularCapitalizedTableName},
+        type: GraphQLString,
         args: {`;
 
   for (var column in tableData.fields) {
     var psqlType = tableData.fields[column].data_type;
     if (validForMutation(psqlType) && column === 'id') {
       var graphQLType = psqlTypeToGraphQLType(psqlType);
-      if (tableData.fields[column].is_nullable === 'NO') {
+      if (!tableData.fields[column].is_nullable) {
         newData += `\n          ${column}: {
             type: new GraphQLNonNull(${graphQLType})
           },`;
@@ -358,8 +358,8 @@ var mutationDelete = function(pluralLowercaseTableName, tableData) {
   newData = newData.slice(0, -1);
   newData += `\n        },
         resolve (source, args) {
-          knex('${pluralLowercaseTableName}').where({ id: args.id }).del().then(numberOfDeletedItems => {
-            console.log('Number of deleted ${pluralLowercaseTableName}: ' + numberOfDeletedItems);
+          return knex('${pluralLowercaseTableName}').where({ id: args.id }).del().then(numberOfDeletedItems => {
+            return 'Number of deleted ${pluralLowercaseTableName}: ' + numberOfDeletedItems;
           });
         }
       },`
