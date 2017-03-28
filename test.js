@@ -13,13 +13,12 @@ var concatSchema = `schema {
 
 var ast = parse(querySchema);
 var schema = buildSchema(concatSchema);
-// var typeInfo = new TypeInfo(schema);
-// console.log(typeInfo.getParentType());
-console.log(ast);
-// console.log(ast.definitions[0].name.value) // Type Name ex:User, Query, Mutation
-// console.log(ast.definitions[0].fields[0].name.value) // Field Name ex: id, users
-// console.log(ast.definitions[0].fields[0].arguments)
-// console.log(typeFromAST(schema, ast.definitions[0].fields[0].type)) // return Type
+var typeInfo = new TypeInfo(schema);
+console.log(typeInfo.getParentType());
+console.log(ast.definitions[0].name.value) // Type Name ex:User, Query, Mutation
+console.log(ast.definitions[0].fields[0].name.value) // Field Name ex: id, users
+console.log(ast.definitions[0].fields[0].arguments)
+console.log(typeFromAST(schema, ast.definitions[0].fields[0].type)) // return Type
 // var jwt = require('express-jwt');
 // var authenticate = jwt({
 //   secret: 'CLIENT_SECRET',

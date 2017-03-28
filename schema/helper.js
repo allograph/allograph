@@ -2,7 +2,7 @@ var fs = require('fs'),
     lingo = require('lingo');
 
 var Helper = {
-  toMutation: function(action, columns, objTypeName) {
+  toMutationField: function(action, columns, objTypeName) {
     var mutation = `\n  ` + action + objTypeName + `(`;
 
     for (var column in columns) {
@@ -32,7 +32,7 @@ var Helper = {
     }
     return mutation
   },
-  toQueryEntry: function(columns, tableName) {
+  toQueryField: function(columns, tableName) {
     var query = `\n  ` + tableName + `(`;
 
     for (var column in columns) {

@@ -1,124 +1,113 @@
-var fs = require('fs');
-var lingo = require('lingo');
-var GraphqlGenerator = function () {};
-var h = require('./helper.js')
-var Bookshelf = require('../bookshelf/bookshelf.js').Bookshelf
-var { buildSchema, typeFromAST, parse } = require('graphql');
+var fs = require('fs'),
+    lingo = require('lingo'),
+    inputQueryDoc = fs.readFileSync('./schema/query.graphql', 'utf-8'),
+    inputMutationDoc = fs.readFileSync('./schema/mutation.graphql', 'utf-8'),
+    GraphqlGenerator = function () {},
+    h = require('./helper.js'),
+    { buildSchema, printSchema, print, parse } = require('graphql');
 
 GraphqlGenerator.prototype.printMetadata = function(dbMetadata) {
-  writeGraphQLObjectSchema(dbMetadata);
-  writeGraphQLQuerySchema(dbMetadata);
-  writeGrpahQLMutationSchema(dbMetadata);
+  var typeDoc = getGraphQLTypeDoc(dbMetadata),
+      queryDoc = getGraphQLQueryDoc(dbMetadata),
+      mutationDoc = getGrpahQLMutationDoc(dbMetadata);
 
+  writeToGraphQLSchema(typeDoc, queryDoc, mutationDoc);
   writeGraphQLSchemaExport();
-  writeTypeBasedModel();
 }
 
 var writeToFile = function(data, fileName) {
   fs.writeFileSync('./schema/' + fileName, data, 'utf-8');
 }
 
-var writeGraphQLObjectSchema = function(dbMetadata) {
-  var newData = ''
+var getGraphQLTypeDoc = function(dbMetadata) {
+  var typeDoc = '';
 
   for (var table in dbMetadata.tables) {
     var objTypeName = h.singularCapitalizedTableName(table);
     var description = dbMetadata.tables[table].description;
-    newData += h.toComment(description) + h.toGraphQLObj(objTypeName);
+    typeDoc += h.toComment(description) + h.toGraphQLObj(objTypeName);
 
     for (var column in dbMetadata.tables[table].fields) {
       var dataType = dbMetadata.tables[table].fields[column].data_type;
       var isNullable = dbMetadata.tables[table].fields[column].is_nullable;
-      newData += h.toGraphQLField(column, dataType, isNullable);
+      typeDoc += h.toGraphQLField(column, dataType, isNullable);
     }
 
-    newData += `}\n\n`
+    typeDoc += `}\n\n`
   }
-  writeToFile(newData, 'graphql/type.graphql');
+  return typeDoc;
 }
 
-var writeGraphQLQuerySchema = function(dbMetadata) {
-  var newData = h.toComment('Root query object') + h.toGraphQLObj('Query');
-  newData = newData.slice(0, -1);
+var getGraphQLQueryDoc = function(dbMetadata) {
+  var inputQueryDefs = [],
+      queryDoc = h.toComment('Root query object') + h.toGraphQLObj('Query'),
+      queryAST = parse(inputQueryDoc),
+      queryFields = queryAST.definitions[0].fields;
+
+  queryFields.forEach(function(field) {
+    inputQueryDefs.push(field.name.value);
+    queryDoc += `  ` + print(field) + `\n`;
+  });
+  queryDoc = queryDoc.slice(0, -1);
 
   for (var table in dbMetadata.tables) {
     var columns = dbMetadata.tables[table].fields;
-    newData += h.toQueryEntry(columns, table);
+
+    if (inputQueryDefs.indexOf(table) === -1) {
+      queryDoc += h.toQueryField(columns, table);
+    }
   }
-  newData += `\n}`
-  writeToFile(newData, 'graphql/query.graphql');
+  queryDoc += `\n}\n`
+  return queryDoc;
 }
 
-var writeGrpahQLMutationSchema = function(dbMetadata) {
-  var newData = h.toComment('Functions to set stuff') + h.toGraphQLObj('Mutation');
-  var actions = ['add', 'update', 'delete']
-  newData = newData.slice(0, -1);
+var getGrpahQLMutationDoc = function(dbMetadata) {
+  var inputMutationDefs = [],
+      mutationDoc = h.toComment('Functions to set stuff') + h.toGraphQLObj('Mutation'),
+      mutationAST = parse(inputMutationDoc),
+      mutationFields = mutationAST.definitions[0].fields,
+      actions = ['add', 'update', 'delete'];
+
+  mutationFields.forEach(function(field) {
+    inputMutationDefs.push(field.name.value);
+    mutationDoc += `  ` + print(field) + `\n`;
+  });
+  mutationDoc = mutationDoc.slice(0, -1);
 
   for (var table in dbMetadata.tables) {
     var objTypeName = h.singularCapitalizedTableName(table);
     var columns = dbMetadata.tables[table].fields;
+
     actions.forEach(function(action) {
-      newData += h.toMutation(action, columns, objTypeName);
+      var mutationDef = action + objTypeName;
+
+      if (inputMutationDefs.indexOf(mutationDef) === -1) {
+        mutationDoc += h.toMutationField(action, columns, objTypeName);
+      }
     });
   }
-  newData += `\n}`
-  writeToFile(newData, 'graphql/mutation.graphql');
+  mutationDoc += `\n}\n`
+  return mutationDoc;
+}
+
+var writeToGraphQLSchema = function(typeDoc, queryDoc, mutationDoc) {
+  var concatSchema = `schema {
+  query: Query
+  mutation: Mutation
+}\n\n` + typeDoc + `\n` + queryDoc + `\n` + mutationDoc;
+
+  writeToFile(concatSchema, 'schema.graphql');
 }
 
 var writeGraphQLSchemaExport = function() {
   var data = `var { buildSchema } = require('graphql'),
     fs = require('fs'),
-    typeSchema = fs.readFileSync('./schema/graphql/type.graphql', 'utf-8'),
-    querySchema = fs.readFileSync('./schema/graphql/query.graphql', 'utf-8'),
-    mutationSchema = fs.readFileSync('./schema/graphql/mutation.graphql', 'utf-8');\n
-var concatSchema = \`schema {
-  query: Query
-  mutation: Mutation
-}\` + typeSchema + \`\\n\` + querySchema + \`\\n\` + mutationSchema
+    schema = fs.readFileSync('./schema/schema.graphql', 'utf-8');
 
-exports.Schema = buildSchema(concatSchema);`
+exports.Schema = buildSchema(schema);`
 
-  writeToFile(data, 'js/schema.js');
+  writeToFile(data, 'schema.js');
 }
 
-var writeTypeBasedModel = function() {
-  var typeSchema = fs.readFileSync('./schema/graphql/type.graphql', 'utf-8'),
-      querySchema = fs.readFileSync('./schema/graphql/query.graphql', 'utf-8'),
-      mutationSchema = fs.readFileSync('./schema/graphql/mutation.graphql', 'utf-8'),
-      typeDefs = parse(typeSchema).definitions,
-      queryDefs = parse(querySchema).definitions,
-      mutationDefs = parse(mutationSchema).definitions;
-
-  typeDefs.forEach(function(typeDef) {
-    var objTypeName = h.singularCapitalizedTableName(typeDef.name.value),
-        jsData = `class ` + objTypeName + ` {\n`;
-console.log(objTypeName);
-  });
-  queryResolver();
-  // for (var typeDef in typeDefs) {
-
-    // var objTypeName = h.singularCapitalizedTableName(table);
-    // var jsData = `class ` + objTypeName + ` {\n`
-
-    // writeToFile(data, 'js/' + table + '.js');
-  // }
-}
-
-var queryResolver = function() {
-  var querySchema = fs.readFileSync('./schema/graphql/query.graphql', 'utf-8'),
-      queryFields = parse(querySchema).definitions[0].fields,
-      jsData = `\n  `,
-      schema = require('./js/schema.js').Schema;
-
-   queryFields.forEach(function(queryField) {
-    var returnType = queryField.type;
-console.log(typeFromAST(schema, returnType));
-//     jsData += queryField.name.value + `(args) {
-// return knex('$()').where(args).then(`
-   });
-}
-
-// cannot be sure about which table and column
-// validation? convention?
-
+exports.Schema =
 exports.GraphqlGenerator = new GraphqlGenerator();
