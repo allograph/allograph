@@ -29,11 +29,13 @@ var Helper = {
       }
     }
 
-    if (numbersOfMutation != 0) { mutation = mutation.slice(0, -2) };
+    if (numbersOfMutation != 0) { mutation = mutation.slice(0, -2); mutation += `)` }
+    if (numbersOfMutation === 0) { mutation = mutation.slice(0, -1); }
+
     if (action === 'delete') {
-      mutation += `): String`
+      mutation += `: String`
     } else {
-      mutation += `): ` + objTypeName
+      mutation += `: ` + objTypeName
     }
     return mutation
   },
@@ -50,8 +52,9 @@ var Helper = {
       }
     }
 
-    if (numbersOfQuery != 0) { query = query.slice(0, -2); }
-    query += `): [` + this.singularCapitalizedTableName(tableName) + `]`
+    if (numbersOfQuery != 0) { query = query.slice(0, -2); query += `);` }
+    if (numbersOfQuery === 0) { query = query.slice(0, -1); }
+    query += `: [` + this.singularCapitalizedTableName(tableName) + `]`
     return query
   },
   toQueryVariable: function(psqlType) {
