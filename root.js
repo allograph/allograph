@@ -1,97 +1,97 @@
 import {
-  Address,
-  Review,
-  Book,
   User,
-  Users_book
+  Comment,
+  Post,
+  Tag,
+  Tags_post,
 } from './schema/models.js'
 
 var root = {
 
-addresses: function (args) {
-    var address = new Address;
-    console.log(args)
-    return address.addresses(args);
-  },
-  addAddress: function(args) {
-    var address = new Address;
-    return address.createAddress(args);
-  },
-  updateAddress: function(args) {
-    var address = new Address;
-    return address.updateAddress(args);
-  },
-  deleteAddress: function({id}) {
-    var address = new Address;
-    return address.deleteAddress(id);
-  },
+  users: function (args) {
+      var user = new User;
+      return user.users(args);
+    },
+    addUser: function(args) {
+      var user = new User;
+      return user.createUser(args);
+    },
+    updateUser: function(args) {
+      var user = new User;
+      return user.updateUser(args);
+    },
+    deleteUser: function({id}) {
+      var user = new User;
+      return user.deleteUser(id);
+    }
 
-reviews: function (args) {
-    var review = new Review;
-    return review.reviews(args);
-  },
-  addReview: function(args) {
-    var review = new Review;
-    return review.createReview(args);
-  },
-  updateReview: function(args) {
-    var review = new Review;
-    return review.updateReview(args);
-  },
-  deleteReview: function({id}) {
-    var review = new Review;
-    return review.deleteReview(id);
-  },
+  comments: function (args) {
+      var comment = new Comment;
+      return comment.comments(args);
+    },
+    addComment: function(args) {
+      var comment = new Comment;
+      return comment.createComment(args);
+    },
+    updateComment: function(args) {
+      var comment = new Comment;
+      return comment.updateComment(args);
+    },
+    deleteComment: function({id}) {
+      var comment = new Comment;
+      return comment.deleteComment(id);
+    }
 
-books: function (args) {
-    var book = new Book;
-    return book.books(args);
-  },
-  addBook: function(args) {
-    var book = new Book;
-    return book.createBook(args);
-  },
-  updateBook: function(args) {
-    var book = new Book;
-    return book.updateBook(args);
-  },
-  deleteBook: function({id}) {
-    var book = new Book;
-    return book.deleteBook(id);
-  },
+  posts: function (args) {
+      var post = new Post;
+      return post.posts(args);
+    },
+    addPost: function(args) {
+      var post = new Post;
+      return post.createPost(args);
+    },
+    updatePost: function(args) {
+      var post = new Post;
+      return post.updatePost(args);
+    },
+    deletePost: function({id}) {
+      var post = new Post;
+      return post.deletePost(id);
+    }
 
-users: function (args) {
-    var user = new User;
-    return user.users(args);
-  },
-  addUser: function(args) {
-    var user = new User;
-    return user.createUser(args);
-  },
-  updateUser: function(args) {
-    var user = new User;
-    return user.updateUser(args);
-  },
-  deleteUser: function({id}) {
-    var user = new User;
-    return user.deleteUser(id);
-  },
+  tags: function (args) {
+      var tag = new Tag;
+      return tag.tags(args);
+    },
+    addTag: function(args) {
+      var tag = new Tag;
+      return tag.createTag(args);
+    },
+    updateTag: function(args) {
+      var tag = new Tag;
+      return tag.updateTag(args);
+    },
+    deleteTag: function({id}) {
+      var tag = new Tag;
+      return tag.deleteTag(id);
+    }
 
-users_books: function (args) {
-    var users_book = new Users_book;
-    return users_book.users_books(args);
-  },
-  addUsers_book: function(args) {
-    var users_book = new Users_book;
-    return users_book.createUsers_book(args);
-  },
-  updateUsers_book: function(args) {
-    var users_book = new Users_book;
-    return users_book.updateUsers_book(args);
-  },
-  deleteUsers_book: function({id}) {
-    var users_book = new Users_book;
-    return users_book.deleteUsers_book(id);
+  tags_posts: function (args) {
+      var tags_post = new Tags_post;
+      return tags_post.tags_posts(args);
+    },
+    addTags_post: function(args) {
+      var tags_post = new Tags_post;
+      return tags_post.createTags_post(args);
+    },
+    updateTags_post: function(args) {
+      var tags_post = new Tags_post;
+      return tags_post.updateTags_post(args);
+    },
+    deleteTags_post: function({id}) {
+      var tags_post = new Tags_post;
+      return tags_post.deleteTags_post(id);
+    }
   }
 };
 

@@ -1,6 +1,5 @@
 #!/usr/bin/env babel-node
-const program = require('commander');
-const graphQLServer = require('../server.js').GraphQLServer;
+const program = require('commander'); 
 const dbTranslator = require('../index.js').DBTranslator;
 const knex = require('../database/connection.js')
 const migrationGenerator = require('../database/migration_generator.js').MigrationGenerator
@@ -14,6 +13,7 @@ program
   .command('server')
   .description('Start Allograph server')
   .action(function(req,optional){
+    const graphQLServer = require('../server.js').GraphQLServer;
     graphQLServer.run()
   });
 
@@ -50,64 +50,3 @@ program
   });  
 
 program.parse(process.argv);   
-
-
-// Terminal Commands
-
-// **Setup**
-// "allo generate:graphql"
-//     description: Generates GraphQL Schema from Database
-//     options: w/ bookshelf model creation for each table
-
-// "allo server"
-//     description: Starts server
-
-// "allo routes"
-//     description: Returns a list of all routes
-
-// **Migrations**
-// "allo migrate"
-//     options: -gql update GraphQL schema
-//     description: Runs all migrations that have not yet been run.
-
-// "allo migrate:rollback"
-//     description: Rolls back the latest migration group. Automatically updates graphQL schema and Bookshelf models.
-
-// ---
-
-// **Models and Tables**
-
-// "allo create:model <modelName>"
-//     description: Creates Bookshelf model. Does not automatically create a table in db. Is this useful?
-//     options: 
-//         -ho <otherTable> (has one relationship to other table)
-//         -hm <otherTable> (has many relationship to other table)
-
-// "allo create:migration <tableName> [(columnName):(columnType):([constraints])]"
-//     description: Creates table migration to create table. Must run "allo migrate" to persist change to db and to automatically generate model (if -m option given).
-//     options: 
-//         -m Will create model upon migration
-//         -ho <otherTable> (has one relationship to other table)
-//         -hm <otherTable> (has many relationship to other table)   
-
-
-// "allo db:seed" to seed data.
-
-
-// "allo drop:table <tableName>"
-//     description: Creates table migration to drop table. Must run "allo migrate" to persist change to db.
-
-// "allo rename:column <tableName> <oldColumnName> <newColumnName>"
-//     options: 
-//     description: Creates table migration to update table. Must run "allo migrate" to persist change to db.   
-
-// "allo change:column_type <tableName> <columnName>" 
-//     options: -i, -s, -d (integer, string, datetime)
-
-// "allo add:constraint <tableName> <columnName>"
-//     options: -nn, -d (nonNull, distinct)  *must pick at least one option*
-//     description: Creates table migration to update table. Must run "allo migrate" to persist change to db.
-
-// "allo remove:constraint <tableName> <columnName>"
-//     options: -nn, -d (nonNull, distinct)  *must pick at least one option*
-//     description: Creates table migration to update table. Must run "allo migrate" to persist change to db.    
