@@ -52,7 +52,7 @@ var Helper = {
       }
     }
 
-    if (numbersOfQuery != 0) { query = query.slice(0, -2); query += `);` }
+    if (numbersOfQuery != 0) { query = query.slice(0, -2); query += `)`; }
     if (numbersOfQuery === 0) { query = query.slice(0, -1); }
     query += `: [` + this.singularCapitalizedTableName(tableName) + `]`
     return query
@@ -60,7 +60,8 @@ var Helper = {
   toQueryVariable: function(psqlType) {
     var typeMap = {
           'character varying': 'String',
-          'integer': 'Int'
+          'integer': 'Int',
+          'boolean': 'Boolean'
         }
     if (typeMap[psqlType]) {
       return typeMap[psqlType];
@@ -78,7 +79,8 @@ var Helper = {
     var timestamp = psqlType.match(/^timestamp/),
         typeMap = {
           'character varying': 'String',
-          'integer': 'Int'
+          'integer': 'Int',
+          'boolean': 'Boolean'
         }
 
     if (typeMap[psqlType]) {

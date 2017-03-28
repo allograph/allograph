@@ -1,66 +1,98 @@
+import {
+  Address,
+  Review,
+  Book,
+  User,
+  Users_book
+} from './schema/models.js'
+
 var root = {
 
-  addComment: function(args) {
-    var comment = new Comment;
-    return comment.createComment(args);
+addresses: function (args) {
+    var address = new Address;
+    console.log(args)
+    return address.addresses(args);
   },
-  updateComment: function(args) {
-    var comment = new Comment;
-    return comment.updateComment(args);
+  addAddress: function(args) {
+    var address = new Address;
+    return address.createAddress(args);
   },
-  deleteComment: function({id}) {
-    var comment = new Comment;
-    return comment.deleteComment(id);
-  }
+  updateAddress: function(args) {
+    var address = new Address;
+    return address.updateAddress(args);
+  },
+  deleteAddress: function({id}) {
+    var address = new Address;
+    return address.deleteAddress(id);
+  },
 
-posts: function (args) {
-    var post = new Post;
-    return post.posts(args);
+reviews: function (args) {
+    var review = new Review;
+    return review.reviews(args);
   },
-  addPost: function(args) {
-    var post = new Post;
-    return post.createPost(args);
+  addReview: function(args) {
+    var review = new Review;
+    return review.createReview(args);
   },
-  updatePost: function(args) {
-    var post = new Post;
-    return post.updatePost(args);
+  updateReview: function(args) {
+    var review = new Review;
+    return review.updateReview(args);
   },
-  deletePost: function({id}) {
-    var post = new Post;
-    return post.deletePost(id);
-  }
+  deleteReview: function({id}) {
+    var review = new Review;
+    return review.deleteReview(id);
+  },
 
-tags: function (args) {
-    var tag = new Tag;
-    return tag.tags(args);
+books: function (args) {
+    var book = new Book;
+    return book.books(args);
   },
-  addTag: function(args) {
-    var tag = new Tag;
-    return tag.createTag(args);
+  addBook: function(args) {
+    var book = new Book;
+    return book.createBook(args);
   },
-  updateTag: function(args) {
-    var tag = new Tag;
-    return tag.updateTag(args);
+  updateBook: function(args) {
+    var book = new Book;
+    return book.updateBook(args);
   },
-  deleteTag: function({id}) {
-    var tag = new Tag;
-    return tag.deleteTag(id);
-  }
+  deleteBook: function({id}) {
+    var book = new Book;
+    return book.deleteBook(id);
+  },
 
-tags_posts: function (args) {
-    var tags_post = new Tags_post;
-    return tags_post.tags_posts(args);
+users: function (args) {
+    var user = new User;
+    return user.users(args);
   },
-  addTags_post: function(args) {
-    var tags_post = new Tags_post;
-    return tags_post.createTags_post(args);
+  addUser: function(args) {
+    var user = new User;
+    return user.createUser(args);
   },
-  updateTags_post: function(args) {
-    var tags_post = new Tags_post;
-    return tags_post.updateTags_post(args);
+  updateUser: function(args) {
+    var user = new User;
+    return user.updateUser(args);
   },
-  deleteTags_post: function({id}) {
-    var tags_post = new Tags_post;
-    return tags_post.deleteTags_post(id);
+  deleteUser: function({id}) {
+    var user = new User;
+    return user.deleteUser(id);
+  },
+
+users_books: function (args) {
+    var users_book = new Users_book;
+    return users_book.users_books(args);
+  },
+  addUsers_book: function(args) {
+    var users_book = new Users_book;
+    return users_book.createUsers_book(args);
+  },
+  updateUsers_book: function(args) {
+    var users_book = new Users_book;
+    return users_book.updateUsers_book(args);
+  },
+  deleteUsers_book: function({id}) {
+    var users_book = new Users_book;
+    return users_book.deleteUsers_book(id);
   }
-}
+};
+
+module.exports = root;
