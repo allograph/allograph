@@ -4,7 +4,6 @@ const graphQLServer = require('../server.js').GraphQLServer;
 const dbTranslator = require('../index.js').DBTranslator;
 const knex = require('../database/connection.js')
 const migrationGenerator = require('../database/migration_generator.js').MigrationGenerator
-const bookshelf = require('../bookshelf/bookshelf.js').Bookshelf
 
 program
   .version('0.0.1')
@@ -22,8 +21,7 @@ program
   .command('generate:graphql')
   .description('Inspect DB schema and generate GraphQL schema.js file')
   .action(function(){
-    var skipModelCreation = (program.no_models === true)
-    dbTranslator.translate(skipModelCreation);
+    dbTranslator.generate();
   });
 
 program
@@ -39,13 +37,6 @@ program
   .action(function(req,optional){
     knex.migrate.rollback({directory: "./migrations"});
   });
-
-// program
-//   .command('create:model <modelName>')
-//   .description("Creates Bookshelf model. Note: does not automatically create a table in db.")
-//   .action(function(modelName){
-//     bookshelf.createModel(modelName)
-//   });  
 
 program
   .command('create:migration <name>')

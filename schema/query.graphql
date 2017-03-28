@@ -1,6 +1,0 @@
-# Root query object
-type Query {
-  name(id: Int, firstName: String, test: String, email: String): [User]
-  posts(id: Int, title: String, content: String): [Post]
-  comments(id: Int, content: String): [Comment]
-}

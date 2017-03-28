@@ -11,6 +11,8 @@ GraphqlGenerator.prototype.printMetadata = function(dbMetadata) {
       queryDoc = getGraphQLQueryDoc(dbMetadata),
       mutationDoc = getGrpahQLMutationDoc(dbMetadata);
 
+  writeRootFile(dbMetadata)
+
   writeToGraphQLSchema(typeDoc, queryDoc, mutationDoc);
   writeGraphQLClassModels(dbMetadata);
   writeGraphQLSchemaExport();
@@ -18,6 +20,48 @@ GraphqlGenerator.prototype.printMetadata = function(dbMetadata) {
 
 var writeToFile = function(data, fileName) {
   fs.writeFileSync('./schema/' + fileName, data, 'utf-8');
+}
+
+// Starts here for root generation just on original graphql:generate
+
+var writeRootFile = function(dbMetadata) {
+  var data = `var root = {`
+
+  for (var table in dbMetadata.tables) {
+    if (dbMetadata.tables.hasOwnProperty(table)) {
+      data += rootTableData(dbMetadata.tables[table]);
+    }
+  }
+
+  data += `\n}`
+
+  fs.writeFile('./root.js', data, { flag: 'wx' }, function (err) {
+      if (err) throw err;
+      console.log("A new root file has been created.");
+  });
+}
+
+var rootTableData = function(tableInfo) {
+  var tableName = tableInfo.name
+  var singularTableName = lingo.en.singularize(tableName)
+  var singularCapitalizedTableName = lingo.capitalize(singularTableName)
+
+  return `\n\n${tableName}: function (args) {
+    var ${singularTableName} = new ${singularCapitalizedTableName};
+    return ${singularTableName}.${tableName}(args);
+  },
+  add${singularCapitalizedTableName}: function(args) {
+    var ${singularTableName} = new ${singularCapitalizedTableName};
+    return ${singularTableName}.create${singularCapitalizedTableName}(args);
+  },
+  update${singularCapitalizedTableName}: function(args) {
+    var ${singularTableName} = new ${singularCapitalizedTableName};
+    return ${singularTableName}.update${singularCapitalizedTableName}(args);
+  },
+  delete${singularCapitalizedTableName}: function({id}) {
+    var ${singularTableName} = new ${singularCapitalizedTableName};
+    return ${singularTableName}.delete${singularCapitalizedTableName}(id);
+  }`
 }
 
 // Starts here for model generation
@@ -88,7 +132,6 @@ var tableColumns = function(tableInfo) {
 
   return data;
 }
-
 
 // Model generation ends
 
@@ -182,5 +225,4 @@ exports.Schema = buildSchema(schema);`
   writeToFile(data, 'schema.js');
 }
 
-exports.Schema =
 exports.GraphqlGenerator = new GraphqlGenerator();

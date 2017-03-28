@@ -1,9 +1,0 @@
-{"relations": {
-  "comments": {
-    "style": "supplement",
-    "relationships": {
-       "has_one": "tag"
-     }
-    }
-  }
-}

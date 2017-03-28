@@ -1,5 +1,0 @@
-# Functions to set stuff
-type Mutation {
-  addUser(email: String): User
-  updateName(id: Int!, firstName: String!, lastName: String!, email: String): String
-}
