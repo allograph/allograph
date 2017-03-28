@@ -33,8 +33,8 @@ var writeRootFile = function(dbMetadata) {
       data += rootTableData(dbMetadata.tables[table]);
     }
   }
-
-  data += `\n  }\n};\n\nmodule.exports = root;`
+  data = data.slice(0, -1);
+  data += `\n};\n\n\nmodule.exports = root;`
 
   fs.writeFile('./root.js', data, { flag: 'wx' }, function (err) {
     if (err) {
@@ -56,7 +56,7 @@ var rootImportStatements = function(dbMetadata) {
     }
   }
 
-  return data + "\n} from './schema/models.js'"  
+  return data + "\n} from './schema/models.js'"
 }
 
 var rootTableData = function(tableInfo) {
@@ -65,21 +65,21 @@ var rootTableData = function(tableInfo) {
   var singularCapitalizedTableName = lingo.capitalize(singularTableName)
 
   return `\n\n  ${tableName}: function (args) {
-      var ${singularTableName} = new ${singularCapitalizedTableName};
-      return ${singularTableName}.${tableName}(args);
-    },
-    add${singularCapitalizedTableName}: function(args) {
-      var ${singularTableName} = new ${singularCapitalizedTableName};
-      return ${singularTableName}.create${singularCapitalizedTableName}(args);
-    },
-    update${singularCapitalizedTableName}: function(args) {
-      var ${singularTableName} = new ${singularCapitalizedTableName};
-      return ${singularTableName}.update${singularCapitalizedTableName}(args);
-    },
-    delete${singularCapitalizedTableName}: function({id}) {
-      var ${singularTableName} = new ${singularCapitalizedTableName};
-      return ${singularTableName}.delete${singularCapitalizedTableName}(id);
-    }`
+    var ${singularTableName} = new ${singularCapitalizedTableName};
+    return ${singularTableName}.${tableName}(args);
+  },
+  add${singularCapitalizedTableName}: function(args) {
+    var ${singularTableName} = new ${singularCapitalizedTableName};
+    return ${singularTableName}.create${singularCapitalizedTableName}(args);
+  },
+  update${singularCapitalizedTableName}: function(args) {
+    var ${singularTableName} = new ${singularCapitalizedTableName};
+    return ${singularTableName}.update${singularCapitalizedTableName}(args);
+  },
+  delete${singularCapitalizedTableName}: function({id}) {
+    var ${singularTableName} = new ${singularCapitalizedTableName};
+    return ${singularTableName}.delete${singularCapitalizedTableName}(id);
+  },`
 }
 
 // Starts here for model generation
