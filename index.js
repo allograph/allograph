@@ -5,5 +5,5 @@ var DBTranslator = function () {};
 DBTranslator.prototype.generate = function() {
   dbData.readSchema(graphqlGenerator.printMetadata);
 }
-new DBTranslator().generate();
-// exports.DBTranslator = new DBTranslator();
+// new DBTranslator().generate();
+exports.DBTranslator = new DBTranslator();

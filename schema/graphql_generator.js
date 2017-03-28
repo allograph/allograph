@@ -36,8 +36,11 @@ var writeRootFile = function(dbMetadata) {
   data += `\n}`
 
   fs.writeFile('./root.js', data, { flag: 'wx' }, function (err) {
-    if (err) throw err;
-    console.log("A new root file has been created.");
+    if (err) {
+      console.log("no File created.")
+    } else {
+      console.log("A new root file has been created.");
+    }
   });
 }
 
