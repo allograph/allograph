@@ -1,9 +1,8 @@
 var fs = require('fs');
 var lingo = require('lingo')
 var SchemaTranslator = function () {};
-var Bookshelf = require('../bookshelf/bookshelf.js').Bookshelf
 
-SchemaTranslator.prototype.printMetadata = function(dbMetadata, skipModelCreation) {
+SchemaTranslator.prototype.printMetadata = function(dbMetadata) {
   writeToSchemaFile(graphQLData());
   writeGraphQLObjectSchema(dbMetadata);
   writeGraphQLQuerySchema(dbMetadata);

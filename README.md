@@ -71,6 +71,20 @@ Consult send_request.js for ideas on how you can utilize your fully-funtioning G
 
 Tables in your database can be modified using the migration system, which harnesses the power of Knex.js. To generate a new migration, use 'allo create:migration <name>' in your command line. The name you provide along with a timestamp will be used to name your migration file, which can be found in the /migrations folder. You also have the option of customizing the migration to be for creating a new table with 'allo create:migration <name> -c <tableName>'. After you're happy with the migration file, you can run 'allo migrate' to persist your change to the database. The migration can be rolled back with 'allo migrate:rollback'. See the section for Command Line Tools below for more information on using Allograph's CLI, and see the [Knex.js API](http://knexjs.org/#Migrations-CLI) for more information on using knex migrations. 
 
+If you need to customize the relations that are automatically detected based on the database schema, you can do so by adding a JSON object to the relations.json file. You cn specify the style as 'supplement' or 'override'. Choosing supplement will add the specified relationship in addition to relationships identified from the db schema. Choosing override will use the specified relationship in place of any relationships identified from the db schema for that class.
+
+Example:
+{"relations": {
+  "comments": {               # comments should be name of model or table
+    "style": "supplement",
+    "relationships": {
+       "has_one": "tag"       # has_ons or has_many; tag should model
+     }
+    }
+  }
+}
+
+
 ## Benefits
 
 ### Relation Detection
@@ -87,8 +101,6 @@ The relation detection feature allows for creation of bookshelf models that are 
 'allo migrate': Runs all migrations that have not yet been run.
 
 'allo migrate:rollback': Rolls back the latest migration group.
-
-'allo create:model <modelName>': Creates Bookshelf model. Note: does not automatically create a table in db!
 
 'allo create:migration <name>': Creates migration file in /migrations folder.
     Optional flag: '-c, --create_table <tableName>'. Creates migration file that for adding a table of the tableName provided. Automatically provides a column for an incrementing primary key; additional columns can be added in the migration file.

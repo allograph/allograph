@@ -40,12 +40,12 @@ program
     knex.migrate.rollback({directory: "./migrations"});
   });
 
-program
-  .command('create:model <modelName>')
-  .description("Creates Bookshelf model. Note: does not automatically create a table in db.")
-  .action(function(modelName){
-    bookshelf.createModel(modelName)
-  });  
+// program
+//   .command('create:model <modelName>')
+//   .description("Creates Bookshelf model. Note: does not automatically create a table in db.")
+//   .action(function(modelName){
+//     bookshelf.createModel(modelName)
+//   });  
 
 program
   .command('create:migration <name>')

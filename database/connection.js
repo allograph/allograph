@@ -1,5 +1,5 @@
 module.exports = require('knex')({
   client: 'pg',
-  connection: 'postgres://tingc:tingc@localhost:5432/blog',
+  connection: 'postgres://rachelminto:postgres@localhost:5432/relay',
   searchPath: 'knex,public'
 });
