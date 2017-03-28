@@ -11,7 +11,7 @@ GraphqlGenerator.prototype.printMetadata = function(dbMetadata) {
       queryDoc = getGraphQLQueryDoc(dbMetadata),
       mutationDoc = getGrpahQLMutationDoc(dbMetadata);
 
-  writeRootFile(dbMetadata)
+  writeRootFile(dbMetadata);
 
   writeToGraphQLSchema(typeDoc, queryDoc, mutationDoc);
   writeGraphQLClassModels(dbMetadata);
@@ -36,8 +36,8 @@ var writeRootFile = function(dbMetadata) {
   data += `\n}`
 
   fs.writeFile('./root.js', data, { flag: 'wx' }, function (err) {
-      if (err) throw err;
-      console.log("A new root file has been created.");
+    if (err) throw err;
+    console.log("A new root file has been created.");
   });
 }
 
@@ -104,7 +104,7 @@ var modelData = function(tableInfo) {
 
   update${singularCapitalizedTableName}(args) {
     return knex('${tableName}').where({ id: args.id }).returning('id').update({`
-      
+
   data += tableColumnsList
 
   data += `\n    }).then(id => {
@@ -156,14 +156,17 @@ var getGraphQLTypeDoc = function(dbMetadata) {
 
 var getGraphQLQueryDoc = function(dbMetadata) {
   var inputQueryDefs = [],
-      queryDoc = h.toComment('Root query object') + h.toGraphQLObj('Query'),
-      queryAST = parse(inputQueryDoc),
-      queryFields = queryAST.definitions[0].fields;
+      queryDoc = h.toComment('Root query object') + h.toGraphQLObj('Query');
 
-  queryFields.forEach(function(field) {
-    inputQueryDefs.push(field.name.value);
-    queryDoc += `  ` + print(field) + `\n`;
-  });
+  if (inputQueryDoc) {
+    var queryAST = parse(inputQueryDoc),
+        queryFields = queryAST.definitions[0].fields;
+
+    queryFields.forEach(function(field) {
+      inputQueryDefs.push(field.name.value);
+      queryDoc += `  ` + print(field) + `\n`;
+    });
+  }
   queryDoc = queryDoc.slice(0, -1);
 
   for (var table in dbMetadata.tables) {
@@ -180,15 +183,18 @@ var getGraphQLQueryDoc = function(dbMetadata) {
 var getGrpahQLMutationDoc = function(dbMetadata) {
   var inputMutationDefs = [],
       mutationDoc = h.toComment('Functions to set stuff') + h.toGraphQLObj('Mutation'),
-      mutationAST = parse(inputMutationDoc),
-      mutationFields = mutationAST.definitions[0].fields,
       actions = ['add', 'update', 'delete'];
 
-  mutationFields.forEach(function(field) {
-    inputMutationDefs.push(field.name.value);
-    mutationDoc += `  ` + print(field) + `\n`;
-  });
-  mutationDoc = mutationDoc.slice(0, -1);
+  if (inputMutationDoc) {
+    var mutationAST = parse(inputMutationDoc),
+        mutationFields = mutationAST.definitions[0].fields;
+
+    mutationFields.forEach(function(field) {
+      inputMutationDefs.push(field.name.value);
+      mutationDoc += `  ` + print(field) + `\n`;
+    });
+    mutationDoc = mutationDoc.slice(0, -1);
+  }
 
   for (var table in dbMetadata.tables) {
     var objTypeName = h.singularCapitalizedTableName(table);

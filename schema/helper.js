@@ -3,28 +3,33 @@ var fs = require('fs'),
 
 var Helper = {
   toMutationField: function(action, columns, objTypeName) {
-    var mutation = `\n  ` + action + objTypeName + `(`;
+    var mutation = `\n  ` + action + objTypeName + `(`,
+        numbersOfMutation = 0;
 
     for (var column in columns) {
-      var dataType = columns[column].data_type;
-      var isNullable = columns[column].is_nullable;
-      var mVar = this.toQueryVariable(dataType);
+      var dataType = columns[column].data_type,
+          isNullable = columns[column].is_nullable,
+          mVar = this.toQueryVariable(dataType);
+
       if (action === 'add') {
         if (mVar && column != 'id') {
           mutation += column + `: ` + mVar + this.nullableMark(isNullable) + `, `
+          numbersOfMutation ++;
         }
       } else if (action === 'update') {
         if (mVar) {
           mutation += column + `: ` + mVar + this.nullableMark(isNullable) + `, `
+          numbersOfMutation ++;
         }
       } else if (action === 'delete') {
         if (column === 'id') {
           mutation += column + `: ` + mVar + this.nullableMark(isNullable) + `, `
+          numbersOfMutation ++;
         }
       }
     }
 
-    mutation = mutation.slice(0, -2);
+    if (numbersOfMutation != 0) { mutation = mutation.slice(0, -2) };
     if (action === 'delete') {
       mutation += `): String`
     } else {
@@ -33,17 +38,19 @@ var Helper = {
     return mutation
   },
   toQueryField: function(columns, tableName) {
-    var query = `\n  ` + tableName + `(`;
+    var query = `\n  ` + tableName + `(`,
+        numbersOfQuery = 0;
 
     for (var column in columns) {
       var dataType = columns[column].data_type;
       var qVar = this.toQueryVariable(dataType);
       if (qVar) {
-        query += column + `: ` + qVar + `, `
+        query += column + `: ` + qVar + `, `;
+        numbersOfQuery ++;
       }
     }
 
-    query = query.slice(0, -2);
+    if (numbersOfQuery != 0) { query = query.slice(0, -2); }
     query += `): [` + this.singularCapitalizedTableName(tableName) + `]`
     return query
   },
