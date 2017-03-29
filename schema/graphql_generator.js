@@ -8,10 +8,112 @@ var fs = require('fs'),
 GraphqlGenerator.prototype.printMetadata = function(dbMetadata) {
   // writeGraphQLClassModels(dbMetadata);
   // writeMutationsFile(dbMetadata);
-  writeQueriesFile(dbMetadata);
-  // writeTypesFile(dbMetadata);
+  // writeQueriesFile(dbMetadata);
+  writeTypesFile(dbMetadata);
   // writeSchemaDefinition();
 }
+
+
+// Translating to GraphQL Type starts here
+var graphQLData = function() {
+  return `import {
+  GraphQLObjectType,
+  GraphQLString,
+  GraphQLInt,
+  GraphQLSchema,
+  GraphQLList,
+  GraphQLNonNull
+} from 'graphql';`
+}
+
+var objectDescription = function(tableName, description) {
+  return `\n
+const ` + tableName + ` = new GraphQLObjectType({
+  name: '` + tableName + `',
+  description: '` + description + `',
+  fields: () => {
+    return {`
+}
+
+var singularCapitalizedTableName = function(name) {
+  var singularName = lingo.en.singularize(name)
+  return lingo.capitalize(singularName);
+}
+
+var foreignKeyColumnData = function(column, tableName, pk_column, fk_column, psqlType) {
+  var lowercaseTableName = tableName.toLowerCase();
+  var listType = psqlType.match(/\[(\w+)\]/);
+  var args;
+  var retuenValue = `${column}`;
+
+  if (listType) {
+    args = `{ ${fk_column}: ${lowercaseTableName}.${pk_column} }`
+  } else {
+    args = `{ ${pk_column}: ${lowercaseTableName}.${fk_column} }`
+    retuenValue = `${column}[0]`
+  }
+
+  return '\n      ' + column + `: {
+        type: ` + psqlTypeToGraphQLType(psqlType) + `,
+        resolve (` + lowercaseTableName + `) {
+          return knex('${column}').where(` + args + `).then(${column} => {;
+            return ` + retuenValue + `;
+          });
+        }
+      },`
+}
+
+var columnData = function(column, table, psqlType, is_nullable) {
+  var typeData = `\n        type: `
+  if (!is_nullable) {
+    typeData += `new GraphQLNonNull(` + psqlTypeToGraphQLType(psqlType) + `),`
+  } else {
+    typeData += psqlTypeToGraphQLType(psqlType) + `,`
+  }
+
+  return '\n      ' + column + `: {` + typeData +
+`\n        resolve (` + lingo.en.singularize(table) + `) {
+          return ` + lingo.en.singularize(table) + '.' + column + `;
+        }
+      },`
+}
+
+var closingBrackets = function() {
+  return `
+    };
+  }
+});`
+}
+
+var writeTypesFile = function(dbMetadata) {
+  var data = graphQLData();
+  for (var table in dbMetadata.tables) {
+
+    if (dbMetadata.tables.hasOwnProperty(table)) {
+
+      var objTypeName = singularCapitalizedTableName(table);
+      var description = dbMetadata.tables[table].description;
+      data += objectDescription(objTypeName, description);
+
+      for (var column in dbMetadata.tables[table].fields) {
+        var psqlType = dbMetadata.tables[table].fields[column].data_type;
+        var is_nullable = dbMetadata.tables[table].fields[column].is_nullable;
+
+        if (dbMetadata.tables.hasOwnProperty(column)) {
+          var fk_column = dbMetadata.tables[table].fields[column].fk_column
+          var pk_column = dbMetadata.tables[table].fields[column].pk_column
+          data += foreignKeyColumnData(column, objTypeName, pk_column, fk_column, psqlType);
+        } else {
+          data += columnData(column, table, psqlType, is_nullable);
+        }
+      }
+
+      data += closingBrackets();
+    };
+  };
+  fs.writeFileSync('./generated/type_definitions.js', data, 'utf-8')
+}
+// Translating to GraphQL Type ends here
 
 var writeQueriesFile = function(dbMetadata) {
   var customMutations = queries;
@@ -20,7 +122,7 @@ var writeQueriesFile = function(dbMetadata) {
   var newData = `const Query = new GraphQLObjectType({
   name: 'Query',
   description: 'Root query object',
-  fields: () => {
+  fields: () {
     return {`
 
   for (var property in dbMetadata.tables) {
@@ -64,7 +166,7 @@ var queryTableHeader = function(tableName) {
 }
 
 var psqlTypeToGraphQLType = function(psqlType) {
-  var listType = psqlType.match(/list\[(\w+)\]/),
+  var listType = psqlType.match(/\[(\w+)\]/),
       timestamp = psqlType.match(/^timestamp/),
       typeMap = {
         'character varying': 'GraphQLString',
