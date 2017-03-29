@@ -3,7 +3,16 @@ var fs = require('fs'),
     inputCustomMutations = fs.readFileSync('./schema/mutations.js', 'utf-8'),
     GraphqlGenerator = function () {},
     h = require('./helper.js'),
-    queries = require('./queries.js').Query;
+    query = require('./queries.js').Query;
+
+import {
+  GraphQLObjectType,
+  GraphQLString,
+  GraphQLInt,
+  GraphQLSchema,
+  GraphQLList,
+  GraphQLNonNull
+} from 'graphql';    
 
 GraphqlGenerator.prototype.printMetadata = function(dbMetadata) {
   // writeGraphQLClassModels(dbMetadata);
@@ -13,18 +22,38 @@ GraphqlGenerator.prototype.printMetadata = function(dbMetadata) {
   // writeSchemaDefinition();
 }
 
-var writeQueriesFile = function(dbMetadata) {
-  var customMutations = queries;
-  console.log(queries);
+// Write Queries Begins
 
+var writeQueriesFile = function(dbMetadata) {
   var newData = `const Query = new GraphQLObjectType({
   name: 'Query',
   description: 'Root query object',
   fields: () => {
     return {`
 
+  var customQueries = query.fields();
+
+  for (var customQuery in customQueries) {
+    if (Object.keys(customQueries[customQuery]).length === 0) { continue; }
+
+    newData += `\n      ${customQuery}: {
+        type: ${customQueries[customQuery].type},
+        args: {`
+
+    for (var arg in customQueries[customQuery].args) {
+      newData += `\n          ${arg}: {
+            type: ${customQueries[customQuery].args[arg].type}\n          },`
+    }
+
+    newData += `\n        },\n        ` 
+    newData += customQueries[customQuery].resolve.toString()
+    newData += `\n      },`
+  }
+
   for (var property in dbMetadata.tables) {
     var tableName = h.singularCapitalizedTableName(property)
+
+    if (Object.keys(customQueries).includes(property)) { continue; }
 
     newData += queryTableHeader(tableName)
 
@@ -46,8 +75,9 @@ var writeQueriesFile = function(dbMetadata) {
 
   newData += queryClosingBrackets();
 
-  fs.writeFileSync('./generated/mutations.js', newData, 'utf-8')
+  fs.writeFileSync('./generated/queries.js', newData, 'utf-8')
 }
+
 
 var queryTableArgs = function(column, psqlType) {
   return `\n          ${column}: {
@@ -97,5 +127,7 @@ var queryClosingBrackets = function() {
   }
 });`
 }
+
+// End Queries
 
 exports.GraphqlGenerator = new GraphqlGenerator();
