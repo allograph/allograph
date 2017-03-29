@@ -138,33 +138,27 @@ var writeRelation = function(meta, relations) {
     }
 
     // property in primary table
-    var fk_data = Object.assign({}, meta.tables[relation["fk_table"]].fields[relation["fk_column"]]);
     meta.tables[relation["pk_table"]].fields[relation["fk_table"]] = {
       data_type: "[" + singularCapitalizedTableName(relation["fk_table"]) + "]",
       fk_column: relation["fk_column"],
       pk_column: relation["pk_column"],
-      fk_datatype: fk_data.data_type,
-      is_nullable: fk_data.is_nullable
+      is_nullable: true
     }
-
-    delete fk_data.data_type;
-    Object.assign(meta.tables[relation["pk_table"]].fields[relation["fk_table"]], fk_data);
 
     // property in foriegn table
     delete meta.tables[relation["fk_table"]].fields[relation["fk_column"]];
+    var fk_data = Object.assign({}, meta.tables[relation["fk_table"]].fields[relation["fk_column"]]);
 
     meta.tables[relation["fk_table"]].fields[relation["pk_table"]] = {
       data_type: singularCapitalizedTableName(relation["pk_table"]),
       update_rule: relation["update_rule"],
       delete_rule: relation["delete_rule"],
       fk_column: relation["fk_column"],
+      pk_table: relation["pk_table"],
       pk_column: relation["pk_column"],
-      pk_datatype: meta.tables[relation["pk_table"]]
-                       .fields[relation["pk_column"]]["data_type"],
+      fk_datatype: fk_data.data_type,
       is_nullable: fk_data.is_nullable
     }
-
-    meta.tables[relation["fk_table"]].fields[relation["pk_table"]];
   });
 
   return meta;
