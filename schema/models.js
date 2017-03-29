@@ -14,8 +14,6 @@ export class User {
       first_name: args.first_name,
       last_name: args.last_name,
       email: args.email,
-      posts: args.posts,
-      comments: args.comments,
     }).into('users').then(id => {
       return knex('users').where({ id: id[0] }).then(user => {
         return user[0];
@@ -29,8 +27,6 @@ export class User {
       first_name: args.first_name,
       last_name: args.last_name,
       email: args.email,
-      posts: args.posts,
-      comments: args.comments,
     }).then(id => {
       return knex('users').where({ id: id[0] }).then(user => {
         return user[0];
@@ -45,162 +41,39 @@ export class User {
   }
 }
 
-export class Comment {
-  comments(args) {
-    return knex('comments').where(args).then(comments => {
-      return comments
+export class Project {
+  projects(args) {
+    return knex('projects').where(args).then(projects => {
+      return projects
     });
   }
 
-  createComment(args) {
-    return knex.returning('id').insert({
-      id: args.id,
-      content: args.content,
-      users: args.users,
-      posts: args.posts,
-    }).into('comments').then(id => {
-      return knex('comments').where({ id: id[0] }).then(comment => {
-        return comment[0];
-      });
-    });
-  }
-
-  updateComment(args) {
-    return knex('comments').where({ id: args.id }).returning('id').update({
-      id: args.id,
-      content: args.content,
-      users: args.users,
-      posts: args.posts,
-    }).then(id => {
-      return knex('comments').where({ id: id[0] }).then(comment => {
-        return comment[0];
-      });
-    });
-  }
-
-  deleteComment(id) {
-    return knex('comments').where({ id: id }).del().then(numberOfDeletedItems => {
-      return 'Number of deleted comments: ' + numberOfDeletedItems;
-    });
-  }
-}
-
-export class Post {
-  posts(args) {
-    return knex('posts').where(args).then(posts => {
-      return posts
-    });
-  }
-
-  createPost(args) {
+  createProject(args) {
     return knex.returning('id').insert({
       id: args.id,
       title: args.title,
-      content: args.content,
-      users: args.users,
-      tags_posts: args.tags_posts,
-      comments: args.comments,
-    }).into('posts').then(id => {
-      return knex('posts').where({ id: id[0] }).then(post => {
-        return post[0];
+      user_id: args.user_id,
+    }).into('projects').then(id => {
+      return knex('projects').where({ id: id[0] }).then(project => {
+        return project[0];
       });
     });
   }
 
-  updatePost(args) {
-    return knex('posts').where({ id: args.id }).returning('id').update({
+  updateProject(args) {
+    return knex('projects').where({ id: args.id }).returning('id').update({
       id: args.id,
       title: args.title,
-      content: args.content,
-      users: args.users,
-      tags_posts: args.tags_posts,
-      comments: args.comments,
     }).then(id => {
-      return knex('posts').where({ id: id[0] }).then(post => {
-        return post[0];
+      return knex('projects').where({ id: id[0] }).then(project => {
+        return project[0];
       });
     });
   }
 
-  deletePost(id) {
-    return knex('posts').where({ id: id }).del().then(numberOfDeletedItems => {
-      return 'Number of deleted posts: ' + numberOfDeletedItems;
-    });
-  }
-}
-
-export class Tag {
-  tags(args) {
-    return knex('tags').where(args).then(tags => {
-      return tags
-    });
-  }
-
-  createTag(args) {
-    return knex.returning('id').insert({
-      id: args.id,
-      title: args.title,
-      tags_posts: args.tags_posts,
-    }).into('tags').then(id => {
-      return knex('tags').where({ id: id[0] }).then(tag => {
-        return tag[0];
-      });
-    });
-  }
-
-  updateTag(args) {
-    return knex('tags').where({ id: args.id }).returning('id').update({
-      id: args.id,
-      title: args.title,
-      tags_posts: args.tags_posts,
-    }).then(id => {
-      return knex('tags').where({ id: id[0] }).then(tag => {
-        return tag[0];
-      });
-    });
-  }
-
-  deleteTag(id) {
-    return knex('tags').where({ id: id }).del().then(numberOfDeletedItems => {
-      return 'Number of deleted tags: ' + numberOfDeletedItems;
-    });
-  }
-}
-
-export class Tags_post {
-  tags_posts(args) {
-    return knex('tags_posts').where(args).then(tags_posts => {
-      return tags_posts
-    });
-  }
-
-  createTags_post(args) {
-    return knex.returning('id').insert({
-      id: args.id,
-      posts: args.posts,
-      tags: args.tags,
-    }).into('tags_posts').then(id => {
-      return knex('tags_posts').where({ id: id[0] }).then(tags_post => {
-        return tags_post[0];
-      });
-    });
-  }
-
-  updateTags_post(args) {
-    return knex('tags_posts').where({ id: args.id }).returning('id').update({
-      id: args.id,
-      posts: args.posts,
-      tags: args.tags,
-    }).then(id => {
-      return knex('tags_posts').where({ id: id[0] }).then(tags_post => {
-        return tags_post[0];
-      });
-    });
-  }
-
-  deleteTags_post(id) {
-    return knex('tags_posts').where({ id: id }).del().then(numberOfDeletedItems => {
-      return 'Number of deleted tags_posts: ' + numberOfDeletedItems;
+  deleteProject(id) {
+    return knex('projects').where({ id: id }).del().then(numberOfDeletedItems => {
+      return 'Number of deleted projects: ' + numberOfDeletedItems;
     });
   }
 }
