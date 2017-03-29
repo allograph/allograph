@@ -3,7 +3,7 @@ var fs = require('fs'),
     inputCustomMutations = fs.readFileSync('./schema/mutations.js', 'utf-8'),
     GraphqlGenerator = function () {},
     h = require('./helper.js'),
-    queries = require('./queries.js');
+    queries = require('./queries.js').Query;
 
 GraphqlGenerator.prototype.printMetadata = function(dbMetadata) {
   // writeGraphQLClassModels(dbMetadata);

@@ -7,21 +7,39 @@ import {
   GraphQLNonNull
 } from 'graphql';
 
-var tables = require('../generated/models');
-
-module.exports = {
-  users: {
-    type: new GraphQLList(User),
-    args: {
-      first_name: {
-        type: GraphQLString
+module.exports.Query = {
+  name: 'Query',
+  description: 'Root query object',
+  fields: () => {
+    return { 
+      tax: {
+        type: new GraphQLObjectType,
+        args: {
+          cost: { type: GraphQLInt }
+        },
+        resolve: (root, args) => {
+          return args.cost * 1.15
+        }
       },
-      last_name: {
-        type: GraphQLString
-      },
-    },
-    resolve (root, args) {
-      return knex('users').where(args)
     }
-  },
-}
+  }
+};
+
+// module.exports.Query = new GraphQLObjectType({
+//   name: 'Query',
+//   description: 'Root query object',
+//   fields: () => {
+//     return { 
+//       tax: {
+//         type: new GraphQLObjectType,
+//         args: {
+//           cost: { type: GraphQLInt }
+//         },
+//         resolve: (root, args) => {
+//           return args.cost * 1.15
+//         }
+//       },
+//     }
+//   }
+// });
+
