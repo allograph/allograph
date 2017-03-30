@@ -91,6 +91,14 @@ var Helper = {
       return psqlType;
     }
   },
+  toGraphQLTypeFromJSType: function(jsType) {
+    var typemap = {
+      'Int': 'GraphQLInt',
+      'String': 'GraphQLString'
+    }
+
+    return typemap[jsType] || 'GraphQLString'
+  },
   toGraphQLField: function(column, dataType, isNullable) {
     return  `  ` + column + `: ` +
             this.toGraphQLType(dataType) +

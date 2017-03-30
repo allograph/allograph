@@ -196,7 +196,5 @@ var singularCapitalizedTableName = function(name) {
   var singularName = lingo.en.singularize(name)
   return lingo.capitalize(singularName);
 }
-// new DBData().readSchema(function() {
-//   console.log("READ")
-// });
+
 exports.DBData = new DBData();

@@ -1,52 +1,41 @@
 const Query = new GraphQLObjectType({
   name: 'Query',
   description: 'Root query object',
-  fields: () {
+  fields: () => {
     return {
       tax: {
-        type: Int,
+        type: GraphQLInt, 
         args: {
           cost: {
-            type: Int
+            type: GraphQLInt
           },
         },
         resolve(root, args) {
           return args.cost * 1.15;
         }
       },
-      comments: {
-        type: new GraphQLList(Comment),
+      users: {
+        type: new GraphQLList(User),
         args: {
           id: {
             type: GraphQLInt
           },
-          content: {
+          first_name: {
+            type: GraphQLString
+          },
+          last_name: {
+            type: GraphQLString
+          },
+          email: {
             type: GraphQLString
           }
         },
         resolve (root, args) {
-          return knex('comments').where(args)
+          return knex('users').where(args)
         }
       },
-      posts: {
-        type: new GraphQLList(Post),
-        args: {
-          id: {
-            type: GraphQLInt
-          },
-          title: {
-            type: GraphQLString
-          },
-          content: {
-            type: GraphQLString
-          }
-        },
-        resolve (root, args) {
-          return knex('posts').where(args)
-        }
-      },
-      tags: {
-        type: new GraphQLList(Tag),
+      projects: {
+        type: new GraphQLList(Project),
         args: {
           id: {
             type: GraphQLInt
@@ -56,20 +45,10 @@ const Query = new GraphQLObjectType({
           }
         },
         resolve (root, args) {
-          return knex('tags').where(args)
-        }
-      },
-      tags_posts: {
-        type: new GraphQLList(Tags_post),
-        args: {
-          id: {
-            type: GraphQLInt
-          }
-        },
-        resolve (root, args) {
-          return knex('tags_posts').where(args)
+          return knex('projects').where(args)
         }
       },
     };
   }
 });
+

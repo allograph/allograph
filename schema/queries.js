@@ -22,8 +22,8 @@ module.exports.Query = {
           return args.cost * 1.15
         }
       },
-      users: {
-      },     
+      // users: {
+      // },     
     }
   }
 };
