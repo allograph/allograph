@@ -3,7 +3,8 @@ var fs = require('fs'),
     inputCustomMutations = fs.readFileSync('./schema/mutations.js', 'utf-8'),
     GraphqlGenerator = function () {},
     h = require('./helper.js'),
-    query = require('./queries.js').Query;
+    query = require('./queries.js').Query,
+    mutation = require('./mutations.js').Mutation;
 
 import {
   GraphQLObjectType,
@@ -240,12 +241,38 @@ var queryClosingBrackets = function() {
 // writeMutations starts here
 
 var writeMutationsFile = function(dbMetadata) {
+
+  var customMutations = mutation.fields();
+
+  for (var customMutation in customMutations) {
+    if (Object.keys(customMutations[customMutation]).length === 0) { continue; }
+  
+    // newData += `\n      ${customQuery}: {
+    //     type: ${h.toGraphQLTypeFromJSType(customQueries[customQuery].type)}, 
+    //     args: {`
+
+    // for (var arg in customQueries[customQuery].args) {
+    //   newData += `\n          ${arg}: {
+    //         type: ${h.toGraphQLTypeFromJSType(customQueries[customQuery].args[arg].type)}\n          },`
+    // }
+
+    // newData += `\n        },\n        ` 
+    // newData += customQueries[customQuery].resolve.toString()
+    // newData += `\n      },`
+  }
+
   var newData = mutationHeader();
   for (var property in dbMetadata.tables) {
     if (dbMetadata.tables.hasOwnProperty(property)) {
-      newData += mutationAdd(property, dbMetadata.tables[property]);
+      if (!Object.keys(customMutations).includes("add" + h.singularCapitalizedTableName(property))) {
+        newData += mutationAdd(property, dbMetadata.tables[property]);
+      }
+      if (!Object.keys(customMutations).includes("update" + h.singularCapitalizedTableName(property))) {
       newData += mutationUpdate(property, dbMetadata.tables[property]);
+      }
+      if (!Object.keys(customMutations).includes("delete" + h.singularCapitalizedTableName(property))) {
       newData += mutationDelete(property, dbMetadata.tables[property]);
+      }
     };
   };
   newData = newData.slice(0, -1);

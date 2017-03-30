@@ -56,19 +56,6 @@ const Mutation = new GraphQLObjectType({
           });
         }
       },
-      deleteUser: {
-        type: GraphQLString,
-        args: {
-          id: {
-            type: new GraphQLNonNull(GraphQLInt)
-          }
-        },
-        resolve (source, args) {
-          return knex('users').where({ id: args.id }).del().then(numberOfDeletedItems => {
-            return 'Number of deleted users: ' + numberOfDeletedItems;
-          });
-        }
-      },
       addProject: {
         type: Project,
         args: {
