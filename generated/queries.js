@@ -4,7 +4,7 @@ const Query = new GraphQLObjectType({
   fields: () => {
     return {
       tax: {
-        type: GraphQLInt, 
+        type: GraphQLInt,
         args: {
           cost: {
             type: GraphQLInt

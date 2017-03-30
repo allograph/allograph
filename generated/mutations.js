@@ -11,7 +11,8 @@ const Mutation = new GraphQLObjectType({
           },
         },
         resolve(source, args) {
-          return "Story title backwards: " + args.title.split("").reverse().join("");
+          var title = args.title;
+          return "Story title backwards: " + title.split("").reverse().join("");
         }
       },
       addUser: {

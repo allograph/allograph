@@ -7,7 +7,6 @@ import {
   GraphQLNonNull
 } from 'graphql';
 
-
 var knex = require('../database/connection')
 
 const User = new GraphQLObjectType({
@@ -86,7 +85,7 @@ const Query = new GraphQLObjectType({
   fields: () => {
     return {
       tax: {
-        type: GraphQLInt, 
+        type: GraphQLInt,
         args: {
           cost: {
             type: GraphQLInt
@@ -147,9 +146,8 @@ const Mutation = new GraphQLObjectType({
           },
         },
         resolve(source, args) {
-          return knex('users').where({ id: 4 }).then(user => {
-            return user[0];
-          });
+          var title = args.title;
+          return "Story title backwards: " + title.split("").reverse().join("");
         }
       },
       addUser: {

@@ -21,6 +21,7 @@ module.exports.Mutation = {
           },
         },
         resolve (source, args) {
+          var title = args.title
           return "Story title backwards: " + title.split("").reverse().join("")
         }
       },
