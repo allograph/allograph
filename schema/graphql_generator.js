@@ -16,7 +16,7 @@ import {
 } from 'graphql';
 
 GraphqlGenerator.prototype.printMetadata = function(dbMetadata) {
-  // writeGraphQLClassModels(dbMetadata);
+  writeGraphQLClassModels(dbMetadata);
   writeMutationsFile(dbMetadata);
   writeQueriesFile(dbMetadata);
   writeTypesFile(dbMetadata);
@@ -35,7 +35,7 @@ var knex = require('../database/connection');`
     }
   }
 
-  fs.writeFileSync('./schema/models.js', data, 'utf-8');
+  fs.writeFileSync('./generated/models.js', data, 'utf-8');
 }
 
 var modelData = function(tableInfo) {
