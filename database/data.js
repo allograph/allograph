@@ -146,7 +146,6 @@ var writeRelation = function(meta, relations) {
     }
 
     // property in foriegn table
-    delete meta.tables[relation["fk_table"]].fields[relation["fk_column"]];
     var fk_data = Object.assign({}, meta.tables[relation["fk_table"]].fields[relation["fk_column"]]);
 
     meta.tables[relation["fk_table"]].fields[relation["pk_table"]] = {
