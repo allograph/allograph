@@ -1,7 +1,7 @@
 const Query = new GraphQLObjectType({
   name: 'Query',
   description: 'Root query object',
-  fields: () => {
+  fields: () {
     return {
       tax: {
         type: Int,
