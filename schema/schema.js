@@ -7,44 +7,35 @@ import {
   GraphQLNonNull
 } from 'graphql';
 
-
 var knex = require('../database/connection')
 
 const User = new GraphQLObjectType({
   name: 'User',
   description: 'This is a table called users',
-  fields: () => {
+  fields () {
     return {
       id: {
-        type: new GraphQLNonNull(GraphQLInt),
+        type: GraphQLInt,
         resolve (user) {
           return user.id;
         }
       },
       first_name: {
-        type: new GraphQLNonNull(GraphQLString),
+        type: GraphQLString,
         resolve (user) {
           return user.first_name;
         }
       },
       last_name: {
-        type: new GraphQLNonNull(GraphQLString),
+        type: GraphQLString,
         resolve (user) {
           return user.last_name;
         }
       },
       email: {
-        type: new GraphQLNonNull(GraphQLString),
+        type: GraphQLString,
         resolve (user) {
           return user.email;
-        }
-      },
-      projects: {
-        type: new GraphQLList(Project),
-        resolve (user) {
-          return knex('projects').where({ user_id: user.id }).then(projects => {;
-            return projects;
-          });
         }
       },
     };
@@ -54,10 +45,10 @@ const User = new GraphQLObjectType({
 const Project = new GraphQLObjectType({
   name: 'Project',
   description: 'This is a table called projects',
-  fields: () => {
+  fields () {
     return {
       id: {
-        type: new GraphQLNonNull(GraphQLInt),
+        type: GraphQLInt,
         resolve (project) {
           return project.id;
         }
@@ -66,14 +57,6 @@ const Project = new GraphQLObjectType({
         type: GraphQLString,
         resolve (project) {
           return project.title;
-        }
-      },
-      users: {
-        type: User,
-        resolve (project) {
-          return knex('users').where({ id: project.user_id }).then(users => {;
-            return users[0];
-          });
         }
       },
     };
@@ -85,17 +68,6 @@ const Query = new GraphQLObjectType({
   description: 'Root query object',
   fields: () => {
     return {
-      tax: {
-        type: GraphQLInt, 
-        args: {
-          cost: {
-            type: GraphQLInt
-          },
-        },
-        resolve(root, args) {
-          return args.cost * 1.15;
-        }
-      },
       users: {
         type: new GraphQLList(User),
         args: {
@@ -135,23 +107,10 @@ const Query = new GraphQLObjectType({
 });
 
 const Mutation = new GraphQLObjectType({
-  name: 'Mutation',
+  name: 'Mutations',
   description: 'Functions to set stuff',
   fields () {
     return {
-      createBackwardsTitle: {
-        type: GraphQLString, 
-        args: {
-          title: {
-            type: GraphQLString
-          },
-        },
-        resolve(source, args) {
-          return knex('users').where({ id: 4 }).then(user => {
-            return user[0];
-          });
-        }
-      },
       addUser: {
         type: User,
         args: {
@@ -205,6 +164,19 @@ const Mutation = new GraphQLObjectType({
           });
         }
       },
+      deleteUser: {
+        type: User,
+        args: {
+          id: {
+            type: new GraphQLNonNull(GraphQLInt)
+          }
+        },
+        resolve (source, args) {
+          knex('users').where({ id: args.id }).del().then(numberOfDeletedItems => {
+            console.log('Number of deleted users: ' + numberOfDeletedItems);
+          });
+        }
+      },
       addProject: {
         type: Project,
         args: {
@@ -243,21 +215,23 @@ const Mutation = new GraphQLObjectType({
         }
       },
       deleteProject: {
-        type: GraphQLString,
+        type: Project,
         args: {
           id: {
             type: new GraphQLNonNull(GraphQLInt)
           }
         },
         resolve (source, args) {
-          return knex('projects').where({ id: args.id }).del().then(numberOfDeletedItems => {
-            return 'Number of deleted projects: ' + numberOfDeletedItems;
+          knex('projects').where({ id: args.id }).del().then(numberOfDeletedItems => {
+            console.log('Number of deleted projects: ' + numberOfDeletedItems);
           });
         }
       }
     };
   }
-});exports.Schema = new GraphQLSchema({
+});
+
+exports.Schema = new GraphQLSchema({
   query: Query,
   mutation: Mutation
 });

@@ -16,7 +16,7 @@ import {
 } from 'graphql';    
 
 GraphqlGenerator.prototype.printMetadata = function(dbMetadata) {
-  // writeGraphQLClassModels(dbMetadata);
+  writeGraphQLClassModels(dbMetadata);
   writeMutationsFile(dbMetadata);
   writeQueriesFile(dbMetadata);
   writeTypesFile(dbMetadata);
@@ -33,7 +33,6 @@ var graphQLData = function() {
   GraphQLList,
   GraphQLNonNull
 } from 'graphql';
-
 
 var knex = require('../database/connection')`
 }
@@ -241,27 +240,26 @@ var queryClosingBrackets = function() {
 // writeMutations starts here
 
 var writeMutationsFile = function(dbMetadata) {
-
+  var newData = mutationHeader();
   var customMutations = mutation.fields();
 
   for (var customMutation in customMutations) {
     if (Object.keys(customMutations[customMutation]).length === 0) { continue; }
   
-    // newData += `\n      ${customQuery}: {
-    //     type: ${h.toGraphQLTypeFromJSType(customQueries[customQuery].type)}, 
-    //     args: {`
+    newData += `\n      ${customMutation}: {
+        type: ${h.toGraphQLTypeFromJSType(customMutations[customMutation].type)}, 
+        args: {`
 
-    // for (var arg in customQueries[customQuery].args) {
-    //   newData += `\n          ${arg}: {
-    //         type: ${h.toGraphQLTypeFromJSType(customQueries[customQuery].args[arg].type)}\n          },`
-    // }
+    for (var arg in customMutations[customMutation].args) {
+      newData += `\n          ${arg}: {
+            type: ${h.toGraphQLTypeFromJSType(customMutations[customMutation].args[arg].type)}\n          },`
+    }
 
-    // newData += `\n        },\n        ` 
-    // newData += customQueries[customQuery].resolve.toString()
-    // newData += `\n      },`
+    newData += `\n        },\n        ` 
+    newData += customMutations[customMutation].resolve.toString()
+    newData += `\n      },`
   }
 
-  var newData = mutationHeader();
   for (var property in dbMetadata.tables) {
     if (dbMetadata.tables.hasOwnProperty(property)) {
       if (!Object.keys(customMutations).includes("add" + h.singularCapitalizedTableName(property))) {

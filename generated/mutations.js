@@ -3,6 +3,17 @@ const Mutation = new GraphQLObjectType({
   description: 'Functions to set stuff',
   fields () {
     return {
+      createBackwardsTitle: {
+        type: GraphQLString, 
+        args: {
+          title: {
+            type: GraphQLString
+          },
+        },
+        resolve(source, args) {
+          return "Story title backwards: " + args.title.split("").reverse().join("");
+        }
+      },
       addUser: {
         type: User,
         args: {
