@@ -1,5 +1,6 @@
 var pg = require('pg');
 var fs = require('fs');
+var lingo = require('lingo');
 
 var knex = require('./connection')
 
@@ -11,17 +12,17 @@ DBData.prototype.readSchema = function (callback, skipModelCreation) {
     var dbName = result.rows[0].table_catalog;
     var tables = result.rows.map(function(row) {
                     return row.table_name;
-                  });  
+                  });
 
     var meta = {
       data: dbName,
       tables: {}
-    };  
+    };
 
     var promisesFor = function(tables) {
       var promises = []
       tables.forEach(function(tableName) {
-        promises.push(knex.raw(`SELECT column_name, data_type, is_nullable, table_name,
+        promises.push(knex.raw(`SELECT column_name, data_type, is_nullable::boolean, table_name,
       column_default FROM information_schema.columns WHERE table_name = ?::text`, [tableName]))
       });
 
@@ -56,7 +57,7 @@ DBData.prototype.readSchema = function (callback, skipModelCreation) {
       writeToJSON(metaWithRelations);
 
 
-      callback(meta, skipModelCreation);    
+      callback(meta, skipModelCreation);
     })
   });
 }
@@ -121,17 +122,12 @@ var writeRelation = function(meta, relations) {
   })
 
   relations.forEach(function(relation) {
-    meta.tables[relation["pk_table"]].fields[relation["fk_table"]] = {
-      data_type: "list[" + formatTableName(relation["fk_table"]) + "]",
-      fk_column: relation["fk_column"],
-      pk_column: relation["pk_column"]
-    }
-
+    // has_many has_one relationships
     if (isJunctionTable(relation.fk_table, relationTables, meta)) {
       var pkTableNames = pkTablesRefByJunction(relation.fk_table, relation.pk_table, relations)
 
       for (var pkTable of pkTableNames) {
-        meta.tables[pkTable].relations.has_many.push(relation.pk_table)    
+        meta.tables[pkTable].relations.has_many.push(relation.pk_table)
       }
 
       meta.tables[relation.fk_table].relations.has_one.push(relation.pk_table)
@@ -141,15 +137,26 @@ var writeRelation = function(meta, relations) {
       meta.tables[relation.fk_table].relations.has_one.push(relation.pk_table)
     }
 
-    delete meta.tables[relation["fk_table"]].fields[relation["fk_column"]]
+    // property in primary table
+    meta.tables[relation["pk_table"]].fields[relation["fk_table"]] = {
+      data_type: "[" + singularCapitalizedTableName(relation["fk_table"]) + "]",
+      fk_column: relation["fk_column"],
+      pk_column: relation["pk_column"],
+      is_nullable: true
+    }
+
+    // property in foriegn table
+    var fk_data = Object.assign({}, meta.tables[relation["fk_table"]].fields[relation["fk_column"]]);
+
     meta.tables[relation["fk_table"]].fields[relation["pk_table"]] = {
-      data_type: formatTableName(relation["pk_table"]),
+      data_type: singularCapitalizedTableName(relation["pk_table"]),
       update_rule: relation["update_rule"],
       delete_rule: relation["delete_rule"],
       fk_column: relation["fk_column"],
+      pk_table: relation["pk_table"],
       pk_column: relation["pk_column"],
-      pk_datatype: meta.tables[relation["pk_table"]]
-                       .fields[relation["pk_column"]]["data_type"]
+      fk_datatype: fk_data.data_type,
+      is_nullable: fk_data.is_nullable
     }
   });
 
@@ -184,8 +191,9 @@ var isJunctionTable = function(tableName, tableNames, meta) {
   return !!(count > 1)
 }
 
-var formatTableName = function(name) {
-  return name.charAt(0).toUpperCase() + name.slice(1).toLowerCase();
-};
+var singularCapitalizedTableName = function(name) {
+  var singularName = lingo.en.singularize(name)
+  return lingo.capitalize(singularName);
+}
 
 exports.DBData = new DBData();

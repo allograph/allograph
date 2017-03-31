@@ -1,3 +1,4 @@
+import * as models from './models'
 import {
   GraphQLObjectType,
   GraphQLString,
@@ -12,30 +13,38 @@ var knex = require('../database/connection')
 const User = new GraphQLObjectType({
   name: 'User',
   description: 'This is a table called users',
-  fields () {
+  fields: () => {
     return {
       id: {
-        type: GraphQLInt,
+        type: new GraphQLNonNull(GraphQLInt),
         resolve (user) {
           return user.id;
         }
       },
       first_name: {
-        type: GraphQLString,
+        type: new GraphQLNonNull(GraphQLString),
         resolve (user) {
           return user.first_name;
         }
       },
       last_name: {
-        type: GraphQLString,
+        type: new GraphQLNonNull(GraphQLString),
         resolve (user) {
           return user.last_name;
         }
       },
       email: {
-        type: GraphQLString,
+        type: new GraphQLNonNull(GraphQLString),
         resolve (user) {
           return user.email;
+        }
+      },
+      projects: {
+        type: new GraphQLList(Project),
+        resolve (user) {
+          return knex('projects').where({ user_id: user.id }).then(projects => {;
+            return projects;
+          });
         }
       },
     };
@@ -45,10 +54,10 @@ const User = new GraphQLObjectType({
 const Project = new GraphQLObjectType({
   name: 'Project',
   description: 'This is a table called projects',
-  fields () {
+  fields: () => {
     return {
       id: {
-        type: GraphQLInt,
+        type: new GraphQLNonNull(GraphQLInt),
         resolve (project) {
           return project.id;
         }
@@ -57,6 +66,14 @@ const Project = new GraphQLObjectType({
         type: GraphQLString,
         resolve (project) {
           return project.title;
+        }
+      },
+      users: {
+        type: User,
+        resolve (project) {
+          return knex('users').where({ id: project.user_id }).then(users => {;
+            return users[0];
+          });
         }
       },
     };
@@ -85,7 +102,8 @@ const Query = new GraphQLObjectType({
           }
         },
         resolve (root, args) {
-          return knex('users').where(args)
+          var user = new models.User()
+          return user.users(args);
         }
       },
       projects: {
@@ -99,7 +117,8 @@ const Query = new GraphQLObjectType({
           }
         },
         resolve (root, args) {
-          return knex('projects').where(args)
+          var project = new models.Project()
+          return project.projects(args);
         }
       },
     };
@@ -107,10 +126,22 @@ const Query = new GraphQLObjectType({
 });
 
 const Mutation = new GraphQLObjectType({
-  name: 'Mutations',
+  name: 'Mutation',
   description: 'Functions to set stuff',
   fields () {
     return {
+      createBackwardsTitle: {
+        type: GraphQLString, 
+        args: {
+          title: {
+            type: GraphQLString
+          },
+        },
+        resolve(source, args) {
+          var title = args.title;
+          return "Story title backwards: " + title.split("").reverse().join("");
+        }
+      },
       addUser: {
         type: User,
         args: {
@@ -124,16 +155,9 @@ const Mutation = new GraphQLObjectType({
             type: new GraphQLNonNull(GraphQLString)
           }
         },
-        resolve (source, args) {
-          return knex.returning('id').insert({
-            first_name: args.first_name,
-            last_name: args.last_name,
-            email: args.email,
-          }).into('users').then(id => {
-            return knex('users').where({ id: id[0] }).then(user => {
-              return user[0];
-            });
-          });
+        resolve (root, args) {
+          var user = new models.User()
+          return user.createUser(args);
         }
       },
       updateUser: {
@@ -152,29 +176,9 @@ const Mutation = new GraphQLObjectType({
             type: new GraphQLNonNull(GraphQLString)
           }
         },
-        resolve (source, args) {
-          return knex('users').where({ id: args.id }).returning('id').update({
-            first_name: args.first_name,
-            last_name: args.last_name,
-            email: args.email,
-          }).then(id => {
-            return knex('users').where({ id: id[0] }).then(user => {
-              return user[0];
-            });
-          });
-        }
-      },
-      deleteUser: {
-        type: User,
-        args: {
-          id: {
-            type: new GraphQLNonNull(GraphQLInt)
-          }
-        },
-        resolve (source, args) {
-          knex('users').where({ id: args.id }).del().then(numberOfDeletedItems => {
-            console.log('Number of deleted users: ' + numberOfDeletedItems);
-          });
+        resolve (root, args) {
+          var user = new models.User()
+          return user.updateUser(args);
         }
       },
       addProject: {
@@ -184,14 +188,9 @@ const Mutation = new GraphQLObjectType({
             type: GraphQLString
           }
         },
-        resolve (source, args) {
-          return knex.returning('id').insert({
-            title: args.title,
-          }).into('projects').then(id => {
-            return knex('projects').where({ id: id[0] }).then(project => {
-              return project[0];
-            });
-          });
+        resolve (root, args) {
+          var project = new models.Project()
+          return project.createProject(args);
         }
       },
       updateProject: {
@@ -204,34 +203,26 @@ const Mutation = new GraphQLObjectType({
             type: GraphQLString
           }
         },
-        resolve (source, args) {
-          return knex('projects').where({ id: args.id }).returning('id').update({
-            title: args.title,
-          }).then(id => {
-            return knex('projects').where({ id: id[0] }).then(project => {
-              return project[0];
-            });
-          });
+        resolve (root, args) {
+          var project = new models.Project()
+          return project.updateProject(args);
         }
       },
       deleteProject: {
-        type: Project,
+        type: GraphQLString,
         args: {
           id: {
             type: new GraphQLNonNull(GraphQLInt)
           }
         },
-        resolve (source, args) {
-          knex('projects').where({ id: args.id }).del().then(numberOfDeletedItems => {
-            console.log('Number of deleted projects: ' + numberOfDeletedItems);
-          });
+        resolve (root, args) {
+          var project = new models.Project()
+          return project.deleteProject(args);
         }
       }
     };
   }
-});
-
-exports.Schema = new GraphQLSchema({
+});exports.Schema = new GraphQLSchema({
   query: Query,
   mutation: Mutation
 });

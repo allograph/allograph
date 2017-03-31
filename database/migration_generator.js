@@ -5,7 +5,6 @@ var MigrationGenerator = function () {};
 
 MigrationGenerator.prototype.generic = function(name) {
   var data = requireStatement();
-
   data += `\n\nexports.up = function(knex, Promise) {
 };
 
@@ -17,7 +16,6 @@ exports.down = function(knex, Promise) {
 
 MigrationGenerator.prototype.createTable = function(name, tableName) {
   var data = requireStatement();
-
   data += `\n\nexports.up = function(knex, Promise) {
   return knex.schema.createTable('${tableName}', function(table) {
     table.increments('id').primary();
