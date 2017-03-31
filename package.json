@@ -21,7 +21,7 @@
     "bookshelf": "^0.10.3",
     "commander": "^2.9.0",
     "express": "^4.13.4",
-    "express-graphql": "^0.4.4",
+    "express-graphql": "^0.6.3",
     "express-jwt": "^5.1.0",
     "graphiql": "^0.9.3",
     "graphql": "^0.9.1",

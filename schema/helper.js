@@ -61,7 +61,8 @@ var Helper = {
     var typeMap = {
           'character varying': 'String',
           'integer': 'Int',
-          'boolean': 'Boolean'
+          'boolean': 'Boolean',
+          'text': 'String'
         }
     if (typeMap[psqlType]) {
       return typeMap[psqlType];
@@ -80,7 +81,8 @@ var Helper = {
         typeMap = {
           'character varying': 'String',
           'integer': 'Int',
-          'boolean': 'Boolean'
+          'boolean': 'Boolean',
+          'text': 'String'
         }
 
     if (typeMap[psqlType]) {
@@ -94,7 +96,8 @@ var Helper = {
   toGraphQLTypeFromJSType: function(jsType) {
     var typemap = {
       'Int': 'GraphQLInt',
-      'String': 'GraphQLString'
+      'String': 'GraphQLString',
+      'Boolean': 'GraphQLBoolean',   
     }
 
     return typemap[jsType] || 'GraphQLString'
