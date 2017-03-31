@@ -13,17 +13,20 @@ module.exports.Query = {
   description: 'Root query object',
   fields: () => {
     return { 
-      tax: {
-        type: GraphQLInt,
-        args: {
-          cost: { type: GraphQLInt }
-        },
-        resolve (root, args) {
-          return args.cost * 1.15
-        }
-      },
-      // users: {
-      // },     
+      // projects: {
+      //   type: new GraphQLList(Project),
+      //   args: {
+      //     id: {
+      //       type: GraphQLInt
+      //     },
+      //     title: {
+      //       type: GraphQLString
+      //     }
+      //   },
+      //   resolve (root, args) {
+      //     return knex('projects').where(args)
+      //   }
+      // },
     }
   }
 };

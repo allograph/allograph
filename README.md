@@ -95,8 +95,9 @@ The relation detection feature allows for creation of bookshelf models that are 
 
 'allo server': Start your Allograph server
 
-'allo generate:graphql': Inspect DB schema and generate GraphQL schema.js file as well as Bookshelf.js (an ORM) models. 
-    Optional flag: '-n' or '--no_models'. No bookshelf models will be generated.
+'allo -h': List of all available commands and options.
+
+'allo generate:graphql': Inspect DB schema and generate GraphQL schema.js file.
 
 'allo migrate': Runs all migrations that have not yet been run.
 

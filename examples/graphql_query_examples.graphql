@@ -14,3 +14,11 @@ query {
     }
   }
 }
+
+query ($first_name: String = "rachel", $includeLastName: Boolean = true) {
+  users(first_name: $first_name) {
+    id
+    first_name
+    last_name @include(if: $includeLastName)
+  }
+}

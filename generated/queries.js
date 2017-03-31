@@ -3,17 +3,6 @@ const Query = new GraphQLObjectType({
   description: 'Root query object',
   fields: () => {
     return {
-      tax: {
-        type: GraphQLInt,
-        args: {
-          cost: {
-            type: GraphQLInt
-          },
-        },
-        resolve(root, args) {
-          return args.cost * 1.15;
-        }
-      },
       users: {
         type: new GraphQLList(User),
         args: {
@@ -31,7 +20,8 @@ const Query = new GraphQLObjectType({
           }
         },
         resolve (root, args) {
-          return knex('users').where(args)
+          var user = new models.User()
+          return user.users(args);
         }
       },
       projects: {
@@ -45,7 +35,8 @@ const Query = new GraphQLObjectType({
           }
         },
         resolve (root, args) {
-          return knex('projects').where(args)
+          var project = new models.Project()
+          return project.projects(args);
         }
       },
     };

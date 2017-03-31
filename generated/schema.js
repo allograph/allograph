@@ -1,3 +1,4 @@
+import * as models from './models'
 import {
   GraphQLObjectType,
   GraphQLString,
@@ -84,17 +85,6 @@ const Query = new GraphQLObjectType({
   description: 'Root query object',
   fields: () => {
     return {
-      tax: {
-        type: GraphQLInt,
-        args: {
-          cost: {
-            type: GraphQLInt
-          },
-        },
-        resolve(root, args) {
-          return args.cost * 1.15;
-        }
-      },
       users: {
         type: new GraphQLList(User),
         args: {
@@ -112,7 +102,8 @@ const Query = new GraphQLObjectType({
           }
         },
         resolve (root, args) {
-          return knex('users').where(args)
+          var user = new models.User()
+          return user.users(args);
         }
       },
       projects: {
@@ -126,7 +117,8 @@ const Query = new GraphQLObjectType({
           }
         },
         resolve (root, args) {
-          return knex('projects').where(args)
+          var project = new models.Project()
+          return project.projects(args);
         }
       },
     };
@@ -163,16 +155,9 @@ const Mutation = new GraphQLObjectType({
             type: new GraphQLNonNull(GraphQLString)
           }
         },
-        resolve (source, args) {
-          return knex.returning('id').insert({
-            first_name: args.first_name,
-            last_name: args.last_name,
-            email: args.email,
-          }).into('users').then(id => {
-            return knex('users').where({ id: id[0] }).then(user => {
-              return user[0];
-            });
-          });
+        resolve (root, args) {
+          var user = new models.User()
+          return user.createUser(args);
         }
       },
       updateUser: {
@@ -191,16 +176,9 @@ const Mutation = new GraphQLObjectType({
             type: new GraphQLNonNull(GraphQLString)
           }
         },
-        resolve (source, args) {
-          return knex('users').where({ id: args.id }).returning('id').update({
-            first_name: args.first_name,
-            last_name: args.last_name,
-            email: args.email,
-          }).then(id => {
-            return knex('users').where({ id: id[0] }).then(user => {
-              return user[0];
-            });
-          });
+        resolve (root, args) {
+          var user = new models.User()
+          return user.updateUser(args);
         }
       },
       addProject: {
@@ -210,14 +188,9 @@ const Mutation = new GraphQLObjectType({
             type: GraphQLString
           }
         },
-        resolve (source, args) {
-          return knex.returning('id').insert({
-            title: args.title,
-          }).into('projects').then(id => {
-            return knex('projects').where({ id: id[0] }).then(project => {
-              return project[0];
-            });
-          });
+        resolve (root, args) {
+          var project = new models.Project()
+          return project.createProject(args);
         }
       },
       updateProject: {
@@ -230,14 +203,9 @@ const Mutation = new GraphQLObjectType({
             type: GraphQLString
           }
         },
-        resolve (source, args) {
-          return knex('projects').where({ id: args.id }).returning('id').update({
-            title: args.title,
-          }).then(id => {
-            return knex('projects').where({ id: id[0] }).then(project => {
-              return project[0];
-            });
-          });
+        resolve (root, args) {
+          var project = new models.Project()
+          return project.updateProject(args);
         }
       },
       deleteProject: {
@@ -247,10 +215,9 @@ const Mutation = new GraphQLObjectType({
             type: new GraphQLNonNull(GraphQLInt)
           }
         },
-        resolve (source, args) {
-          return knex('projects').where({ id: args.id }).del().then(numberOfDeletedItems => {
-            return 'Number of deleted projects: ' + numberOfDeletedItems;
-          });
+        resolve (root, args) {
+          var project = new models.Project()
+          return project.deleteProject(args);
         }
       }
     };

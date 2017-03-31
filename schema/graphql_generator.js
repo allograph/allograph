@@ -316,11 +316,13 @@ var psqlTypeToGraphQLType = function(psqlType) {
 }
 
 var queryResolveFunction = function(tableName) {
-  var lowercasePluralTableName = lingo.en.pluralize(tableName.toLowerCase());
+  var lowercaseTableName = tableName.toLowerCase();
+  var pluralizedLowercaseTableName = lingo.en.pluralize(lowercaseTableName)
   return `
         },
         resolve (root, args) {
-          return knex('${lowercasePluralTableName}').where(args)
+          var ${lowercaseTableName} = new models.${tableName}()
+          return ${lowercaseTableName}.${pluralizedLowercaseTableName}(args);
         }
       },`
 }
@@ -416,30 +418,13 @@ var mutationAdd = function(pluralLowercaseTableName, tableData) {
   }
 
   newData = newData.slice(0, -1);
-  newData += `\n        },
-        resolve (source, args) {
-          return knex.returning('id').insert({`;
-
-  for (var column in tableData.fields) {
-    var pk_datatype = tableData.fields[column].pk_datatype;
-    var psqlType = tableData.fields[column].data_type;
-    var fk_column = tableData.fields[column].fk_column;
-
-    if (validForMutation(psqlType) && column !== 'id') {
-      newData += `\n            ${column}: args.${column},`;
-    } else if (pk_datatype) {
-      newData += `\n            ${fk_column}: args.${fk_column},`;
-    }
-  }
-
-newData +=  `\n          }).into('${pluralLowercaseTableName}').then(id => {
-            return knex('${pluralLowercaseTableName}').where({ id: id[0] }).then(${singularLowercaseTableName} => {
-              return ${singularLowercaseTableName}[0];
-            });
-          });
+  newData += `
+        },
+        resolve (root, args) {
+          var ${singularLowercaseTableName} = new models.${singularCapitalizedTableName}()
+          return ${singularLowercaseTableName}.create${singularCapitalizedTableName}(args);
         }
       },`
-
   return newData
 }
 
@@ -468,21 +453,9 @@ var mutationUpdate = function(pluralLowercaseTableName, tableData) {
   }
   newData = newData.slice(0, -1);
   newData += `\n        },
-        resolve (source, args) {
-          return knex('${pluralLowercaseTableName}').where({ id: args.id }).returning('id').update({`;
-
-  for (var column in tableData.fields) {
-    var psqlType = tableData.fields[column].data_type;
-    if (validForMutation(psqlType) && column !== 'id') {
-      newData += `\n            ${column}: args.${column},`;
-    }
-  }
-
-newData +=  `\n          }).then(id => {
-            return knex('${pluralLowercaseTableName}').where({ id: id[0] }).then(${singularLowercaseTableName} => {
-              return ${singularLowercaseTableName}[0];
-            });
-          });
+        resolve (root, args) {
+          var ${singularLowercaseTableName} = new models.${singularCapitalizedTableName}()
+          return ${singularLowercaseTableName}.update${singularCapitalizedTableName}(args);
         }
       },`
 
@@ -514,10 +487,9 @@ var mutationDelete = function(pluralLowercaseTableName, tableData) {
   }
   newData = newData.slice(0, -1);
   newData += `\n        },
-        resolve (source, args) {
-          return knex('${pluralLowercaseTableName}').where({ id: args.id }).del().then(numberOfDeletedItems => {
-            return 'Number of deleted ${pluralLowercaseTableName}: ' + numberOfDeletedItems;
-          });
+        resolve (root, args) {
+          var ${singularLowercaseTableName} = new models.${singularCapitalizedTableName}()
+          return ${singularLowercaseTableName}.delete${singularCapitalizedTableName}(args);
         }
       },`
 
@@ -535,7 +507,8 @@ var validForMutation = function(psqlType) {
 // writeMutations ends here
 
 var writeSchemaDefinition = function() {
-  var schema = fs.readFileSync('./generated/type_definitions.js', 'utf-8');
+  var schema = "import * as models from './models'\n"
+  schema += fs.readFileSync('./generated/type_definitions.js', 'utf-8');
   schema += fs.readFileSync('./generated/queries.js', 'utf-8');
   schema += fs.readFileSync('./generated/mutations.js', 'utf-8');
 
