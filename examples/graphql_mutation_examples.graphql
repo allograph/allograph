@@ -1,0 +1,15 @@
+mutation {
+  addUser(first_name: "mary" last_name: "O'Brien", email: "mobrien@email.com") {
+    id
+  }
+}
+
+mutation {
+  addProject(
+    title: "Reverse engineer a toaster"
+    user_id: 1
+  ) {
+  users {
+    first_name
+  }
+}
