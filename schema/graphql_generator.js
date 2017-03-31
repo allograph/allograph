@@ -40,12 +40,13 @@ var knex = require('../database/connection');`
 
 var modelData = function(tableInfo) {
   var tableName = tableInfo.name
+  var pluralTableName = lingo.en.pluralize(tableName)
   var singularTableName = lingo.en.singularize(tableName)
   var singularCapitalizedTableName = lingo.capitalize(singularTableName)
   var validArgs = toArgs(tableInfo.fields);
 
   var data = `\n\nexport class ${singularCapitalizedTableName} {
-  ${tableName}(args) {
+  ${pluralTableName}(args) {
     return knex('${tableName}').where(args).then(${tableName} => {
       return ${tableName}
     });
@@ -127,6 +128,7 @@ var graphQLData = function() {
   GraphQLInt,
   GraphQLSchema,
   GraphQLList,
+  GraphQLBoolean,
   GraphQLNonNull
 } from 'graphql';
 
@@ -263,7 +265,9 @@ var writeQueriesFile = function(dbMetadata) {
       var psqlType = dbMetadata.tables[property].fields[column].data_type;
       var typeMap = {
             'character varying': 'GraphQLString',
-            'integer': 'GraphQLInt'
+            'integer': 'GraphQLInt',
+            'boolean': 'GraphQLBoolean',
+            'text': 'GraphQLString'                  
           };
 
       if (typeMap[psqlType]) {
@@ -301,7 +305,9 @@ var psqlTypeToGraphQLType = function(psqlType) {
       timestamp = psqlType.match(/^timestamp/),
       typeMap = {
         'character varying': 'GraphQLString',
-        'integer': 'GraphQLInt'
+        'integer': 'GraphQLInt',
+        'boolean': 'GraphQLBoolean',
+        'text': 'GraphQLString'
       }
 
   if (listType) {
@@ -499,7 +505,9 @@ var mutationDelete = function(pluralLowercaseTableName, tableData) {
 var validForMutation = function(psqlType) {
   var typeMap = {
         'character varying': 'GraphQLString',
-        'integer': 'GraphQLInt'
+        'integer': 'GraphQLInt',
+        'boolean': 'GraphQLBoolean',
+        'text': 'GraphQLString'        
       };
   return !!typeMap[psqlType];
 }

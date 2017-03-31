@@ -12,19 +12,6 @@ module.exports.Mutation = {
   description: 'Functions to set stuff',
   fields () {
     return {
-      deleteUser: {},
-      createBackwardsTitle: {
-        type: GraphQLString,
-        args: {
-          title: {
-            type: new GraphQLNonNull(GraphQLString)
-          },
-        },
-        resolve (source, args) {
-          var title = args.title
-          return "Story title backwards: " + title.split("").reverse().join("")
-        }
-      },
     }      
   }
 }

@@ -18,7 +18,7 @@ program
   });
 
 program
-  .command('generate:graphql')
+  .command('schema')
   .description('Inspect DB schema and generate GraphQL schema.js file')
   .action(function(){
     dbTranslator.generate();
