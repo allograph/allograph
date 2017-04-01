@@ -407,20 +407,9 @@ const Query = new GraphQLObjectType({
   description: 'Root query object',
   fields: () => {
     return {
-      tax: {
-        type: GraphQLInt,
-        args: {
-          cost: {
-            type: GraphQLInt
-          },
-        },
-        resolve(root, args) {
-          return args.cost * 1.15;
-        }
-      },
       comments: {
-        type: new GraphQLList(Comment),
-        args: {
+          type: new GraphQLList(Comment),
+          args: {
           id: {
             type: GraphQLInt
           },
@@ -429,12 +418,15 @@ const Query = new GraphQLObjectType({
           },
           content: {
             type: GraphQLString
-          }
+          },
+          limit: {
+            type: GraphQLInt
+          },
         },
-        resolve (root, args) {
-          var comment = new CommentClass()
+        resolve(root, args) {
+          var comment = new CommentClass();
           return comment.comments(args).then(Comment => {
-            return Comment
+            return Comment;
           });
         }
       },
@@ -634,20 +626,6 @@ const Mutation = new GraphQLObjectType({
           var comment = new CommentClass()
           comment.updateComment(args).then(activity => {
             return activity[0];
-          });
-        }
-      },
-      deleteComment: {
-        type: GraphQLString,
-        args: {
-          id: {
-            type: new GraphQLNonNull(GraphQLInt)
-          }
-        },
-        resolve (root, args) {
-          var comment = new CommentClass()
-          comment.deleteComment(args).then(numberOfDeletedItems => {
-            return 'Number of deleted activity: ' + numberOfDeletedItems;
           });
         }
       },

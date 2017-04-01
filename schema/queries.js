@@ -7,22 +7,36 @@ import {
   GraphQLNonNull
 } from 'graphql';
 
+import { Comment } from '../generated/type_definitions'
+
 module.exports.Query = {
   name: 'Query',
   description: 'Root query object',
   fields: () => {
     return { 
-      tax: {
-        type: GraphQLInt,
+      comments: {
+        type: new GraphQLList(Comment),
         args: {
-          cost: { type: GraphQLInt }
+          id: {
+            type: GraphQLInt
+          },
+          card_id: {
+            type: GraphQLInt
+          },
+          content: {
+            type: GraphQLString
+          },
+          limit: {
+            type: GraphQLInt
+          }
         },
         resolve (root, args) {
-          return args.cost * 1.15
+          var comment = new CommentClass()
+          return comment.comments(args).then(Comment => {
+            return Comment
+          });
         }
-      },
-      users: {
-      },     
+      },   
     }
   }
 };

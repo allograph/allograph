@@ -40,20 +40,6 @@ const Mutation = new GraphQLObjectType({
           });
         }
       },
-      deleteComment: {
-        type: GraphQLString,
-        args: {
-          id: {
-            type: new GraphQLNonNull(GraphQLInt)
-          }
-        },
-        resolve (root, args) {
-          var comment = new CommentClass()
-          comment.deleteComment(args).then(numberOfDeletedItems => {
-            return 'Number of deleted activity: ' + numberOfDeletedItems;
-          });
-        }
-      },
       addLabel: {
         type: Label,
         args: {

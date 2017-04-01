@@ -12,6 +12,7 @@ module.exports.Mutation = {
   description: 'Functions to set stuff',
   fields () {
     return {
+      deleteComment: {}
     }      
   }
 }

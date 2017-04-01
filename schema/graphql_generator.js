@@ -8,6 +8,7 @@ var fs = require('fs'),
 
 import {
   GraphQLObjectType,
+  TypeInfo,
   GraphQLString,
   GraphQLInt,
   GraphQLSchema,
@@ -18,10 +19,11 @@ import {
 GraphqlGenerator.prototype.printMetadata = function(dbMetadata) {
   writeGraphQLSuperModels(dbMetadata);
   writeModelFiles(dbMetadata);
+  writeTypesFile(dbMetadata);
   writeMutationsFile(dbMetadata);
   writeQueriesFile(dbMetadata);
-  writeTypesFile(dbMetadata);
   writeSchemaDefinition(dbMetadata);
+  process.exit()
 }
 
 // Starts here for model file generation
@@ -227,8 +229,26 @@ var writeTypesFile = function(dbMetadata) {
   };
 
   data += '\n\n'
-  fs.writeFileSync('./generated/type_definitions.js', data, 'utf-8')
+  fs.writeFileSync('./generated/schema.js', data, 'utf-8');
+  addTypeDefinitionExportStatement(dbMetadata);
 }
+
+var addTypeDefinitionExportStatement = function(dbMetadata) {
+  var schema = fs.readFileSync('./generated/schema.js', 'utf-8')
+  var exportStatement = `\n\nexport {`
+
+  for (var tableName in dbMetadata.tables) {
+    var singularLowercaseTableName = lingo.en.singularize(tableName);
+    var singularCapitalizedTableName = lingo.capitalize(singularLowercaseTableName)
+    exportStatement += ` ${singularCapitalizedTableName},`
+  }
+
+  exportStatement = exportStatement.slice(0, -1);
+  schema = schema + exportStatement + " }"
+
+  fs.writeFileSync('./generated/type_definitions.js', schema, 'utf-8');
+}
+
 // Translating to GraphQL Type ends here
 
 // Write Queries Begins
@@ -244,10 +264,18 @@ var writeQueriesFile = function(dbMetadata) {
 
   for (var customQuery in customQueries) {
     if (Object.keys(customQueries[customQuery]).length === 0) { continue; }
+      var listType = (customQueries[customQuery].type)
 
-    newData += `\n      ${customQuery}: {
-        type: ${h.toGraphQLTypeFromJSType(customQueries[customQuery].type)},
-        args: {`
+    if(listType.toString().match(/\[(\w+)\]/)) {
+      var baseGraphQLObjectType = listType.toString().replace(/[\[\]]/g, "")
+      newData += `\n      ${customQuery}: {
+          type: new GraphQLList(${baseGraphQLObjectType}),
+          args: {`
+    } else {
+      newData += `\n      ${customQuery}: {
+          type: ${h.toGraphQLTypeFromJSType(customQueries[customQuery].type)},
+          args: {`
+    }
 
     for (var arg in customQueries[customQuery].args) {
       newData += `\n          ${arg}: {
@@ -261,8 +289,9 @@ var writeQueriesFile = function(dbMetadata) {
 
   for (var property in dbMetadata.tables) {
     var tableName = h.singularCapitalizedTableName(property)
+    var pluralTableName = lingo.en.pluralize(lingo.en.singularize(property.toLowerCase())) // Account for both singular and plural table names.
 
-    if (Object.keys(customQueries).includes(property)) { continue; }
+    if (Object.keys(customQueries).includes(pluralTableName)) { continue; }
 
     newData += queryTableHeader(tableName)
 
@@ -544,7 +573,9 @@ var importModels = function(dbMetadata) {
 
 var writeSchemaDefinition = function(dbMetadata) {
   var schema = importModels(dbMetadata);
-  schema += fs.readFileSync('./generated/type_definitions.js', 'utf-8');
+  // Type definitions already written to schema file b/c needed to add export
+  // statement to type definition file before generating queries & mutations  
+  schema += fs.readFileSync('./generated/schema.js', 'utf-8');
   schema += fs.readFileSync('./generated/queries.js', 'utf-8');
   schema += fs.readFileSync('./generated/mutations.js', 'utf-8');
 
