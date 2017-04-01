@@ -14,13 +14,13 @@
 |   ├── mutations.js
 |   ├── queries.js
 |   ├── schema.js
+|   ├── schema.json
 |   └── type_definition.js
 ├── migrations
 ├── schema
 |   ├── graphql_generator.js
 |   ├── mutations.js         # define your mutations in this file
 |   ├── queries.js           # define your queries in this file
-|   ├── schema.json
 |   └── helper.js
 ├── test
 ├── index.js
