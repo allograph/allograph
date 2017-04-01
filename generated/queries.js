@@ -3,6 +3,17 @@ const Query = new GraphQLObjectType({
   description: 'Root query object',
   fields: () => {
     return {
+      tax: {
+        type: GraphQLInt,
+        args: {
+          cost: {
+            type: GraphQLInt
+          },
+        },
+        resolve(root, args) {
+          return args.cost * 1.15;
+        }
+      },
       comments: {
         type: new GraphQLList(Comment),
         args: {
@@ -17,8 +28,10 @@ const Query = new GraphQLObjectType({
           }
         },
         resolve (root, args) {
-          var comment = new models.Comment()
-          return comment.comments(args);
+          var comment = new CommentClass()
+          return comment.comments(args).then(Comment => {
+            return Comment
+          });
         }
       },
       labels: {
@@ -35,8 +48,10 @@ const Query = new GraphQLObjectType({
           }
         },
         resolve (root, args) {
-          var label = new models.Label()
-          return label.labels(args);
+          var label = new LabelClass()
+          return label.labels(args).then(Label => {
+            return Label
+          });
         }
       },
       activities: {
@@ -65,11 +80,19 @@ const Query = new GraphQLObjectType({
           },
           actionable_item: {
             type: GraphQLString
+          },
+          due_date: {
+            type: GraphQLString
+          },
+          date: {
+            type: GraphQLString
           }
         },
         resolve (root, args) {
-          var activity = new models.Activity()
-          return activity.activities(args);
+          var activity = new ActivityClass()
+          return activity.activities(args).then(Activity => {
+            return Activity
+          });
         }
       },
       card_labels: {
@@ -86,8 +109,10 @@ const Query = new GraphQLObjectType({
           }
         },
         resolve (root, args) {
-          var card_label = new models.Card_label()
-          return card_label.card_labels(args);
+          var card_label = new Card_labelClass()
+          return card_label.card_labels(args).then(Card_label => {
+            return Card_label
+          });
         }
       },
       lists: {
@@ -104,8 +129,10 @@ const Query = new GraphQLObjectType({
           }
         },
         resolve (root, args) {
-          var list = new models.List()
-          return list.lists(args);
+          var list = new ListClass()
+          return list.lists(args).then(List => {
+            return List
+          });
         }
       },
       notifications: {
@@ -122,8 +149,10 @@ const Query = new GraphQLObjectType({
           }
         },
         resolve (root, args) {
-          var notification = new models.Notification()
-          return notification.notifications(args);
+          var notification = new NotificationClass()
+          return notification.notifications(args).then(Notification => {
+            return Notification
+          });
         }
       },
       cards: {
@@ -141,6 +170,9 @@ const Query = new GraphQLObjectType({
           description: {
             type: GraphQLString
           },
+          due_date: {
+            type: GraphQLString
+          },
           position: {
             type: GraphQLInt
           },
@@ -149,8 +181,10 @@ const Query = new GraphQLObjectType({
           }
         },
         resolve (root, args) {
-          var card = new models.Card()
-          return card.cards(args);
+          var card = new CardClass()
+          return card.cards(args).then(Card => {
+            return Card
+          });
         }
       },
     };
