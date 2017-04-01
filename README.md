@@ -3,25 +3,29 @@
 .
 |
 ├── build
-|   └── allo.js           # cli file
-├── migrations
-├── server.js
-├── index.js
+|   └── allo.js              # you can check commands here
 ├── database
 |   ├── connection.js
-|   ├── migration_generator.js
-|   └── data.js
+|   ├── data.js
+|   └── migration_generator.js
+├── examples
+├── generated
+|   ├── model.js
+|   ├── mutations.js
+|   ├── queries.js
+|   ├── schema.js
+|   └── type_definition.js
+├── migrations
 ├── schema
-|   ├── schema.graphql    # generated from schema_translator.js
-|   ├── schema.json       # generated from data.js
-|   └── users
-|       ├── users.js      # implementation of graphql schema in javascript
-|       └── users.graphql # graphql schema
-├── bookshelf
-|   ├── models 
-|   |   └── users.js
-|   └── bookshelf.js
+|   ├── graphql_generator.js
+|   ├── mutations.js         # define your mutations in this file
+|   ├── queries.js           # define your queries in this file
+|   ├── schema.json
+|   └── helper.js
 ├── test
+├── index.js
+├── server.js
+├── knexfile.js
 ├── package.json
 ├── .gitignore
 ├── .babelrc
