@@ -40,13 +40,12 @@ var knex = require('../database/connection');`
 
 var modelData = function(tableInfo) {
   var tableName = tableInfo.name
-  var pluralTableName = lingo.en.pluralize(tableName)
   var singularTableName = lingo.en.singularize(tableName)
   var singularCapitalizedTableName = lingo.capitalize(singularTableName)
   var validArgs = toArgs(tableInfo.fields);
 
   var data = `\n\nexport class ${singularCapitalizedTableName} {
-  ${pluralTableName}(args) {
+  ${tableName}(args) {
     return knex('${tableName}').where(args).then(${tableName} => {
       return ${tableName}
     });
@@ -132,7 +131,8 @@ var graphQLData = function() {
   GraphQLNonNull
 } from 'graphql';
 
-var knex = require('../database/connection')`
+var knex = require('../database/connection');
+var jwt = require('jsonwebtoken');`
 }
 
 var objectDescription = function(tableName, description) {
@@ -164,7 +164,7 @@ var foreignKeyColumnData = function(column, tableName, pk_column, fk_column, psq
 
   return '\n      ' + column + `: {
         type: ` + psqlTypeToGraphQLType(psqlType) + `,
-        resolve (` + lowercaseTableName + `) {
+        resolve (` + lowercaseTableName + `, args, context) {
           return knex('${column}').where(` + args + `).then(${column} => {;
             return ` + returnValue + `;
           });
@@ -181,7 +181,7 @@ var columnData = function(column, table, psqlType, is_nullable) {
   }
 
   return '\n      ' + column + `: {` + typeData +
-`\n        resolve (` + lingo.en.singularize(table) + `) {
+`\n        resolve (` + lingo.en.singularize(table) + `, args, context) {
           return ` + lingo.en.singularize(table) + '.' + column + `;
         }
       },`
@@ -267,7 +267,7 @@ var writeQueriesFile = function(dbMetadata) {
             'character varying': 'GraphQLString',
             'integer': 'GraphQLInt',
             'boolean': 'GraphQLBoolean',
-            'text': 'GraphQLString'                  
+            'text': 'GraphQLString'
           };
 
       if (typeMap[psqlType]) {
@@ -326,7 +326,7 @@ var queryResolveFunction = function(tableName) {
   var pluralizedLowercaseTableName = lingo.en.pluralize(lowercaseTableName)
   return `
         },
-        resolve (root, args) {
+        resolve (root, args, context) {
           var ${lowercaseTableName} = new models.${tableName}()
           return ${lowercaseTableName}.${pluralizedLowercaseTableName}(args);
         }
@@ -349,9 +349,9 @@ var writeMutationsFile = function(dbMetadata) {
 
   for (var customMutation in customMutations) {
     if (Object.keys(customMutations[customMutation]).length === 0) { continue; }
-  
+
     newData += `\n      ${customMutation}: {
-        type: ${h.toGraphQLTypeFromJSType(customMutations[customMutation].type)}, 
+        type: ${h.toGraphQLTypeFromJSType(customMutations[customMutation].type)},
         args: {`
 
     for (var arg in customMutations[customMutation].args) {
@@ -359,9 +359,14 @@ var writeMutationsFile = function(dbMetadata) {
             type: ${h.toGraphQLTypeFromJSType(customMutations[customMutation].args[arg].type)}\n          },`
     }
 
-    newData += `\n        },\n        ` 
+    newData += `\n        },\n        `
     newData += customMutations[customMutation].resolve.toString()
     newData += `\n      },`
+  }
+
+  // if there is table called 'users', add default login mutation
+  if (Object.keys(dbMetadata.tables).includes("users")) {
+    newData += mutationLogin(dbMetadata.tables["users"]);
   }
 
   for (var property in dbMetadata.tables) {
@@ -388,6 +393,45 @@ var mutationHeader = function() {
   description: 'Functions to set stuff',
   fields () {
     return {`
+}
+
+var mutationLogin = function(tableData) {
+  var newData = `\n      login: {
+        type: GraphQLString,
+        args: {`;
+
+  for (var column in tableData.fields) {
+    var psqlType = tableData.fields[column].data_type,
+        is_nullable = tableData.fields[column].is_nullable;
+
+    if (!is_nullable && validLoginType(psqlType) && column !== 'id') {
+      var graphQLType = psqlTypeToGraphQLType(psqlType);
+      newData += `\n          ${column}: {
+            type: new GraphQLNonNull(${graphQLType})
+          },`;
+    }
+  }
+
+  newData = newData.slice(0, -1);
+  newData += `
+        },
+        resolve (root, args, context) {
+          var user = new models.User();
+          return user.users(args).then(user => {
+            return jwt.sign({ user: user[0] }, 'allograph-secret' );
+          });
+        }
+      },`
+  return newData
+}
+
+var validLoginType = function(psqlType) {
+  var typeMap = {
+        'character varying': 'GraphQLString',
+        'integer': 'GraphQLInt',
+        'text': 'GraphQLString'
+      };
+  return !!typeMap[psqlType];
 }
 
 var mutationAdd = function(pluralLowercaseTableName, tableData) {
@@ -426,7 +470,7 @@ var mutationAdd = function(pluralLowercaseTableName, tableData) {
   newData = newData.slice(0, -1);
   newData += `
         },
-        resolve (root, args) {
+        resolve (root, args, context) {
           var ${singularLowercaseTableName} = new models.${singularCapitalizedTableName}()
           return ${singularLowercaseTableName}.create${singularCapitalizedTableName}(args);
         }
@@ -459,7 +503,7 @@ var mutationUpdate = function(pluralLowercaseTableName, tableData) {
   }
   newData = newData.slice(0, -1);
   newData += `\n        },
-        resolve (root, args) {
+        resolve (root, args, context) {
           var ${singularLowercaseTableName} = new models.${singularCapitalizedTableName}()
           return ${singularLowercaseTableName}.update${singularCapitalizedTableName}(args);
         }
@@ -493,7 +537,7 @@ var mutationDelete = function(pluralLowercaseTableName, tableData) {
   }
   newData = newData.slice(0, -1);
   newData += `\n        },
-        resolve (root, args) {
+        resolve (root, args, context) {
           var ${singularLowercaseTableName} = new models.${singularCapitalizedTableName}()
           return ${singularLowercaseTableName}.delete${singularCapitalizedTableName}(args);
         }
@@ -507,7 +551,7 @@ var validForMutation = function(psqlType) {
         'character varying': 'GraphQLString',
         'integer': 'GraphQLInt',
         'boolean': 'GraphQLBoolean',
-        'text': 'GraphQLString'        
+        'text': 'GraphQLString'
       };
   return !!typeMap[psqlType];
 }
@@ -520,7 +564,7 @@ var writeSchemaDefinition = function() {
   schema += fs.readFileSync('./generated/queries.js', 'utf-8');
   schema += fs.readFileSync('./generated/mutations.js', 'utf-8');
 
-  schema += `exports.Schema = new GraphQLSchema({
+  schema += '\n\n' + `exports.Schema = new GraphQLSchema({
   query: Query,
   mutation: Mutation
 });`
