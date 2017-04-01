@@ -365,8 +365,13 @@ var writeMutationsFile = function(dbMetadata) {
   }
 
   // if there is table called 'users', add default login mutation
-  if (Object.keys(dbMetadata.tables).includes("users")) {
+  if (Object.keys(dbMetadata.tables).includes("users") &&
+    Object.keys(dbMetadata.tables["users"].fields).includes("email") &&
+    Object.keys(dbMetadata.tables["users"].fields).includes("password")) {
     newData += mutationLogin(dbMetadata.tables["users"]);
+  } else {
+    console.log("You don't have a table 'users' with columns 'password' and 'email',")
+    console.log("so there won't be a auto generated default login mutation.")
   }
 
   for (var property in dbMetadata.tables) {
@@ -401,10 +406,9 @@ var mutationLogin = function(tableData) {
         args: {`;
 
   for (var column in tableData.fields) {
-    var psqlType = tableData.fields[column].data_type,
-        is_nullable = tableData.fields[column].is_nullable;
+    var psqlType = tableData.fields[column].data_type;
 
-    if (!is_nullable && validLoginType(psqlType) && column !== 'id') {
+    if (validLoginType(psqlType) && (column === 'email' || column === 'password')) {
       var graphQLType = psqlTypeToGraphQLType(psqlType);
       newData += `\n          ${column}: {
             type: new GraphQLNonNull(${graphQLType})
