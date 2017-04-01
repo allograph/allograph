@@ -3,6 +3,17 @@ const Query = new GraphQLObjectType({
   description: 'Root query object',
   fields: () => {
     return {
+      tax: {
+        type: GraphQLInt,
+        args: {
+          cost: {
+            type: GraphQLInt
+          },
+        },
+        resolve(root, args) {
+          return args.cost * 1.15;
+        }
+      },
       comments: {
         type: new GraphQLList(Comment),
         args: {
@@ -17,7 +28,7 @@ const Query = new GraphQLObjectType({
           }
         },
         resolve (root, args) {
-          var comment = new models.Comment()
+          var comment = new CommentClass()
           return comment.comments(args).then(Comment => {
             return Comment
           });
@@ -37,7 +48,7 @@ const Query = new GraphQLObjectType({
           }
         },
         resolve (root, args) {
-          var label = new models.Label()
+          var label = new LabelClass()
           return label.labels(args).then(Label => {
             return Label
           });
@@ -78,7 +89,7 @@ const Query = new GraphQLObjectType({
           }
         },
         resolve (root, args) {
-          var activity = new models.Activity()
+          var activity = new ActivityClass()
           return activity.activities(args).then(Activity => {
             return Activity
           });
@@ -98,7 +109,7 @@ const Query = new GraphQLObjectType({
           }
         },
         resolve (root, args) {
-          var card_label = new models.Card_label()
+          var card_label = new Card_labelClass()
           return card_label.card_labels(args).then(Card_label => {
             return Card_label
           });
@@ -118,7 +129,7 @@ const Query = new GraphQLObjectType({
           }
         },
         resolve (root, args) {
-          var list = new models.List()
+          var list = new ListClass()
           return list.lists(args).then(List => {
             return List
           });
@@ -138,7 +149,7 @@ const Query = new GraphQLObjectType({
           }
         },
         resolve (root, args) {
-          var notification = new models.Notification()
+          var notification = new NotificationClass()
           return notification.notifications(args).then(Notification => {
             return Notification
           });
@@ -170,7 +181,7 @@ const Query = new GraphQLObjectType({
           }
         },
         resolve (root, args) {
-          var card = new models.Card()
+          var card = new CardClass()
           return card.cards(args).then(Card => {
             return Card
           });

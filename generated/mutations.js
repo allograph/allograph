@@ -14,7 +14,7 @@ const Mutation = new GraphQLObjectType({
           }
         },
         resolve (root, args) {
-          var comment = new models.Comment()
+          var comment = new CommentClass()
           comment.createComment(args).then(comment => {
             return comment[0];
           });
@@ -34,7 +34,7 @@ const Mutation = new GraphQLObjectType({
           }
         },
         resolve (root, args) {
-          var comment = new models.Comment()
+          var comment = new CommentClass()
           comment.updateComment(args).then(activity => {
             return activity[0];
           });
@@ -48,7 +48,7 @@ const Mutation = new GraphQLObjectType({
           }
         },
         resolve (root, args) {
-          var comment = new models.Comment()
+          var comment = new CommentClass()
           comment.deleteComment(args).then(numberOfDeletedItems => {
             return 'Number of deleted activity: ' + numberOfDeletedItems;
           });
@@ -65,7 +65,7 @@ const Mutation = new GraphQLObjectType({
           }
         },
         resolve (root, args) {
-          var label = new models.Label()
+          var label = new LabelClass()
           label.createLabel(args).then(label => {
             return label[0];
           });
@@ -85,7 +85,7 @@ const Mutation = new GraphQLObjectType({
           }
         },
         resolve (root, args) {
-          var label = new models.Label()
+          var label = new LabelClass()
           label.updateLabel(args).then(activity => {
             return activity[0];
           });
@@ -99,7 +99,7 @@ const Mutation = new GraphQLObjectType({
           }
         },
         resolve (root, args) {
-          var label = new models.Label()
+          var label = new LabelClass()
           label.deleteLabel(args).then(numberOfDeletedItems => {
             return 'Number of deleted activity: ' + numberOfDeletedItems;
           });
@@ -137,7 +137,7 @@ const Mutation = new GraphQLObjectType({
           }
         },
         resolve (root, args) {
-          var activity = new models.Activity()
+          var activity = new ActivityClass()
           activity.createActivity(args).then(activity => {
             return activity[0];
           });
@@ -178,7 +178,7 @@ const Mutation = new GraphQLObjectType({
           }
         },
         resolve (root, args) {
-          var activity = new models.Activity()
+          var activity = new ActivityClass()
           activity.updateActivity(args).then(activity => {
             return activity[0];
           });
@@ -192,7 +192,7 @@ const Mutation = new GraphQLObjectType({
           }
         },
         resolve (root, args) {
-          var activity = new models.Activity()
+          var activity = new ActivityClass()
           activity.deleteActivity(args).then(numberOfDeletedItems => {
             return 'Number of deleted activity: ' + numberOfDeletedItems;
           });
@@ -209,7 +209,7 @@ const Mutation = new GraphQLObjectType({
           }
         },
         resolve (root, args) {
-          var card_label = new models.Card_label()
+          var card_label = new Card_labelClass()
           card_label.createCard_label(args).then(card_label => {
             return card_label[0];
           });
@@ -229,7 +229,7 @@ const Mutation = new GraphQLObjectType({
           }
         },
         resolve (root, args) {
-          var card_label = new models.Card_label()
+          var card_label = new Card_labelClass()
           card_label.updateCard_label(args).then(activity => {
             return activity[0];
           });
@@ -243,7 +243,7 @@ const Mutation = new GraphQLObjectType({
           }
         },
         resolve (root, args) {
-          var card_label = new models.Card_label()
+          var card_label = new Card_labelClass()
           card_label.deleteCard_label(args).then(numberOfDeletedItems => {
             return 'Number of deleted activity: ' + numberOfDeletedItems;
           });
@@ -260,7 +260,7 @@ const Mutation = new GraphQLObjectType({
           }
         },
         resolve (root, args) {
-          var list = new models.List()
+          var list = new ListClass()
           list.createList(args).then(list => {
             return list[0];
           });
@@ -280,7 +280,7 @@ const Mutation = new GraphQLObjectType({
           }
         },
         resolve (root, args) {
-          var list = new models.List()
+          var list = new ListClass()
           list.updateList(args).then(activity => {
             return activity[0];
           });
@@ -294,7 +294,7 @@ const Mutation = new GraphQLObjectType({
           }
         },
         resolve (root, args) {
-          var list = new models.List()
+          var list = new ListClass()
           list.deleteList(args).then(numberOfDeletedItems => {
             return 'Number of deleted activity: ' + numberOfDeletedItems;
           });
@@ -311,7 +311,7 @@ const Mutation = new GraphQLObjectType({
           }
         },
         resolve (root, args) {
-          var notification = new models.Notification()
+          var notification = new NotificationClass()
           notification.createNotification(args).then(notification => {
             return notification[0];
           });
@@ -331,7 +331,7 @@ const Mutation = new GraphQLObjectType({
           }
         },
         resolve (root, args) {
-          var notification = new models.Notification()
+          var notification = new NotificationClass()
           notification.updateNotification(args).then(activity => {
             return activity[0];
           });
@@ -345,7 +345,7 @@ const Mutation = new GraphQLObjectType({
           }
         },
         resolve (root, args) {
-          var notification = new models.Notification()
+          var notification = new NotificationClass()
           notification.deleteNotification(args).then(numberOfDeletedItems => {
             return 'Number of deleted activity: ' + numberOfDeletedItems;
           });
@@ -374,7 +374,7 @@ const Mutation = new GraphQLObjectType({
           }
         },
         resolve (root, args) {
-          var card = new models.Card()
+          var card = new CardClass()
           card.createCard(args).then(card => {
             return card[0];
           });
@@ -406,7 +406,7 @@ const Mutation = new GraphQLObjectType({
           }
         },
         resolve (root, args) {
-          var card = new models.Card()
+          var card = new CardClass()
           card.updateCard(args).then(activity => {
             return activity[0];
           });
@@ -420,7 +420,7 @@ const Mutation = new GraphQLObjectType({
           }
         },
         resolve (root, args) {
-          var card = new models.Card()
+          var card = new CardClass()
           card.deleteCard(args).then(numberOfDeletedItems => {
             return 'Number of deleted activity: ' + numberOfDeletedItems;
           });
