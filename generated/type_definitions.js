@@ -393,3 +393,6 @@ const Card = new GraphQLObjectType({
   }
 });
 
+
+
+export { Comment, Label, Activity, Card_label, List, Notification, Card }

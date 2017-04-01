@@ -3,20 +3,9 @@ const Query = new GraphQLObjectType({
   description: 'Root query object',
   fields: () => {
     return {
-      tax: {
-        type: GraphQLInt,
-        args: {
-          cost: {
-            type: GraphQLInt
-          },
-        },
-        resolve(root, args) {
-          return args.cost * 1.15;
-        }
-      },
       comments: {
-        type: new GraphQLList(Comment),
-        args: {
+          type: new GraphQLList(Comment),
+          args: {
           id: {
             type: GraphQLInt
           },
@@ -25,12 +14,15 @@ const Query = new GraphQLObjectType({
           },
           content: {
             type: GraphQLString
-          }
+          },
+          limit: {
+            type: GraphQLInt
+          },
         },
-        resolve (root, args) {
-          var comment = new CommentClass()
+        resolve(root, args) {
+          var comment = new CommentClass();
           return comment.comments(args).then(Comment => {
-            return Comment
+            return Comment;
           });
         }
       },
