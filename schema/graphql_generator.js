@@ -40,16 +40,14 @@ var knex = require('../database/connection');`
 
 var modelData = function(tableInfo) {
   var tableName = tableInfo.name
-  var pluralTableName = lingo.en.pluralize(tableName)
+  var pluralTableName = lingo.en.pluralize(lingo.en.singularize(tableName))
   var singularTableName = lingo.en.singularize(tableName)
   var singularCapitalizedTableName = lingo.capitalize(singularTableName)
   var validArgs = toArgs(tableInfo.fields);
 
   var data = `\n\nexport class ${singularCapitalizedTableName} {
   ${pluralTableName}(args) {
-    return knex('${tableName}').where(args).then(${tableName} => {
-      return ${tableName}
-    });
+    return knex('${tableName}').where(args);
   }
 
   create${singularCapitalizedTableName}(args) {
@@ -58,9 +56,7 @@ var modelData = function(tableInfo) {
   data += validArgs
 
   data += `\n    }).into('${tableName}').then(id => {
-      return knex('${tableName}').where({ id: id[0] }).then(${singularTableName} => {
-        return ${singularTableName}[0];
-      });
+      return knex('${tableName}').where({ id: id[0] });
     });
   }
 
@@ -70,16 +66,12 @@ var modelData = function(tableInfo) {
   data += validArgs
 
   data += `\n    }).then(id => {
-      return knex('${tableName}').where({ id: id[0] }).then(${singularTableName} => {
-        return ${singularTableName}[0];
-      });
+      return knex('${tableName}').where({ id: id[0] });
     });
   }
 
-  delete${singularCapitalizedTableName}(id) {
-    return knex('${tableName}').where({ id: id }).del().then(numberOfDeletedItems => {
-      return 'Number of deleted ${tableName}: ' + numberOfDeletedItems;
-    });
+  delete${singularCapitalizedTableName}(args) {
+    return knex('${tableName}').where({ id: args.id }).del()
   }
 }`
 
@@ -94,13 +86,6 @@ var toArgs = function(fields) {
     if (field != 'id') {
       if (validArgsType(type)) {
         args += `\n      ${field}: args.${field},`;
-      } else if (!validArgsType(type)) {
-        var list = type.match(/\[(\w+)\]/),
-            fk_field = fields[field].fk_column;
-
-        if (!list) {
-          args += `\n      ${fk_field}: args.${fk_field},`;
-        }
       }
     }
   }
@@ -112,7 +97,9 @@ var validArgsType = function(type) {
   var typeMap = {
           'character varying': 'String',
           'integer': 'Int',
-          'boolean': 'Boolean'
+          'text': 'String',
+          'boolean': 'Boolean',
+          'timestamp with time zone': 'String'
         };
 
   return typeMap[type]
@@ -267,7 +254,8 @@ var writeQueriesFile = function(dbMetadata) {
             'character varying': 'GraphQLString',
             'integer': 'GraphQLInt',
             'boolean': 'GraphQLBoolean',
-            'text': 'GraphQLString'                  
+            'text': 'GraphQLString',
+            'timestamp with time zone': 'GraphQLString'
           };
 
       if (typeMap[psqlType]) {
@@ -307,7 +295,8 @@ var psqlTypeToGraphQLType = function(psqlType) {
         'character varying': 'GraphQLString',
         'integer': 'GraphQLInt',
         'boolean': 'GraphQLBoolean',
-        'text': 'GraphQLString'
+        'text': 'GraphQLString',
+        'timestamp with time zone': 'GraphQLString'        
       }
 
   if (listType) {
@@ -328,7 +317,9 @@ var queryResolveFunction = function(tableName) {
         },
         resolve (root, args) {
           var ${lowercaseTableName} = new models.${tableName}()
-          return ${lowercaseTableName}.${pluralizedLowercaseTableName}(args);
+          return ${lowercaseTableName}.${pluralizedLowercaseTableName}(args).then(${tableName} => {
+            return ${tableName}
+          });
         }
       },`
 }
@@ -428,7 +419,9 @@ var mutationAdd = function(pluralLowercaseTableName, tableData) {
         },
         resolve (root, args) {
           var ${singularLowercaseTableName} = new models.${singularCapitalizedTableName}()
-          return ${singularLowercaseTableName}.create${singularCapitalizedTableName}(args);
+          ${singularLowercaseTableName}.create${singularCapitalizedTableName}(args).then(${singularLowercaseTableName} => {
+            return ${singularLowercaseTableName}[0];
+          });
         }
       },`
   return newData
@@ -461,7 +454,9 @@ var mutationUpdate = function(pluralLowercaseTableName, tableData) {
   newData += `\n        },
         resolve (root, args) {
           var ${singularLowercaseTableName} = new models.${singularCapitalizedTableName}()
-          return ${singularLowercaseTableName}.update${singularCapitalizedTableName}(args);
+          ${singularLowercaseTableName}.update${singularCapitalizedTableName}(args).then(activity => {
+            return activity[0];
+          });
         }
       },`
 
@@ -495,7 +490,9 @@ var mutationDelete = function(pluralLowercaseTableName, tableData) {
   newData += `\n        },
         resolve (root, args) {
           var ${singularLowercaseTableName} = new models.${singularCapitalizedTableName}()
-          return ${singularLowercaseTableName}.delete${singularCapitalizedTableName}(args);
+          ${singularLowercaseTableName}.delete${singularCapitalizedTableName}(args).then(numberOfDeletedItems => {
+            return 'Number of deleted activity: ' + numberOfDeletedItems;
+          });
         }
       },`
 
@@ -507,7 +504,8 @@ var validForMutation = function(psqlType) {
         'character varying': 'GraphQLString',
         'integer': 'GraphQLInt',
         'boolean': 'GraphQLBoolean',
-        'text': 'GraphQLString'        
+        'text': 'GraphQLString',
+        'timestamp with time zone': 'GraphQLString'                
       };
   return !!typeMap[psqlType];
 }

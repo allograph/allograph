@@ -3,47 +3,35 @@ var knex = require('../database/connection');
 
 export class Comment {
   comments(args) {
-    return knex('comment').where(args).then(comment => {
-      return comment
-    });
+    return knex('comment').where(args);
   }
 
   createComment(args) {
     return knex.returning('id').insert({
       card_id: args.card_id,
-      undefined: args.undefined,
-      card_id: args.card_id,
+      content: args.content,
     }).into('comment').then(id => {
-      return knex('comment').where({ id: id[0] }).then(comment => {
-        return comment[0];
-      });
+      return knex('comment').where({ id: id[0] });
     });
   }
 
   updateComment(args) {
     return knex('comment').where({ id: args.id }).returning('id').update({
       card_id: args.card_id,
-      undefined: args.undefined,
-      card_id: args.card_id,
+      content: args.content,
     }).then(id => {
-      return knex('comment').where({ id: id[0] }).then(comment => {
-        return comment[0];
-      });
+      return knex('comment').where({ id: id[0] });
     });
   }
 
-  deleteComment(id) {
-    return knex('comment').where({ id: id }).del().then(numberOfDeletedItems => {
-      return 'Number of deleted comment: ' + numberOfDeletedItems;
-    });
+  deleteComment(args) {
+    return knex('comment').where({ id: args.id }).del()
   }
 }
 
 export class Label {
   labels(args) {
-    return knex('label').where(args).then(label => {
-      return label
-    });
+    return knex('label').where(args);
   }
 
   createLabel(args) {
@@ -51,9 +39,7 @@ export class Label {
       name: args.name,
       color: args.color,
     }).into('label').then(id => {
-      return knex('label').where({ id: id[0] }).then(label => {
-        return label[0];
-      });
+      return knex('label').where({ id: id[0] });
     });
   }
 
@@ -62,24 +48,18 @@ export class Label {
       name: args.name,
       color: args.color,
     }).then(id => {
-      return knex('label').where({ id: id[0] }).then(label => {
-        return label[0];
-      });
+      return knex('label').where({ id: id[0] });
     });
   }
 
-  deleteLabel(id) {
-    return knex('label').where({ id: id }).del().then(numberOfDeletedItems => {
-      return 'Number of deleted label: ' + numberOfDeletedItems;
-    });
+  deleteLabel(args) {
+    return knex('label').where({ id: args.id }).del()
   }
 }
 
 export class Activity {
   activities(args) {
-    return knex('activity').where(args).then(activity => {
-      return activity
-    });
+    return knex('activity').where(args);
   }
 
   createActivity(args) {
@@ -91,15 +71,10 @@ export class Activity {
       list_id_dest: args.list_id_dest,
       action: args.action,
       actionable_item: args.actionable_item,
-      undefined: args.undefined,
-      undefined: args.undefined,
-      card_id_source: args.card_id_source,
-      comment_id: args.comment_id,
-      list_id_source: args.list_id_source,
+      due_date: args.due_date,
+      date: args.date,
     }).into('activity').then(id => {
-      return knex('activity').where({ id: id[0] }).then(activity => {
-        return activity[0];
-      });
+      return knex('activity').where({ id: id[0] });
     });
   }
 
@@ -112,42 +87,29 @@ export class Activity {
       list_id_dest: args.list_id_dest,
       action: args.action,
       actionable_item: args.actionable_item,
-      undefined: args.undefined,
-      undefined: args.undefined,
-      card_id_source: args.card_id_source,
-      comment_id: args.comment_id,
-      list_id_source: args.list_id_source,
+      due_date: args.due_date,
+      date: args.date,
     }).then(id => {
-      return knex('activity').where({ id: id[0] }).then(activity => {
-        return activity[0];
-      });
+      return knex('activity').where({ id: id[0] });
     });
   }
 
-  deleteActivity(id) {
-    return knex('activity').where({ id: id }).del().then(numberOfDeletedItems => {
-      return 'Number of deleted activity: ' + numberOfDeletedItems;
-    });
+  deleteActivity(args) {
+    return knex('activity').where({ id: args.id }).del()
   }
 }
 
 export class Card_label {
   card_labels(args) {
-    return knex('card_label').where(args).then(card_label => {
-      return card_label
-    });
+    return knex('card_label').where(args);
   }
 
   createCard_label(args) {
     return knex.returning('id').insert({
       card_id: args.card_id,
       label_id: args.label_id,
-      card_id: args.card_id,
-      label_id: args.label_id,
     }).into('card_label').then(id => {
-      return knex('card_label').where({ id: id[0] }).then(card_label => {
-        return card_label[0];
-      });
+      return knex('card_label').where({ id: id[0] });
     });
   }
 
@@ -155,27 +117,19 @@ export class Card_label {
     return knex('card_label').where({ id: args.id }).returning('id').update({
       card_id: args.card_id,
       label_id: args.label_id,
-      card_id: args.card_id,
-      label_id: args.label_id,
     }).then(id => {
-      return knex('card_label').where({ id: id[0] }).then(card_label => {
-        return card_label[0];
-      });
+      return knex('card_label').where({ id: id[0] });
     });
   }
 
-  deleteCard_label(id) {
-    return knex('card_label').where({ id: id }).del().then(numberOfDeletedItems => {
-      return 'Number of deleted card_label: ' + numberOfDeletedItems;
-    });
+  deleteCard_label(args) {
+    return knex('card_label').where({ id: args.id }).del()
   }
 }
 
 export class List {
   lists(args) {
-    return knex('list').where(args).then(list => {
-      return list
-    });
+    return knex('list').where(args);
   }
 
   createList(args) {
@@ -183,9 +137,7 @@ export class List {
       name: args.name,
       position: args.position,
     }).into('list').then(id => {
-      return knex('list').where({ id: id[0] }).then(list => {
-        return list[0];
-      });
+      return knex('list').where({ id: id[0] });
     });
   }
 
@@ -194,35 +146,26 @@ export class List {
       name: args.name,
       position: args.position,
     }).then(id => {
-      return knex('list').where({ id: id[0] }).then(list => {
-        return list[0];
-      });
+      return knex('list').where({ id: id[0] });
     });
   }
 
-  deleteList(id) {
-    return knex('list').where({ id: id }).del().then(numberOfDeletedItems => {
-      return 'Number of deleted list: ' + numberOfDeletedItems;
-    });
+  deleteList(args) {
+    return knex('list').where({ id: args.id }).del()
   }
 }
 
 export class Notification {
   notifications(args) {
-    return knex('notification').where(args).then(notification => {
-      return notification
-    });
+    return knex('notification').where(args);
   }
 
   createNotification(args) {
     return knex.returning('id').insert({
       activity_id: args.activity_id,
       seen: args.seen,
-      activity_id: args.activity_id,
     }).into('notification').then(id => {
-      return knex('notification').where({ id: id[0] }).then(notification => {
-        return notification[0];
-      });
+      return knex('notification').where({ id: id[0] });
     });
   }
 
@@ -230,63 +173,48 @@ export class Notification {
     return knex('notification').where({ id: args.id }).returning('id').update({
       activity_id: args.activity_id,
       seen: args.seen,
-      activity_id: args.activity_id,
     }).then(id => {
-      return knex('notification').where({ id: id[0] }).then(notification => {
-        return notification[0];
-      });
+      return knex('notification').where({ id: id[0] });
     });
   }
 
-  deleteNotification(id) {
-    return knex('notification').where({ id: id }).del().then(numberOfDeletedItems => {
-      return 'Number of deleted notification: ' + numberOfDeletedItems;
-    });
+  deleteNotification(args) {
+    return knex('notification').where({ id: args.id }).del()
   }
 }
 
 export class Card {
   cards(args) {
-    return knex('card').where(args).then(card => {
-      return card
-    });
+    return knex('card').where(args);
   }
 
   createCard(args) {
     return knex.returning('id').insert({
       list_id: args.list_id,
-      undefined: args.undefined,
-      undefined: args.undefined,
-      undefined: args.undefined,
+      name: args.name,
+      description: args.description,
+      due_date: args.due_date,
       position: args.position,
       subscriber: args.subscriber,
-      list_id: args.list_id,
     }).into('card').then(id => {
-      return knex('card').where({ id: id[0] }).then(card => {
-        return card[0];
-      });
+      return knex('card').where({ id: id[0] });
     });
   }
 
   updateCard(args) {
     return knex('card').where({ id: args.id }).returning('id').update({
       list_id: args.list_id,
-      undefined: args.undefined,
-      undefined: args.undefined,
-      undefined: args.undefined,
+      name: args.name,
+      description: args.description,
+      due_date: args.due_date,
       position: args.position,
       subscriber: args.subscriber,
-      list_id: args.list_id,
     }).then(id => {
-      return knex('card').where({ id: id[0] }).then(card => {
-        return card[0];
-      });
+      return knex('card').where({ id: id[0] });
     });
   }
 
-  deleteCard(id) {
-    return knex('card').where({ id: id }).del().then(numberOfDeletedItems => {
-      return 'Number of deleted card: ' + numberOfDeletedItems;
-    });
+  deleteCard(args) {
+    return knex('card').where({ id: args.id }).del()
   }
 }

@@ -18,7 +18,9 @@ const Query = new GraphQLObjectType({
         },
         resolve (root, args) {
           var comment = new models.Comment()
-          return comment.comments(args);
+          return comment.comments(args).then(Comment => {
+            return Comment
+          });
         }
       },
       labels: {
@@ -36,7 +38,9 @@ const Query = new GraphQLObjectType({
         },
         resolve (root, args) {
           var label = new models.Label()
-          return label.labels(args);
+          return label.labels(args).then(Label => {
+            return Label
+          });
         }
       },
       activities: {
@@ -65,11 +69,19 @@ const Query = new GraphQLObjectType({
           },
           actionable_item: {
             type: GraphQLString
+          },
+          due_date: {
+            type: GraphQLString
+          },
+          date: {
+            type: GraphQLString
           }
         },
         resolve (root, args) {
           var activity = new models.Activity()
-          return activity.activities(args);
+          return activity.activities(args).then(Activity => {
+            return Activity
+          });
         }
       },
       card_labels: {
@@ -87,7 +99,9 @@ const Query = new GraphQLObjectType({
         },
         resolve (root, args) {
           var card_label = new models.Card_label()
-          return card_label.card_labels(args);
+          return card_label.card_labels(args).then(Card_label => {
+            return Card_label
+          });
         }
       },
       lists: {
@@ -105,7 +119,9 @@ const Query = new GraphQLObjectType({
         },
         resolve (root, args) {
           var list = new models.List()
-          return list.lists(args);
+          return list.lists(args).then(List => {
+            return List
+          });
         }
       },
       notifications: {
@@ -123,7 +139,9 @@ const Query = new GraphQLObjectType({
         },
         resolve (root, args) {
           var notification = new models.Notification()
-          return notification.notifications(args);
+          return notification.notifications(args).then(Notification => {
+            return Notification
+          });
         }
       },
       cards: {
@@ -141,6 +159,9 @@ const Query = new GraphQLObjectType({
           description: {
             type: GraphQLString
           },
+          due_date: {
+            type: GraphQLString
+          },
           position: {
             type: GraphQLInt
           },
@@ -150,7 +171,9 @@ const Query = new GraphQLObjectType({
         },
         resolve (root, args) {
           var card = new models.Card()
-          return card.cards(args);
+          return card.cards(args).then(Card => {
+            return Card
+          });
         }
       },
     };
