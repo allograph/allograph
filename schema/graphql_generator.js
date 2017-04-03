@@ -35,9 +35,9 @@ var writeModelFiles = function(dbMetadata) {
 
     var data = `import { Base${singularCapitalizedTableName} } from '../../generated/models'
 var knex = require('../../database/connection');\n
-export class ${singularCapitalizedTableName} extends Base${singularCapitalizedTableName} {\n\n}`
+export class ${singularCapitalizedTableName} extends Base${singularCapitalizedTableName} {\n\n}`;
 
-    fs.writeFile(`./schema/models/${singularLowercaseTableName}.js`, data, { flag: 'wx' }, function (err) {});
+    fs.writeFileSync(`./schema/models/${singularLowercaseTableName}.js`, data, { flag: 'wx' }, function (err) {});
   }
 }
 
@@ -344,7 +344,7 @@ var psqlTypeToGraphQLType = function(psqlType) {
         'integer': 'GraphQLInt',
         'boolean': 'GraphQLBoolean',
         'text': 'GraphQLString',
-        'timestamp with time zone': 'GraphQLString'        
+        'timestamp with time zone': 'GraphQLString'
       }
 
   if (listType) {
@@ -364,7 +364,7 @@ var queryResolveFunction = function(tableName) {
   return `
         },
         resolve (root, args, context) {
-          var ${lowercaseTableName} = new models.${tableName}()
+          var ${lowercaseTableName} = new ${tableName}Class()
           return ${lowercaseTableName}.${pluralizedLowercaseTableName}(args);
         }
       },`
@@ -457,7 +457,7 @@ var mutationLogin = function(tableData) {
   newData += `
         },
         resolve (root, args, context) {
-          var user = new models.User();
+          var user = new UserClass();
           return user.users(args).then(user => {
             return jwt.sign({ user: user[0] }, 'allograph-secret' );
           });
@@ -512,7 +512,7 @@ var mutationAdd = function(pluralLowercaseTableName, tableData) {
   newData += `
         },
         resolve (root, args, context) {
-          var ${singularLowercaseTableName} = new models.${singularCapitalizedTableName}()
+          var ${singularLowercaseTableName} = new ${singularCapitalizedTableName}Class()
           return ${singularLowercaseTableName}.create${singularCapitalizedTableName}(args);
         }
       },`
@@ -545,7 +545,7 @@ var mutationUpdate = function(pluralLowercaseTableName, tableData) {
   newData = newData.slice(0, -1);
   newData += `\n        },
         resolve (root, args, context) {
-          var ${singularLowercaseTableName} = new models.${singularCapitalizedTableName}()
+          var ${singularLowercaseTableName} = new ${singularCapitalizedTableName}Class()
           return ${singularLowercaseTableName}.update${singularCapitalizedTableName}(args);
         }
       },`
@@ -579,7 +579,7 @@ var mutationDelete = function(pluralLowercaseTableName, tableData) {
   newData = newData.slice(0, -1);
   newData += `\n        },
         resolve (root, args, context) {
-          var ${singularLowercaseTableName} = new models.${singularCapitalizedTableName}()
+          var ${singularLowercaseTableName} = new ${singularCapitalizedTableName}Class()
           return ${singularLowercaseTableName}.delete${singularCapitalizedTableName}(args);
         }
       },`
@@ -593,7 +593,7 @@ var validForMutation = function(psqlType) {
         'integer': 'GraphQLInt',
         'boolean': 'GraphQLBoolean',
         'text': 'GraphQLString',
-        'timestamp with time zone': 'GraphQLString'                
+        'timestamp with time zone': 'GraphQLString'
       };
   return !!typeMap[psqlType];
 }
@@ -615,7 +615,7 @@ var importModels = function(dbMetadata) {
 var writeSchemaDefinition = function(dbMetadata) {
   var schema = importModels(dbMetadata);
   // Type definitions already written to schema file b/c needed to add export
-  // statement to type definition file before generating queries & mutations  
+  // statement to type definition file before generating queries & mutations
   schema += fs.readFileSync('./generated/schema.js', 'utf-8');
   schema += fs.readFileSync('./generated/queries.js', 'utf-8');
   schema += fs.readFileSync('./generated/mutations.js', 'utf-8');
