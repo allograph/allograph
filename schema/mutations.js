@@ -11,8 +11,7 @@ module.exports.Mutation = {
   name: 'Mutation',
   description: 'Functions to set stuff',
   fields () {
-    return {
-      deleteComment: {}
+    return {   
     }      
   }
 }

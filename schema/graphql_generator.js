@@ -21,6 +21,7 @@ GraphqlGenerator.prototype.printMetadata = function(dbMetadata) {
   writeModelFiles(dbMetadata);
   writeTypesFile(dbMetadata);
   writeMutationsFile(dbMetadata);
+
   writeQueriesFile(dbMetadata);
   writeSchemaDefinition(dbMetadata);
   process.exit()
@@ -37,7 +38,18 @@ var writeModelFiles = function(dbMetadata) {
 var knex = require('../../database/connection');\n
 export class ${singularCapitalizedTableName} extends Base${singularCapitalizedTableName} {\n\n}`;
 
-    fs.writeFileSync(`./schema/models/${singularLowercaseTableName}.js`, data, { flag: 'wx' }, function (err) {});
+    var pathName = `./schema/models/${singularLowercaseTableName}.js`
+    if (fs.existsSync(pathName)) {
+      console.log('Model file already exists and will not be overwritten.')
+    } else {
+      fs.writeFileSync(pathName, data, { flag: 'wx' }, function (err) {
+        if (err) {
+          console.log('file already exists.')
+        } else {
+          console.log('created file.')
+        }
+      });      
+    }
   }
 }
 
@@ -408,14 +420,16 @@ var writeMutationsFile = function(dbMetadata) {
     newData += mutationLogin(dbMetadata.tables["users"]);
   } else {
     console.log("You don't have a table 'users' with columns 'password' and 'email',")
-    console.log("so there won't be a auto generated default login mutation.")
+    console.log("so there won't be an auto generated default login mutation.")
   }
+
 
   for (var property in dbMetadata.tables) {
     if (dbMetadata.tables.hasOwnProperty(property)) {
       if (!Object.keys(customMutations).includes("add" + h.singularCapitalizedTableName(property))) {
         newData += mutationAdd(property, dbMetadata.tables[property]);
       }
+
       if (!Object.keys(customMutations).includes("update" + h.singularCapitalizedTableName(property))) {
       newData += mutationUpdate(property, dbMetadata.tables[property]);
       }
