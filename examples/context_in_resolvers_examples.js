@@ -2,14 +2,19 @@
 // through context in every resolver. It can be used for authorization.
 // The following is a example.
 
-resolve (parentobj, args, context) {
+resolve (root, args, context) {
   var current_user = context.user,
       postClass = new PostClass();
 
-  // find posts that is viewable by current user
-  return postClass.posts(args).then(posts => {
-    return posts.filter(post => {
-      return post.userId === current_user.id;
-    });
-  });
+    if (current_user)
+      return postClass.posts().then(posts => {
+        // filter posts that is created by current user
+        return posts.filter(post => {
+          return post.userId === current_user.id;
+        });
+      });
+    else {
+      return postClass.posts()
+    }
+  }
 }
