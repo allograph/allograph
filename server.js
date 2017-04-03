@@ -10,8 +10,8 @@ app.use('/graphql', expressJWT({
 }));
 
 app.use('/graphql', function(req, res, done) {
-  const authToken = req.user || {};
-  req.context = { user: authToken }
+  const user = req.user || {};
+  req.context = user;
   done();
 });
 
