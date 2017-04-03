@@ -13,3 +13,19 @@ mutation {
     first_name
   }
 }
+
+
+
+mutation addComment($in: String!, $includeContent: Boolean!) {
+  addComment(card_id:2, content: $in) {
+    card {
+      comment @include(if: $includeContent) {
+        id
+        card {
+          due_date
+        }
+      }
+      description
+    }
+  }
+}

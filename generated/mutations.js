@@ -14,8 +14,10 @@ const Mutation = new GraphQLObjectType({
           }
         },
         resolve (root, args) {
-          var comment = new models.Comment()
-          return comment.createComment(args);
+          var comment = new CommentClass()
+          comment.createComment(args).then(comment => {
+            return comment[0];
+          });
         }
       },
       updateComment: {
@@ -32,20 +34,10 @@ const Mutation = new GraphQLObjectType({
           }
         },
         resolve (root, args) {
-          var comment = new models.Comment()
-          return comment.updateComment(args);
-        }
-      },
-      deleteComment: {
-        type: GraphQLString,
-        args: {
-          id: {
-            type: new GraphQLNonNull(GraphQLInt)
-          }
-        },
-        resolve (root, args) {
-          var comment = new models.Comment()
-          return comment.deleteComment(args);
+          var comment = new CommentClass()
+          comment.updateComment(args).then(activity => {
+            return activity[0];
+          });
         }
       },
       addLabel: {
@@ -59,8 +51,10 @@ const Mutation = new GraphQLObjectType({
           }
         },
         resolve (root, args) {
-          var label = new models.Label()
-          return label.createLabel(args);
+          var label = new LabelClass()
+          label.createLabel(args).then(label => {
+            return label[0];
+          });
         }
       },
       updateLabel: {
@@ -77,8 +71,10 @@ const Mutation = new GraphQLObjectType({
           }
         },
         resolve (root, args) {
-          var label = new models.Label()
-          return label.updateLabel(args);
+          var label = new LabelClass()
+          label.updateLabel(args).then(activity => {
+            return activity[0];
+          });
         }
       },
       deleteLabel: {
@@ -89,8 +85,10 @@ const Mutation = new GraphQLObjectType({
           }
         },
         resolve (root, args) {
-          var label = new models.Label()
-          return label.deleteLabel(args);
+          var label = new LabelClass()
+          label.deleteLabel(args).then(numberOfDeletedItems => {
+            return 'Number of deleted activity: ' + numberOfDeletedItems;
+          });
         }
       },
       addActivity: {
@@ -116,11 +114,19 @@ const Mutation = new GraphQLObjectType({
           },
           actionable_item: {
             type: new GraphQLNonNull(GraphQLString)
+          },
+          due_date: {
+            type: GraphQLString
+          },
+          date: {
+            type: new GraphQLNonNull(GraphQLString)
           }
         },
         resolve (root, args) {
-          var activity = new models.Activity()
-          return activity.createActivity(args);
+          var activity = new ActivityClass()
+          activity.createActivity(args).then(activity => {
+            return activity[0];
+          });
         }
       },
       updateActivity: {
@@ -149,11 +155,19 @@ const Mutation = new GraphQLObjectType({
           },
           actionable_item: {
             type: new GraphQLNonNull(GraphQLString)
+          },
+          due_date: {
+            type: GraphQLString
+          },
+          date: {
+            type: new GraphQLNonNull(GraphQLString)
           }
         },
         resolve (root, args) {
-          var activity = new models.Activity()
-          return activity.updateActivity(args);
+          var activity = new ActivityClass()
+          activity.updateActivity(args).then(activity => {
+            return activity[0];
+          });
         }
       },
       deleteActivity: {
@@ -164,8 +178,10 @@ const Mutation = new GraphQLObjectType({
           }
         },
         resolve (root, args) {
-          var activity = new models.Activity()
-          return activity.deleteActivity(args);
+          var activity = new ActivityClass()
+          activity.deleteActivity(args).then(numberOfDeletedItems => {
+            return 'Number of deleted activity: ' + numberOfDeletedItems;
+          });
         }
       },
       addCard_label: {
@@ -179,8 +195,10 @@ const Mutation = new GraphQLObjectType({
           }
         },
         resolve (root, args) {
-          var card_label = new models.Card_label()
-          return card_label.createCard_label(args);
+          var card_label = new Card_labelClass()
+          card_label.createCard_label(args).then(card_label => {
+            return card_label[0];
+          });
         }
       },
       updateCard_label: {
@@ -197,8 +215,10 @@ const Mutation = new GraphQLObjectType({
           }
         },
         resolve (root, args) {
-          var card_label = new models.Card_label()
-          return card_label.updateCard_label(args);
+          var card_label = new Card_labelClass()
+          card_label.updateCard_label(args).then(activity => {
+            return activity[0];
+          });
         }
       },
       deleteCard_label: {
@@ -209,8 +229,10 @@ const Mutation = new GraphQLObjectType({
           }
         },
         resolve (root, args) {
-          var card_label = new models.Card_label()
-          return card_label.deleteCard_label(args);
+          var card_label = new Card_labelClass()
+          card_label.deleteCard_label(args).then(numberOfDeletedItems => {
+            return 'Number of deleted activity: ' + numberOfDeletedItems;
+          });
         }
       },
       addList: {
@@ -224,8 +246,10 @@ const Mutation = new GraphQLObjectType({
           }
         },
         resolve (root, args) {
-          var list = new models.List()
-          return list.createList(args);
+          var list = new ListClass()
+          list.createList(args).then(list => {
+            return list[0];
+          });
         }
       },
       updateList: {
@@ -242,8 +266,10 @@ const Mutation = new GraphQLObjectType({
           }
         },
         resolve (root, args) {
-          var list = new models.List()
-          return list.updateList(args);
+          var list = new ListClass()
+          list.updateList(args).then(activity => {
+            return activity[0];
+          });
         }
       },
       deleteList: {
@@ -254,8 +280,10 @@ const Mutation = new GraphQLObjectType({
           }
         },
         resolve (root, args) {
-          var list = new models.List()
-          return list.deleteList(args);
+          var list = new ListClass()
+          list.deleteList(args).then(numberOfDeletedItems => {
+            return 'Number of deleted activity: ' + numberOfDeletedItems;
+          });
         }
       },
       addNotification: {
@@ -269,8 +297,10 @@ const Mutation = new GraphQLObjectType({
           }
         },
         resolve (root, args) {
-          var notification = new models.Notification()
-          return notification.createNotification(args);
+          var notification = new NotificationClass()
+          notification.createNotification(args).then(notification => {
+            return notification[0];
+          });
         }
       },
       updateNotification: {
@@ -287,8 +317,10 @@ const Mutation = new GraphQLObjectType({
           }
         },
         resolve (root, args) {
-          var notification = new models.Notification()
-          return notification.updateNotification(args);
+          var notification = new NotificationClass()
+          notification.updateNotification(args).then(activity => {
+            return activity[0];
+          });
         }
       },
       deleteNotification: {
@@ -299,8 +331,10 @@ const Mutation = new GraphQLObjectType({
           }
         },
         resolve (root, args) {
-          var notification = new models.Notification()
-          return notification.deleteNotification(args);
+          var notification = new NotificationClass()
+          notification.deleteNotification(args).then(numberOfDeletedItems => {
+            return 'Number of deleted activity: ' + numberOfDeletedItems;
+          });
         }
       },
       addCard: {
@@ -315,6 +349,9 @@ const Mutation = new GraphQLObjectType({
           description: {
             type: GraphQLString
           },
+          due_date: {
+            type: GraphQLString
+          },
           position: {
             type: new GraphQLNonNull(GraphQLInt)
           },
@@ -323,8 +360,10 @@ const Mutation = new GraphQLObjectType({
           }
         },
         resolve (root, args) {
-          var card = new models.Card()
-          return card.createCard(args);
+          var card = new CardClass()
+          card.createCard(args).then(card => {
+            return card[0];
+          });
         }
       },
       updateCard: {
@@ -342,6 +381,9 @@ const Mutation = new GraphQLObjectType({
           description: {
             type: GraphQLString
           },
+          due_date: {
+            type: GraphQLString
+          },
           position: {
             type: new GraphQLNonNull(GraphQLInt)
           },
@@ -350,8 +392,10 @@ const Mutation = new GraphQLObjectType({
           }
         },
         resolve (root, args) {
-          var card = new models.Card()
-          return card.updateCard(args);
+          var card = new CardClass()
+          card.updateCard(args).then(activity => {
+            return activity[0];
+          });
         }
       },
       deleteCard: {
@@ -362,8 +406,10 @@ const Mutation = new GraphQLObjectType({
           }
         },
         resolve (root, args) {
-          var card = new models.Card()
-          return card.deleteCard(args);
+          var card = new CardClass()
+          card.deleteCard(args).then(numberOfDeletedItems => {
+            return 'Number of deleted activity: ' + numberOfDeletedItems;
+          });
         }
       }
     };
