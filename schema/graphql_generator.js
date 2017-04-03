@@ -48,7 +48,7 @@ export class ${singularCapitalizedTableName} extends Base${singularCapitalizedTa
         } else {
           console.log('created file.')
         }
-      });      
+      });
     }
   }
 }
@@ -88,7 +88,7 @@ var modelData = function(tableInfo) {
   data += validArgs
 
   data += `\n    }).into('${tableName}').then(id => {
-      return knex('${tableName}').where({ id: id[0] });
+      return knex('${tableName}').where({ id: id[0] }).first();
     });
   }
 
@@ -98,7 +98,7 @@ var modelData = function(tableInfo) {
   data += validArgs
 
   data += `\n    }).then(id => {
-      return knex('${tableName}').where({ id: id[0] });
+      return knex('${tableName}').where({ id: id[0] }).first();
     });
   }
 
@@ -170,24 +170,24 @@ var singularCapitalizedTableName = function(name) {
 }
 
 var foreignKeyColumnData = function(column, tableName, pk_column, fk_column, psqlType) {
-  var lowercaseTableName = tableName.toLowerCase();
-  var listType = psqlType.match(/\[(\w+)\]/);
-  var args;
-  var returnValue = `${column}`;
+  var lowercaseTableName = tableName.toLowerCase(),
+      listType = psqlType.match(/\[(\w+)\]/),
+      args,
+      returnValue = `;`,
+      fieldName = column;
 
   if (listType) {
     args = `{ ${fk_column}: ${lowercaseTableName}.${pk_column} }`
   } else {
     args = `{ ${pk_column}: ${lowercaseTableName}.${fk_column} }`
-    returnValue = `${column}[0]`
+    returnValue = `.first();`
+    fieldName = lingo.en.singularize(column);
   }
 
-  return '\n      ' + column + `: {
+  return '\n      ' + fieldName + `: {
         type: ` + psqlTypeToGraphQLType(psqlType) + `,
         resolve (` + lowercaseTableName + `, args, context) {
-          return knex('${column}').where(` + args + `).then(${column} => {;
-            return ` + returnValue + `;
-          });
+          return knex('${column}').where(` + args + `)` + returnValue + `
         }
       },`
 }
