@@ -7,7 +7,7 @@ import {
   GraphQLNonNull
 } from 'graphql';
 
-import { Trainer } from '../generated/type_definitions'
+import { Trainer, Pokemon } from '../generated/type_definitions'
 
 module.exports.Query = {
   name: 'Query',
@@ -24,7 +24,18 @@ module.exports.Query = {
         resolve(root, args, context) {
           return knex('trainers').where({ name: args.name }).first();
         }
-      },   
+      },
+      Pokemon: {
+        type: Pokemon,
+        args: {
+          id: {
+            type: GraphQLString
+          },
+        },
+        resolve(root, args, context) {
+          return knex('pokemons').where({ id: args.id }).first();
+        }      
+      }
     }
   }
 };

@@ -94,13 +94,57 @@ var Helper = {
     }
   },
   toGraphQLTypeFromJSType: function(jsType) {
+    console.log(jsType)
     var typemap = {
       'Int': 'GraphQLInt',
       'String': 'GraphQLString',
-      'Boolean': 'GraphQLBoolean',   
+      'Boolean': 'GraphQLBoolean',
+      'Int!': 'new GraphQLNonNull(GraphQLInt)',
+      'String!': 'new GraphQLNonNull(GraphQLString)',
+      'Boolean!': 'new GraphQLNonNull(GraphQLBoolean)',          
     }
 
     return typemap[jsType]
+  },
+  customFieldType: function(customQueries, customQuery) {
+    var typemap = {
+      'Int': 'GraphQLInt',
+      'String': 'GraphQLString',
+      'Boolean': 'GraphQLBoolean',
+      'Int!': 'new GraphQLNonNull(GraphQLInt)',
+      'String!': 'new GraphQLNonNull(GraphQLString)',
+      'Boolean!': 'new GraphQLNonNull(GraphQLBoolean)',          
+    }    
+
+    var type = (customQueries[customQuery].type);
+    var newData = `\n      ${customQuery}: {`;
+
+    if(type.toString().match(/\[(\w+)\]/)) {
+      var baseGraphQLObjectType = type.toString().replace(/[\[\]]/g, "")
+      newData += `\n          type: new GraphQLList(${baseGraphQLObjectType}),`
+    } else if (typemap[type]) {
+      newData += `\n          type: ${toGraphQLTypeFromJSType(type)},`
+    } else {
+      newData += `\n          type: ${type},`
+    }
+
+    newData += `\n          args: {`
+    return newData;
+  },
+  customArgsType: function(arg, customMutation, customMutations) {
+    var typemap = {
+      'Int': 'GraphQLInt',
+      'String': 'GraphQLString',
+      'Boolean': 'GraphQLBoolean',
+      'Int!': 'new GraphQLNonNull(GraphQLInt)',
+      'String!': 'new GraphQLNonNull(GraphQLString)',
+      'Boolean!': 'new GraphQLNonNull(GraphQLBoolean)',          
+    }    
+
+    var newData = `\n          ${arg}: {
+            type: ${typemap[customMutations[customMutation].args[arg].type]}\n          },`
+            
+    return newData
   },
   toGraphQLField: function(column, dataType, isNullable) {
     return  `  ` + column + `: ` +

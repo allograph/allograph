@@ -6,7 +6,6 @@ const expressJWT = require('express-jwt');
 const jwt = require('jsonwebtoken');
 
 app.use(cors())
-app.options('*', cors())
 
 app.use('/graphql', expressJWT({
   secret: 'allograph-secret',
