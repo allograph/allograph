@@ -1,8 +1,12 @@
 const express = require("express");
 const graphqlHTTP = require("express-graphql");
 const app = express();
+var cors = require('cors')
 const expressJWT = require('express-jwt');
-const jwt = require('jsonwebtoken')
+const jwt = require('jsonwebtoken');
+
+app.use(cors())
+app.options('*', cors())
 
 app.use('/graphql', expressJWT({
   secret: 'allograph-secret',
@@ -27,7 +31,7 @@ GraphQLServer.prototype.run = function() {
     context: req.context
   })));
 
-  app.listen(3000, () => console.log('Now browse to localhost:3000/graphql'));
+  app.listen(4000, () => console.log('Now browse to localhost:4000/graphql'));
 }
 
 exports.GraphQLServer = new GraphQLServer();

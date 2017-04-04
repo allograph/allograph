@@ -8,7 +8,7 @@ var fs = require('fs'),
 
 import {
   GraphQLObjectType,
-  TypeInfo,
+  TypeInfo, // Can we get rid of this?
   GraphQLString,
   GraphQLInt,
   GraphQLSchema,
@@ -284,10 +284,14 @@ var writeQueriesFile = function(dbMetadata) {
       newData += `\n      ${customQuery}: {
           type: new GraphQLList(${baseGraphQLObjectType}),
           args: {`
-    } else {
+    } else if (h.toGraphQLTypeFromJSType(customQueries[customQuery].type)) {
       newData += `\n      ${customQuery}: {
           type: ${h.toGraphQLTypeFromJSType(customQueries[customQuery].type)},
           args: {`
+    } else {
+      newData += `\n      ${customQuery}: {
+          type: ${customQueries[customQuery].type},
+          args: {`      
     }
 
     for (var arg in customQueries[customQuery].args) {

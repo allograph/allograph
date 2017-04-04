@@ -3,6 +3,17 @@ const Query = new GraphQLObjectType({
   description: 'Root query object',
   fields: () => {
     return {
+      Trainer: {
+          type: Trainer,
+          args: {
+          name: {
+            type: GraphQLString
+          },
+        },
+        resolve(root, args, context) {
+          return knex('trainers').where({ name: args.name }).first();
+        }
+      },
       trainers: {
         type: new GraphQLList(Trainer),
         args: {

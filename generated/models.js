@@ -10,7 +10,7 @@ export class BaseTrainer {
     return knex.returning('id').insert({
       name: args.name,
     }).into('trainers').then(id => {
-      return knex('trainers').where({ id: id[0] });
+      return knex('trainers').where({ id: id[0] }).first();
     });
   }
 
@@ -18,7 +18,7 @@ export class BaseTrainer {
     return knex('trainers').where({ id: args.id }).returning('id').update({
       name: args.name,
     }).then(id => {
-      return knex('trainers').where({ id: id[0] });
+      return knex('trainers').where({ id: id[0] }).first();
     });
   }
 
@@ -38,7 +38,7 @@ export class BasePokemon {
       name: args.name,
       trainer_id: args.trainer_id,
     }).into('pokemons').then(id => {
-      return knex('pokemons').where({ id: id[0] });
+      return knex('pokemons').where({ id: id[0] }).first();
     });
   }
 
@@ -48,7 +48,7 @@ export class BasePokemon {
       name: args.name,
       trainer_id: args.trainer_id,
     }).then(id => {
-      return knex('pokemons').where({ id: id[0] });
+      return knex('pokemons').where({ id: id[0] }).first();
     });
   }
 
