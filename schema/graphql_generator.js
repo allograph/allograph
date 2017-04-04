@@ -21,7 +21,6 @@ GraphqlGenerator.prototype.printMetadata = function(dbMetadata) {
   writeModelFiles(dbMetadata);
   writeTypesFile(dbMetadata);
   writeMutationsFile(dbMetadata);
-
   writeQueriesFile(dbMetadata);
   writeSchemaDefinition(dbMetadata);
   process.exit()
@@ -277,22 +276,7 @@ var writeQueriesFile = function(dbMetadata) {
 
   for (var customQuery in customQueries) {
     if (Object.keys(customQueries[customQuery]).length === 0) { continue; }
-      var listType = (customQueries[customQuery].type)
-
-    if(listType.toString().match(/\[(\w+)\]/)) {
-      var baseGraphQLObjectType = listType.toString().replace(/[\[\]]/g, "")
-      newData += `\n      ${customQuery}: {
-          type: new GraphQLList(${baseGraphQLObjectType}),
-          args: {`
-    } else if (h.toGraphQLTypeFromJSType(customQueries[customQuery].type)) {
-      newData += `\n      ${customQuery}: {
-          type: ${h.toGraphQLTypeFromJSType(customQueries[customQuery].type)},
-          args: {`
-    } else {
-      newData += `\n      ${customQuery}: {
-          type: ${customQueries[customQuery].type},
-          args: {`      
-    }
+    newData += h.customFieldType(customQueries, customQuery)
 
     for (var arg in customQueries[customQuery].args) {
       newData += `\n          ${arg}: {
@@ -402,14 +386,11 @@ var writeMutationsFile = function(dbMetadata) {
 
   for (var customMutation in customMutations) {
     if (Object.keys(customMutations[customMutation]).length === 0) { continue; }
-
-    newData += `\n      ${customMutation}: {
-        type: ${h.toGraphQLTypeFromJSType(customMutations[customMutation].type)},
-        args: {`
+    
+    newData += h.customFieldType(customMutations, customMutation)
 
     for (var arg in customMutations[customMutation].args) {
-      newData += `\n          ${arg}: {
-            type: ${h.toGraphQLTypeFromJSType(customMutations[customMutation].args[arg].type)}\n          },`
+      newData += h.customArgsType(arg, customMutation, customMutations)
     }
 
     newData += `\n        },\n        `
@@ -576,7 +557,7 @@ var mutationDelete = function(pluralLowercaseTableName, tableData) {
   var singularCapitalizedTableName = lingo.capitalize(singularLowercaseTableName);
 
   var newData = `\n      delete${singularCapitalizedTableName}: {
-        type: GraphQLString,
+        type: ${singularCapitalizedTableName},
         args: {`;
 
   for (var column in tableData.fields) {
