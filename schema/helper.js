@@ -100,7 +100,7 @@ var Helper = {
       'Boolean': 'GraphQLBoolean',   
     }
 
-    return typemap[jsType] || 'GraphQLString'
+    return typemap[jsType]
   },
   toGraphQLField: function(column, dataType, isNullable) {
     return  `  ` + column + `: ` +

@@ -20,6 +20,7 @@
     "babel-register": "^6.24.0",
     "bookshelf": "^0.10.3",
     "commander": "^2.9.0",
+    "cors": "^2.8.3",
     "express": "^4.13.4",
     "express-graphql": "^0.6.3",
     "express-jwt": "^5.1.0",

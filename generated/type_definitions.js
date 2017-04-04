@@ -31,9 +31,7 @@ const Trainer = new GraphQLObjectType({
       pokemons: {
         type: new GraphQLList(Pokemon),
         resolve (trainer, args, context) {
-          return knex('pokemons').where({ trainer_id: trainer.id }).then(pokemons => {;
-            return pokemons;
-          });
+          return knex('pokemons').where({ trainer_id: trainer.id });
         }
       },
     };
@@ -69,12 +67,10 @@ const Pokemon = new GraphQLObjectType({
           return pokemon.trainer_id;
         }
       },
-      trainers: {
+      trainer: {
         type: Trainer,
         resolve (pokemon, args, context) {
-          return knex('trainers').where({ id: pokemon.trainer_id }).then(trainers => {;
-            return trainers[0];
-          });
+          return knex('trainers').where({ id: pokemon.trainer_id }).first();
         }
       },
     };
