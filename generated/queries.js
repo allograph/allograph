@@ -3,51 +3,74 @@ const Query = new GraphQLObjectType({
   description: 'Root query object',
   fields: () => {
     return {
-      Trainer: {
-          type: Trainer,
+      usersProjects: {
+          type: new GraphQLList(Project),
           args: {
-          name: {
-            type: GraphQLString
+          id: {
+            type: GraphQLInt
           },
         },
         resolve(root, args, context) {
-          return knex('trainers').where({ name: args.name }).first();
+          var user = new UserClass();
+          console.log('Request made $$$$$$$$$$');
+          return user.userProjects(args);
         }
       },
-      trainers: {
-        type: new GraphQLList(Trainer),
+      users: {
+        type: new GraphQLList(User),
         args: {
           id: {
+            type: GraphQLInt
+          },
+          first_name: {
             type: GraphQLString
           },
-          name: {
+          last_name: {
+            type: GraphQLString
+          },
+          email: {
             type: GraphQLString
           }
         },
         resolve (root, args, context) {
-          var trainer = new TrainerClass()
-          return trainer.trainers(args);
+          var user = new UserClass()
+          return user.users(args);
         }
       },
-      pokemons: {
-        type: new GraphQLList(Pokemon),
+      projects: {
+        type: new GraphQLList(Project),
         args: {
           id: {
+            type: GraphQLInt
+          },
+          title: {
             type: GraphQLString
           },
-          url: {
-            type: GraphQLString
-          },
-          name: {
-            type: GraphQLString
-          },
-          trainer_id: {
-            type: GraphQLString
+          user_id: {
+            type: GraphQLInt
           }
         },
         resolve (root, args, context) {
-          var pokemon = new PokemonClass()
-          return pokemon.pokemons(args);
+          var project = new ProjectClass()
+          return project.projects(args);
+        }
+      },
+      users_projects: {
+        type: new GraphQLList(Users_project),
+        args: {
+          id: {
+            type: GraphQLInt
+          },
+          users_id: {
+            type: GraphQLInt
+          },
+          projects_id: {
+            type: GraphQLInt
+          }
+        },
+        resolve (root, args, context) {
+          var users_project = new Users_projectClass()
+          return users_project.users_projects(args);
         }
       },
     };

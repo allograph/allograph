@@ -4,6 +4,7 @@ const app = express();
 var cors = require('cors')
 const expressJWT = require('express-jwt');
 const jwt = require('jsonwebtoken');
+const DataLoader = require('dataloader');
 
 app.use(cors())
 

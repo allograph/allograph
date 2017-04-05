@@ -1,5 +1,6 @@
 import {
   GraphQLObjectType,
+  GrpahQLInputObjectType,
   GraphQLString,
   GraphQLInt,
   GraphQLSchema,
@@ -7,35 +8,27 @@ import {
   GraphQLNonNull
 } from 'graphql';
 
-import { Trainer, Pokemon } from '../generated/type_definitions'
+import { User, Project } from '../generated/type_definitions'
+
 
 module.exports.Query = {
   name: 'Query',
   description: 'Root query object',
   fields: () => {
-    return {  
-      Trainer: {
-          type: Trainer,
-          args: {
-          name: {
-            type: GraphQLString
-          },
-        },
-        resolve(root, args, context) {
-          return knex('trainers').where({ name: args.name }).first();
-        }
-      },
-      Pokemon: {
-        type: Pokemon,
+    return {
+      usersProjects: {
+        type: new GraphQLList(Project),
         args: {
           id: {
-            type: GraphQLString
+            type: GraphQLInt
           },
         },
-        resolve(root, args, context) {
-          return knex('pokemons').where({ id: args.id }).first();
-        }      
-      }
+        resolve (root, args, context) {
+          var user = new UserClass()
+          console.log('Request made $$$$$$$$$$')
+          return user.userProjects(args);
+        }
+      },      
     }
   }
 };

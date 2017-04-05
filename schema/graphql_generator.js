@@ -8,6 +8,7 @@ var fs = require('fs'),
 
 import {
   GraphQLObjectType,
+  GraphQLInputObjectType,
   TypeInfo, // Can we get rid of this?
   GraphQLString,
   GraphQLInt,
@@ -279,8 +280,7 @@ var writeQueriesFile = function(dbMetadata) {
     newData += h.customFieldType(customQueries, customQuery)
 
     for (var arg in customQueries[customQuery].args) {
-      newData += `\n          ${arg}: {
-            type: ${h.toGraphQLTypeFromJSType(customQueries[customQuery].args[arg].type)}\n          },`
+      newData += h.customArgsType(arg, customQueries[customQuery].args[arg].type)
     }
 
     newData += `\n        },\n        `
@@ -390,7 +390,7 @@ var writeMutationsFile = function(dbMetadata) {
     newData += h.customFieldType(customMutations, customMutation)
 
     for (var arg in customMutations[customMutation].args) {
-      newData += h.customArgsType(arg, customMutation, customMutations)
+      newData += h.customArgsType(arg, customMutations[customMutation].args[arg].type)
     }
 
     newData += `\n        },\n        `
@@ -414,7 +414,6 @@ var writeMutationsFile = function(dbMetadata) {
       if (!Object.keys(customMutations).includes("add" + h.singularCapitalizedTableName(property))) {
         newData += mutationAdd(property, dbMetadata.tables[property]);
       }
-
       if (!Object.keys(customMutations).includes("update" + h.singularCapitalizedTableName(property))) {
       newData += mutationUpdate(property, dbMetadata.tables[property]);
       }
