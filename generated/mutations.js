@@ -3,94 +3,180 @@ const Mutation = new GraphQLObjectType({
   description: 'Functions to set stuff',
   fields () {
     return {
-      addTrainer: {
-        type: Trainer,
+      login: {
+        type: GraphQLString,
         args: {
-          name: {
-            type: GraphQLString
-          }
-        },
-        resolve (root, args, context) {
-          var trainer = new TrainerClass()
-          return trainer.createTrainer(args);
-        }
-      },
-      updateTrainer: {
-        type: Trainer,
-        args: {
-          id: {
+          email: {
             type: new GraphQLNonNull(GraphQLString)
           },
-          name: {
+          password: {
+            type: new GraphQLNonNull(GraphQLString)
+          }
+        },
+        resolve (root, args, context) {
+          var user = new UserClass();
+          return user.users(args).then(user => {
+            return jwt.sign({ user: user[0] }, 'allograph-secret' );
+          });
+        }
+      },
+      addUser: {
+        type: User,
+        args: {
+          firstName: {
+            type: new GraphQLNonNull(GraphQLString)
+          },
+          lastName: {
+            type: new GraphQLNonNull(GraphQLString)
+          },
+          email: {
+            type: GraphQLString
+          },
+          password: {
             type: GraphQLString
           }
         },
         resolve (root, args, context) {
-          var trainer = new TrainerClass()
-          return trainer.updateTrainer(args);
+          var user = new UserClass()
+          return user.createUser(args);
         }
       },
-      deleteTrainer: {
+      updateUser: {
+        type: User,
+        args: {
+          id: {
+            type: new GraphQLNonNull(GraphQLInt)
+          },
+          firstName: {
+            type: new GraphQLNonNull(GraphQLString)
+          },
+          lastName: {
+            type: new GraphQLNonNull(GraphQLString)
+          },
+          email: {
+            type: GraphQLString
+          },
+          password: {
+            type: GraphQLString
+          }
+        },
+        resolve (root, args, context) {
+          var user = new UserClass()
+          return user.updateUser(args);
+        }
+      },
+      deleteUser: {
         type: GraphQLString,
         args: {
           id: {
-            type: new GraphQLNonNull(GraphQLString)
+            type: new GraphQLNonNull(GraphQLInt)
           }
         },
         resolve (root, args, context) {
-          var trainer = new TrainerClass()
-          return trainer.deleteTrainer(args);
+          var user = new UserClass()
+          return user.deleteUser(args);
         }
       },
-      addPokemon: {
-        type: Pokemon,
+      addPost: {
+        type: Post,
         args: {
-          url: {
+          title: {
             type: new GraphQLNonNull(GraphQLString)
           },
-          name: {
+          content: {
             type: new GraphQLNonNull(GraphQLString)
           },
-          trainer_id: {
-            type: GraphQLString
+          userId: {
+            type: GraphQLInt
           }
         },
         resolve (root, args, context) {
-          var pokemon = new PokemonClass()
-          return pokemon.createPokemon(args);
+          var post = new PostClass()
+          return post.createPost(args);
         }
       },
-      updatePokemon: {
-        type: Pokemon,
+      updatePost: {
+        type: Post,
         args: {
           id: {
-            type: GraphQLString
+            type: new GraphQLNonNull(GraphQLInt)
           },
-          url: {
+          title: {
             type: new GraphQLNonNull(GraphQLString)
           },
-          name: {
+          content: {
             type: new GraphQLNonNull(GraphQLString)
           },
-          trainer_id: {
-            type: GraphQLString
+          userId: {
+            type: GraphQLInt
           }
         },
         resolve (root, args, context) {
-          var pokemon = new PokemonClass()
-          return pokemon.updatePokemon(args);
+          var post = new PostClass()
+          return post.updatePost(args);
         }
       },
-      deletePokemon: {
+      deletePost: {
         type: GraphQLString,
         args: {
           id: {
-            type: GraphQLString
+            type: new GraphQLNonNull(GraphQLInt)
           }
         },
         resolve (root, args, context) {
-          var pokemon = new PokemonClass()
-          return pokemon.deletePokemon(args);
+          var post = new PostClass()
+          return post.deletePost(args);
+        }
+      },
+      addComment: {
+        type: Comment,
+        args: {
+          content: {
+            type: new GraphQLNonNull(GraphQLString)
+          },
+          userId: {
+            type: GraphQLInt
+          },
+          postId: {
+            type: GraphQLInt
+          }
+        },
+        resolve (root, args, context) {
+          var comment = new CommentClass()
+          return comment.createComment(args);
+        }
+      },
+      updateComment: {
+        type: Comment,
+        args: {
+          id: {
+            type: new GraphQLNonNull(GraphQLInt)
+          },
+          content: {
+            type: new GraphQLNonNull(GraphQLString)
+          },
+          userId: {
+            type: GraphQLInt
+          },
+          postId: {
+            type: GraphQLInt
+          }
+        },
+        resolve (root, args, context) {
+          var comment = new CommentClass()
+          return comment.updateComment(args);
+        }
+      },
+      deleteComment: {
+        type: GraphQLString,
+        args: {
+          id: {
+            type: new GraphQLNonNull(GraphQLInt)
+          }
+        },
+        resolve (root, args, context) {
+          var comment = new CommentClass()
+          return comment.deleteComment(args);
         }
       }
     };

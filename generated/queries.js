@@ -3,40 +3,70 @@ const Query = new GraphQLObjectType({
   description: 'Root query object',
   fields: () => {
     return {
-      trainers: {
-        type: new GraphQLList(Trainer),
+      users: {
+        type: new GraphQLList(User),
         args: {
           id: {
+            type: GraphQLInt
+          },
+          firstName: {
             type: GraphQLString
           },
-          name: {
+          lastName: {
+            type: GraphQLString
+          },
+          email: {
+            type: GraphQLString
+          },
+          password: {
             type: GraphQLString
           }
         },
         resolve (root, args, context) {
-          var trainer = new TrainerClass()
-          return trainer.trainers(args);
+          var user = new UserClass()
+          return user.users(args);
         }
       },
-      pokemons: {
-        type: new GraphQLList(Pokemon),
+      posts: {
+        type: new GraphQLList(Post),
         args: {
           id: {
+            type: GraphQLInt
+          },
+          title: {
             type: GraphQLString
           },
-          url: {
+          content: {
             type: GraphQLString
           },
-          name: {
-            type: GraphQLString
-          },
-          trainer_id: {
-            type: GraphQLString
+          userId: {
+            type: GraphQLInt
           }
         },
         resolve (root, args, context) {
-          var pokemon = new PokemonClass()
-          return pokemon.pokemons(args);
+          var post = new PostClass()
+          return post.posts(args);
+        }
+      },
+      comments: {
+        type: new GraphQLList(Comment),
+        args: {
+          id: {
+            type: GraphQLInt
+          },
+          content: {
+            type: GraphQLString
+          },
+          userId: {
+            type: GraphQLInt
+          },
+          postId: {
+            type: GraphQLInt
+          }
+        },
+        resolve (root, args, context) {
+          var comment = new CommentClass()
+          return comment.comments(args);
         }
       },
     };

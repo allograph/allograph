@@ -29,17 +29,17 @@ GraphQLServer.prototype.run = function() {
   })));
 
   // Below is an example of swagger schema to graphql
-  swaggerSchema('./swagger/swagger.json').then(schema => {
-    app.use('/graphql', graphqlHTTP(() => {
-      return {
-        schema,
-        context: {
-          GQLProxyBaseUrl: 'http://petstore.swagger.io/v2'
-        },
-        graphiql: true
-      };
-    }));
-  });
+  // swaggerSchema('./swagger/swagger.json').then(schema => {
+  //   app.use('/graphql', graphqlHTTP(() => {
+  //     return {
+  //       schema,
+  //       context: {
+  //         GQLProxyBaseUrl: 'http://petstore.swagger.io/v2'
+  //       },
+  //       graphiql: true
+  //     };
+  //   }));
+  // });
 
   app.listen(3000, () => console.log('Now browse to localhost:3000/graphql'));
 }

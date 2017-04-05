@@ -4,34 +4,18 @@ const rp = require('request-promise');
 const {GraphQLSchema, GraphQLObjectType} = require('graphql');
 const {getAllEndPoints, loadSchema} = require('./swagger');
 const {createGQLObject, mapParametersToFields} = require('./type_map');
-const build = (swaggerPath) => {
+
+const queryFields = (swaggerPath) => {
   return loadSchema(swaggerPath).then(swaggerSchema => {
     const endpoints = getAllEndPoints(swaggerSchema);
-    const rootType = new GraphQLObjectType({
-      name: 'Query',
-      fields: () => {
-        const queryFields = getQueriesFields(endpoints, false);
-        if (!Object.keys(queryFields).length) {
-          throw new Error('Did not find any GET endpoints');
-        }
-        return queryFields;
-        resolve: () => 'Without this resolver graphql does not resolve further'
-      }
-    });
+    return getQueriesFields(endpoints, false);
+  });
+};
 
-    const graphQLSchema = {
-      query: rootType
-    };
-
-    const mutationFields = getQueriesFields(endpoints, true);
-    if (Object.keys(mutationFields).length) {
-      graphQLSchema.mutation = new GraphQLObjectType({
-        name: 'Mutation',
-        fields: mutationFields
-      });
-    }
-
-    return new GraphQLSchema(graphQLSchema);
+const mutationFields = (swaggerPath) => {
+  return loadSchema(swaggerPath).then(swaggerSchema => {
+    const endpoints = getAllEndPoints(swaggerSchema);
+    return getQueriesFields(endpoints, true);
   });
 };
 
@@ -64,4 +48,7 @@ function getQueriesFields(endpoints, isMutation) {
   }, {});
 }
 
-module.exports = build;
+module.exports = {
+  queryFields,
+  mutationFields
+};

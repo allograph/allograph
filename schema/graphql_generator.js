@@ -4,11 +4,12 @@ var fs = require('fs'),
     GraphqlGenerator = function () {},
     h = require('./helper.js'),
     query = require('./queries.js').Query,
-    mutation = require('./mutations.js').Mutation;
+    mutation = require('./mutations.js').Mutation,
+    swaggerQuery = require('../swagger').queryFields('./swagger/swagger.json'),
+    swaggerMutation = require('../swagger').mutationFields('./swagger/swagger.json');
 
 import {
   GraphQLObjectType,
-  TypeInfo,
   GraphQLString,
   GraphQLInt,
   GraphQLSchema,
@@ -151,8 +152,8 @@ var graphQLData = function() {
   GraphQLNonNull
 } from 'graphql';
 
-var knex = require('../database/connection');
-var jwt = require('jsonwebtoken');`
+var knex = require('../database/connection'),
+    jwt = require('jsonwebtoken');`
 }
 
 var objectDescription = function(tableName, description) {
@@ -326,13 +327,51 @@ var writeQueriesFile = function(dbMetadata) {
     newData = newData.slice(0, -1);
     newData += queryResolveFunction(tableName)
   }
+console.log("OUTSIDE")
+console.log(swaggerQuery)
+  swaggerQuery.then(queries => {
+    console.log("HERE")
+    console.log(queries);
+    for (var query in queries) {
+      console.log(queries[query])
+    }
+  }, error => {
+    console.log("ERROR")
+    console.log(error);
+  });
 
   newData += queryClosingBrackets();
   newData += '\n\n'
-
   fs.writeFileSync('./generated/queries.js', newData, 'utf-8')
 }
 
+var getSwaggerQuery = function() {
+  var data = ''
+
+  swaggerQuery.then(queries => {
+    // console.log(queries);
+    for (var query in queries) {
+      data += query + `: {
+  type: ` + queries[query].type.toString() + `,
+  args: {
+    `;
+      for (var arg in queries[query].args) {
+        data += arg + `: {
+      type: `
+      console.log(queries[query].args[arg].type);
+      }
+
+//   `resolve ` + queries[query].resolve.toString() + `
+// },` + '\n'
+
+//       console.log(queries[query].args)
+      // console.log(queries[query].resolve.toString())
+    }
+    // console.log(data)
+  });
+}
+
+// getSwaggerQuery()
 
 var queryTableArgs = function(column, psqlType) {
   return `\n          ${column}: {
