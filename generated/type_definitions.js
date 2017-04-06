@@ -11,195 +11,66 @@ import {
 var knex = require('../database/connection');
 var jwt = require('jsonwebtoken');
 
-const User = new GraphQLObjectType({
-  name: 'User',
-  description: 'This is a table called users',
+const Trainer = new GraphQLObjectType({
+  name: 'Trainer',
+  description: 'This is a table called trainers',
   fields: () => {
     return {
       id: {
-        type: new GraphQLNonNull(GraphQLInt),
-        resolve (user, args, context) {
-          return user.id;
-        }
-      },
-      first_name: {
         type: new GraphQLNonNull(GraphQLString),
-        resolve (user, args, context) {
-          return user.first_name;
+        resolve (trainer, args, context) {
+          return trainer.id;
         }
       },
-      last_name: {
-        type: new GraphQLNonNull(GraphQLString),
-        resolve (user, args, context) {
-          return user.last_name;
-        }
-      },
-      email: {
-        type: new GraphQLNonNull(GraphQLString),
-        resolve (user, args, context) {
-          return user.email;
-        }
-      },
-      projects: {
-        type: new GraphQLList(Project),
-        resolve (user, args, context) {
-          return knex('projects').where({ user_id: user.id });
-        }
-      },
-      users_projects: {
-        type: new GraphQLList(Users_project),
-        resolve (user, args, context) {
-          return knex('users_projects').where({ users_id: user.id });
-        }
-      },
-    };
-  }
-});
-
-const Tag = new GraphQLObjectType({
-  name: 'Tag',
-  description: 'This is a table called tags',
-  fields: () => {
-    return {
-      id: {
-        type: new GraphQLNonNull(GraphQLInt),
-        resolve (tag, args, context) {
-          return tag.id;
-        }
-      },
-      title: {
+      name: {
         type: GraphQLString,
-        resolve (tag, args, context) {
-          return tag.title;
+        resolve (trainer, args, context) {
+          return trainer.name;
         }
       },
-      tags_projects: {
-        type: new GraphQLList(Tags_project),
-        resolve (tag, args, context) {
-          return knex('tags_projects').where({ tag_id: tag.id });
-        }
-      },
-    };
-  }
-});
-
-const Tags_project = new GraphQLObjectType({
-  name: 'Tags_project',
-  description: 'This is a table called tags_projects',
-  fields: () => {
-    return {
-      id: {
-        type: new GraphQLNonNull(GraphQLInt),
-        resolve (tags_project, args, context) {
-          return tags_project.id;
-        }
-      },
-      project_id: {
-        type: GraphQLInt,
-        resolve (tags_project, args, context) {
-          return tags_project.project_id;
-        }
-      },
-      tag_id: {
-        type: GraphQLInt,
-        resolve (tags_project, args, context) {
-          return tags_project.tag_id;
-        }
-      },
-      project: {
-        type: Project,
-        resolve (tags_project, args, context) {
-          return knex('projects').where({ id: tags_project.project_id }).first();
-        }
-      },
-      tag: {
-        type: Tag,
-        resolve (tags_project, args, context) {
-          return knex('tags').where({ id: tags_project.tag_id }).first();
+      pokemons: {
+        type: new GraphQLList(Pokemon),
+        resolve (trainer, args, context) {
+          return knex('pokemons').where({ trainer_id: trainer.id });
         }
       },
     };
   }
 });
 
-const Project = new GraphQLObjectType({
-  name: 'Project',
-  description: 'This is a table called projects',
+const Pokemon = new GraphQLObjectType({
+  name: 'Pokemon',
+  description: 'This is a table called pokemons',
   fields: () => {
     return {
       id: {
-        type: new GraphQLNonNull(GraphQLInt),
-        resolve (project, args, context) {
-          return project.id;
-        }
-      },
-      title: {
         type: GraphQLString,
-        resolve (project, args, context) {
-          return project.title;
+        resolve (pokemon, args, context) {
+          return pokemon.id;
         }
       },
-      user_id: {
-        type: GraphQLInt,
-        resolve (project, args, context) {
-          return project.user_id;
+      url: {
+        type: new GraphQLNonNull(GraphQLString),
+        resolve (pokemon, args, context) {
+          return pokemon.url;
         }
       },
-      user: {
-        type: User,
-        resolve (project, args, context) {
-          return knex('users').where({ id: project.user_id }).first();
+      name: {
+        type: new GraphQLNonNull(GraphQLString),
+        resolve (pokemon, args, context) {
+          return pokemon.name;
         }
       },
-      users_projects: {
-        type: new GraphQLList(Users_project),
-        resolve (project, args, context) {
-          return knex('users_projects').where({ projects_id: project.id });
+      trainer_id: {
+        type: GraphQLString,
+        resolve (pokemon, args, context) {
+          return pokemon.trainer_id;
         }
       },
-      tags_projects: {
-        type: new GraphQLList(Tags_project),
-        resolve (project, args, context) {
-          return knex('tags_projects').where({ project_id: project.id });
-        }
-      },
-    };
-  }
-});
-
-const Users_project = new GraphQLObjectType({
-  name: 'Users_project',
-  description: 'This is a table called users_projects',
-  fields: () => {
-    return {
-      id: {
-        type: new GraphQLNonNull(GraphQLInt),
-        resolve (users_project, args, context) {
-          return users_project.id;
-        }
-      },
-      users_id: {
-        type: GraphQLInt,
-        resolve (users_project, args, context) {
-          return users_project.users_id;
-        }
-      },
-      projects_id: {
-        type: GraphQLInt,
-        resolve (users_project, args, context) {
-          return users_project.projects_id;
-        }
-      },
-      user: {
-        type: User,
-        resolve (users_project, args, context) {
-          return knex('users').where({ id: users_project.users_id }).first();
-        }
-      },
-      project: {
-        type: Project,
-        resolve (users_project, args, context) {
-          return knex('projects').where({ id: users_project.projects_id }).first();
+      trainer: {
+        type: Trainer,
+        resolve (pokemon, args, context) {
+          return knex('trainers').where({ id: pokemon.trainer_id }).first();
         }
       },
     };
@@ -208,4 +79,4 @@ const Users_project = new GraphQLObjectType({
 
 
 
-export { User, Tag, Tags_project, Project, Users_project }
+export { Trainer, Pokemon }

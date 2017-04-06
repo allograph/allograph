@@ -5,7 +5,6 @@ var cors = require('cors')
 const expressJWT = require('express-jwt');
 const jwt = require('jsonwebtoken');
 const DataLoader = require('dataloader');
-import {maskErrors, UserError} from 'graphql-errors';
 
 app.use(cors())
 
@@ -20,20 +19,22 @@ app.use('/graphql', function(req, res, done) {
   done();
 });
 
+var port = process.env.PORT || 4000;
+
 var GraphQLServer = function () {};
 
 GraphQLServer.prototype.run = function() {
   const schema = require("./generated/schema.js").Schema;
-  maskErrors(schema);
 
   app.use('/graphql', graphqlHTTP((req) => ({
     schema: schema,
     pretty: true,
-    graphiql: true,
+    graphiql: false,
     context: req.context
   })));
 
-  app.listen(4000, () => console.log('Now browse to localhost:4000/graphql'));
+  app.listen(port, () => console.log('Our app is running on http://localhost:' + port));
 }
 
 exports.GraphQLServer = new GraphQLServer();
+graphQLServer.run()
