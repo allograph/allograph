@@ -5,6 +5,7 @@ var cors = require('cors')
 const expressJWT = require('express-jwt');
 const jwt = require('jsonwebtoken');
 const DataLoader = require('dataloader');
+import {maskErrors, UserError} from 'graphql-errors';
 
 app.use(cors())
 
@@ -23,6 +24,7 @@ var GraphQLServer = function () {};
 
 GraphQLServer.prototype.run = function() {
   const schema = require("./generated/schema.js").Schema;
+  maskErrors(schema);
 
   app.use('/graphql', graphqlHTTP((req) => ({
     schema: schema,

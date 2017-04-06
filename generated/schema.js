@@ -5,6 +5,7 @@ import { Tag as TagClass } from '../schema/models/tag'
 import { Tags_project as Tags_projectClass } from '../schema/models/tags_project'
 import { Project as ProjectClass } from '../schema/models/project'
 import { Users_project as Users_projectClass } from '../schema/models/users_project'
+import {maskErrors, UserError} from 'graphql-errors';
 import {
   GraphQLObjectType,
   GraphQLString,
@@ -17,41 +18,6 @@ import {
 
 var knex = require('../database/connection');
 var jwt = require('jsonwebtoken');
-
-import DataLoader from 'dataloader';
-
-const getProjectTagsUsingProjectId = (projectIds) => {
-  var tags = []
-  for (var projectId in projectIds) {
-    tags.push(
-      knex.select('*')
-      .from('projects')
-      .leftJoin('tags_projects', 'tags_projects.project_id', 'projects.id')
-      .leftJoin('tags', 'tags_projects.tag_id', 'tags.id')
-      .where({ 'tags_projects.project_id': projectId })
-      .then(function(tags){
-        return tags
-      })
-    );
-  }
-
-  return Promise.all(tags)
-};
-
-  const TagByProjectIdLoader = new DataLoader(getProjectTagsUsingProjectId);
-  // return Post
-  //   .collection(postIds.map((id) => {
-  //     return {
-  //       id
-  //     };
-  //   }))
-  //   .load('tags')
-  //   .call('toJSON')
-  //   .then((collection) => {
-  //     return collection.map((post) => {
-  //       return post.tags;
-  //     });
-  //   });
 
 const User = new GraphQLObjectType({
   name: 'User',
@@ -85,7 +51,10 @@ const User = new GraphQLObjectType({
       projects: {
         type: new GraphQLList(Project),
         resolve (user, args, context) {
-          return knex('projects').where({ user_id: user.id });
+          return knex('projects').where({ user_id: user })
+          .on('query-error', function(error, obj) {
+            throw new UserError('Unable to fetch users list.');
+          })
         }
       },
       users_projects: {
@@ -193,12 +162,6 @@ const Project = new GraphQLObjectType({
           return knex('users').where({ id: project.user_id }).first();
         }
       },
-      tags: {
-        type: new GraphQLList(Tag),
-        resolve: (project) => {
-          return TagByProjectIdLoader.load(project.id);
-        }
-      },
       users_projects: {
         type: new GraphQLList(Users_project),
         resolve (project, args, context) {
@@ -259,19 +222,6 @@ const Query = new GraphQLObjectType({
   description: 'Root query object',
   fields: () => {
     return {
-      usersProjects: {
-          type: new GraphQLList(Project),
-          args: {
-          id: {
-            type: GraphQLInt
-          },
-        },
-        resolve(root, args, context) {
-          var user = new UserClass();
-          console.log('Request made $$$$$$$$$$');
-          return user.userProjects(args);
-        }
-      },
       users: {
         type: new GraphQLList(User),
         args: {
@@ -301,7 +251,7 @@ const Query = new GraphQLObjectType({
           },
           title: {
             type: GraphQLString
-          },
+          }
         },
         resolve (root, args, context) {
           var tag = new TagClass()
@@ -337,7 +287,7 @@ const Query = new GraphQLObjectType({
           },
           user_id: {
             type: GraphQLInt
-          },        
+          }
         },
         resolve (root, args, context) {
           var project = new ProjectClass()

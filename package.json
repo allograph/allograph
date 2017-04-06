@@ -27,6 +27,7 @@
     "express-jwt": "^5.1.0",
     "graphiql": "^0.9.3",
     "graphql": "^0.9.1",
+    "graphql-errors": "^2.1.0",
     "knex": "^0.12.8",
     "lingo": "0.0.5",
     "pg": "^4.5.6",

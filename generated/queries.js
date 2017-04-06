@@ -3,19 +3,6 @@ const Query = new GraphQLObjectType({
   description: 'Root query object',
   fields: () => {
     return {
-      usersProjects: {
-          type: new GraphQLList(Project),
-          args: {
-          id: {
-            type: GraphQLInt
-          },
-        },
-        resolve(root, args, context) {
-          var user = new UserClass();
-          console.log('Request made $$$$$$$$$$');
-          return user.userProjects(args);
-        }
-      },
       users: {
         type: new GraphQLList(User),
         args: {
