@@ -3,51 +3,94 @@ const Query = new GraphQLObjectType({
   description: 'Root query object',
   fields: () => {
     return {
-      Trainer: {
-          type: Trainer,
-          args: {
-          name: {
-            type: GraphQLString
-          },
-        },
-        resolve(root, args, context) {
-          return knex('trainers').where({ name: args.name }).first();
-        }
-      },
-      trainers: {
-        type: new GraphQLList(Trainer),
+      users: {
+        type: new GraphQLList(User),
         args: {
           id: {
+            type: GraphQLInt
+          },
+          first_name: {
             type: GraphQLString
           },
-          name: {
+          last_name: {
+            type: GraphQLString
+          },
+          email: {
             type: GraphQLString
           }
         },
         resolve (root, args, context) {
-          var trainer = new TrainerClass()
-          return trainer.trainers(args);
+          var user = new UserClass()
+          return user.users(args);
         }
       },
-      pokemons: {
-        type: new GraphQLList(Pokemon),
+      tags: {
+        type: new GraphQLList(Tag),
         args: {
           id: {
-            type: GraphQLString
+            type: GraphQLInt
           },
-          url: {
-            type: GraphQLString
-          },
-          name: {
-            type: GraphQLString
-          },
-          trainer_id: {
+          title: {
             type: GraphQLString
           }
         },
         resolve (root, args, context) {
-          var pokemon = new PokemonClass()
-          return pokemon.pokemons(args);
+          var tag = new TagClass()
+          return tag.tags(args);
+        }
+      },
+      tags_projects: {
+        type: new GraphQLList(Tags_project),
+        args: {
+          id: {
+            type: GraphQLInt
+          },
+          project_id: {
+            type: GraphQLInt
+          },
+          tag_id: {
+            type: GraphQLInt
+          }
+        },
+        resolve (root, args, context) {
+          var tags_project = new Tags_projectClass()
+          return tags_project.tags_projects(args);
+        }
+      },
+      projects: {
+        type: new GraphQLList(Project),
+        args: {
+          id: {
+            type: GraphQLInt
+          },
+          title: {
+            type: GraphQLString
+          },
+          user_id: {
+            type: GraphQLInt
+          }
+        },
+        resolve (root, args, context) {
+          var project = new ProjectClass()
+          return project.projects(args);
+        }
+      },
+      users_projects: {
+        type: new GraphQLList(Users_project),
+        args: {
+          id: {
+            type: GraphQLInt
+          },
+          users_id: {
+            type: GraphQLInt
+          },
+          projects_id: {
+            type: GraphQLInt
+          }
+        },
+        resolve (root, args, context) {
+          var users_project = new Users_projectClass()
+          return users_project.users_projects(args);
         }
       },
     };

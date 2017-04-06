@@ -95,6 +95,60 @@ Example:
 
 The relation detection feature allows for creation of bookshelf models that are already set up with has one and has many relationships whenever they can be detected based on the database structure itself. Allograph's database inspector identifies any table with three columns, two of which are foreign keys, as a junction table. The two tables that are referenced by the foreign keys in the junction tables will each be given Has Many references to each other. 
 
+## Features
+
+### Error Masking
+
+Allograph harnesses the power of 'graphql-errors' to allow you to easily hide details of all errors from the client so you do not inadvertently leak information about your schema. 
+In server.js:
+```javascript
+
+import {maskErrors, UserError} from 'graphql-errors';
+
+// More code here left out for brevity
+
+GraphQLServer.prototype.run = function() {
+  const schema = require("./generated/schema.js").Schema;
+  maskErrors(schema);   // including maskErrors(schema) will mask all errors. Can remove if you want to select individual errors to mask.
+
+  app.use('/graphql', graphqlHTTP((req) => ({
+    schema: schema,
+    pretty: true,
+    graphiql: true,
+    context: req.context
+  })));
+
+  app.listen(4000, () => console.log('Now browse to localhost:4000/graphql'));
+}
+
+```
+
+Use UserError in a resolve function to create your own custom error message.
+
+```javascript
+import {maskErrors, UserError} from 'graphql-errors';
+
+const User = new GraphQLObjectType({
+  name: 'User',
+  description: 'This is a table called users',
+  fields: () => {
+    return {
+      projects: {
+        type: new GraphQLList(Project),
+        resolve (user, args, context) {
+          return knex('projects').where({ user_id: user })
+          .on('query-error', function(error, obj) {
+            throw new UserError('Unable to fetch users list.');
+          })
+        }
+      },
+    };
+  }
+});      
+```
+
+
+
 ### Command Line Tools
 
 'allo server': Start your Allograph server
