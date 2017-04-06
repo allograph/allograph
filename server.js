@@ -36,5 +36,5 @@ GraphQLServer.prototype.run = function() {
   app.listen(port, () => console.log('Our app is running on http://localhost:' + port));
 }
 
-exports.GraphQLServer = new GraphQLServer();
-graphQLServer.run()
+// exports.GraphQLServer = new GraphQLServer();
+new graphQLServer.run()
