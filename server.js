@@ -34,7 +34,3 @@ app.use('/graphql', graphqlHTTP((req) => ({
 })));
 
 app.listen(port, () => console.log('Our app is running on http://localhost:' + port));
-
-
-
-// exports.GraphQLServer = new GraphQLServer();
