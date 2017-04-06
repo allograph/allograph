@@ -73,7 +73,7 @@ var columnData = function(field) {
 };
 
 var writeToJSON = function(meta) {
-  fs.writeFile('./generated/schema.json', JSON.stringify(meta), 'utf8', function(result) {
+  fs.writeFileSync('./generated/schema.json', JSON.stringify(meta), 'utf8', function(result) {
   });
 };
 

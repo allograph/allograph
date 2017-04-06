@@ -5,6 +5,7 @@ var cors = require('cors')
 const expressJWT = require('express-jwt');
 const jwt = require('jsonwebtoken');
 const DataLoader = require('dataloader');
+const buildSchema = require('./schema/build_schema.js');
 
 app.use(cors())
 
@@ -20,17 +21,20 @@ app.use('/graphql', function(req, res, done) {
 });
 
 var port = process.env.PORT || 4000;
-
 var GraphQLServer = function () {};
 
+GraphQLServer.prototype.run = function() {
+  buildSchema().then(function(schema) {
+    app.use('/graphql', graphqlHTTP((req) => ({
+      schema: schema,
+      pretty: true,
+      graphiql: true,
+      context: Object.assign(req.context, {
+        GQLProxyBaseUrl: 'http://petstore.swagger.io/v2'
+      })
+    })));
+  });
+  app.listen(port, () => console.log('Our app is running on http://localhost:' + port));
+}
 
-const schema = require("./generated/schema.js").Schema;
-
-app.use('/graphql', graphqlHTTP((req) => ({
-  schema: schema,
-  pretty: true,
-  graphiql: false,
-  context: req.context
-})));
-
-app.listen(port, () => console.log('Our app is running on http://localhost:' + port));
+exports.GraphQLServer = new GraphQLServer();

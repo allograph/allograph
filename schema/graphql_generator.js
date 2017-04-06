@@ -1,15 +1,17 @@
 var fs = require('fs'),
     lingo = require('lingo'),
+    _ = require('lodash'),
     inputCustomMutations = fs.readFileSync('./schema/mutations.js', 'utf-8'),
     GraphqlGenerator = function () {},
     h = require('./helper.js'),
     query = require('./queries.js').Query,
-    mutation = require('./mutations.js').Mutation;
+    mutation = require('./mutations.js').Mutation,
+    swaggerQuery = require('../swagger').queryFields('./swagger/swagger.json'),
+    swaggerMutation = require('../swagger').mutationFields('./swagger/swagger.json');
 
 import {
   GraphQLObjectType,
   GraphQLInputObjectType,
-  TypeInfo, // Can we get rid of this?
   GraphQLString,
   GraphQLInt,
   GraphQLSchema,
@@ -24,7 +26,7 @@ GraphqlGenerator.prototype.printMetadata = function(dbMetadata) {
   writeMutationsFile(dbMetadata);
   writeQueriesFile(dbMetadata);
   writeSchemaDefinition(dbMetadata);
-  process.exit()
+  // process.exit()
 }
 
 // Starts here for model file generation
@@ -151,8 +153,8 @@ var graphQLData = function() {
   GraphQLNonNull
 } from 'graphql';
 
-var knex = require('../database/connection');
-var jwt = require('jsonwebtoken');`
+var knex = require('../database/connection'),
+    jwt = require('jsonwebtoken');`
 }
 
 var objectDescription = function(tableName, description) {
@@ -267,11 +269,7 @@ var addTypeDefinitionExportStatement = function(dbMetadata) {
 // Write Queries Begins
 
 var writeQueriesFile = function(dbMetadata) {
-  var newData = `const Query = new GraphQLObjectType({
-  name: 'Query',
-  description: 'Root query object',
-  fields: () => {
-    return {`
+  var newData = `const queryFields = {`
 
   var customQueries = query.fields();
 
@@ -315,12 +313,9 @@ var writeQueriesFile = function(dbMetadata) {
     newData += queryResolveFunction(tableName)
   }
 
-  newData += queryClosingBrackets();
-  newData += '\n\n'
-
+  newData += '\n    };\n\n'
   fs.writeFileSync('./generated/queries.js', newData, 'utf-8')
 }
-
 
 var queryTableArgs = function(column, psqlType) {
   return `\n          ${column}: {
@@ -370,23 +365,17 @@ var queryResolveFunction = function(tableName) {
       },`
 }
 
-var queryClosingBrackets = function() {
-  return `\n    };
-  }
-});`
-}
-
 // writeQueries ends here
 
 // writeMutations starts here
 
 var writeMutationsFile = function(dbMetadata) {
-  var newData = mutationHeader();
+  var newData = `const mutationFields = {`
   var customMutations = mutation.fields();
 
   for (var customMutation in customMutations) {
     if (Object.keys(customMutations[customMutation]).length === 0) { continue; }
-    
+
     newData += h.customFieldType(customMutations, customMutation)
 
     for (var arg in customMutations[customMutation].args) {
@@ -423,17 +412,9 @@ var writeMutationsFile = function(dbMetadata) {
     };
   };
   newData = newData.slice(0, -1);
-  newData += closingBrackets();
+  newData += '\n    };';
   fs.writeFileSync('./generated/mutations.js', newData, 'utf-8')
 };
-
-var mutationHeader = function() {
-  return `const Mutation = new GraphQLObjectType({
-  name: 'Mutation',
-  description: 'Functions to set stuff',
-  fields () {
-    return {`
-}
 
 var mutationLogin = function(tableData) {
   var newData = `\n      login: {
@@ -618,10 +599,10 @@ var writeSchemaDefinition = function(dbMetadata) {
   schema += fs.readFileSync('./generated/queries.js', 'utf-8');
   schema += fs.readFileSync('./generated/mutations.js', 'utf-8');
 
-  schema += '\n\n' + `exports.Schema = new GraphQLSchema({
-  query: Query,
-  mutation: Mutation
-});`
+  schema += '\n\n' + `module.exports = {
+  queryFields,
+  mutationFields
+};`
 
   fs.writeFileSync('./generated/schema.js', schema, 'utf-8');
 }
