@@ -23,18 +23,18 @@ var port = process.env.PORT || 4000;
 
 var GraphQLServer = function () {};
 
-GraphQLServer.prototype.run = function() {
-  const schema = require("./generated/schema.js").Schema;
 
-  app.use('/graphql', graphqlHTTP((req) => ({
-    schema: schema,
-    pretty: true,
-    graphiql: false,
-    context: req.context
-  })));
+const schema = require("./generated/schema.js").Schema;
 
-  app.listen(port, () => console.log('Our app is running on http://localhost:' + port));
-}
+app.use('/graphql', graphqlHTTP((req) => ({
+  schema: schema,
+  pretty: true,
+  graphiql: false,
+  context: req.context
+})));
+
+app.listen(port, () => console.log('Our app is running on http://localhost:' + port));
+
+
 
 // exports.GraphQLServer = new GraphQLServer();
-new graphQLServer.run()
