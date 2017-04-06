@@ -18,6 +18,41 @@ import {
 var knex = require('../database/connection');
 var jwt = require('jsonwebtoken');
 
+import DataLoader from 'dataloader';
+
+const getProjectTagsUsingProjectId = (projectIds) => {
+  var tags = []
+  for (var projectId in projectIds) {
+    tags.push(
+      knex.select('*')
+      .from('projects')
+      .leftJoin('tags_projects', 'tags_projects.project_id', 'projects.id')
+      .leftJoin('tags', 'tags_projects.tag_id', 'tags.id')
+      .where({ 'tags_projects.project_id': projectId })
+      .then(function(tags){
+        return tags
+      })
+    );
+  }
+
+  return Promise.all(tags)
+};
+
+  const TagByProjectIdLoader = new DataLoader(getProjectTagsUsingProjectId);
+  // return Post
+  //   .collection(postIds.map((id) => {
+  //     return {
+  //       id
+  //     };
+  //   }))
+  //   .load('tags')
+  //   .call('toJSON')
+  //   .then((collection) => {
+  //     return collection.map((post) => {
+  //       return post.tags;
+  //     });
+  //   });
+
 const User = new GraphQLObjectType({
   name: 'User',
   description: 'This is a table called users',
@@ -160,12 +195,8 @@ const Project = new GraphQLObjectType({
       },
       tags: {
         type: new GraphQLList(Tag),
-        resolve: (project, args) => {
-          return knex.select('*')
-          .from('projects')
-          .leftJoin('tags_projects', 'tags_projects.project_id', 'projects.id')
-          .leftJoin('tags', 'tags_projects.tag_id', 'tags.id')
-          .where({ 'tags_projects.project_id': project.id })
+        resolve: (project) => {
+          return TagByProjectIdLoader.load(project.id);
         }
       },
       users_projects: {
