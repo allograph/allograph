@@ -31,6 +31,60 @@ export class BaseUser {
   }
 }
 
+export class BaseTag {
+  tags(args) {
+    return knex('tags').where(args);
+  }
+
+  createTag(args) {
+    return knex.returning('id').insert({
+      title: args.title,
+    }).into('tags').then(id => {
+      return knex('tags').where({ id: id[0] }).first();
+    });
+  }
+
+  updateTag(args) {
+    return knex('tags').where({ id: args.id }).returning('id').update({
+      title: args.title,
+    }).then(id => {
+      return knex('tags').where({ id: id[0] }).first();
+    });
+  }
+
+  deleteTag(args) {
+    return knex('tags').where({ id: args.id }).del()
+  }
+}
+
+export class BaseTags_project {
+  tags_projects(args) {
+    return knex('tags_projects').where(args);
+  }
+
+  createTags_project(args) {
+    return knex.returning('id').insert({
+      project_id: args.project_id,
+      tag_id: args.tag_id,
+    }).into('tags_projects').then(id => {
+      return knex('tags_projects').where({ id: id[0] }).first();
+    });
+  }
+
+  updateTags_project(args) {
+    return knex('tags_projects').where({ id: args.id }).returning('id').update({
+      project_id: args.project_id,
+      tag_id: args.tag_id,
+    }).then(id => {
+      return knex('tags_projects').where({ id: id[0] }).first();
+    });
+  }
+
+  deleteTags_project(args) {
+    return knex('tags_projects').where({ id: args.id }).del()
+  }
+}
+
 export class BaseProject {
   projects(args) {
     return knex('projects').where(args);

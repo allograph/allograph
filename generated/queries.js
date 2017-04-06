@@ -37,6 +37,39 @@ const Query = new GraphQLObjectType({
           return user.users(args);
         }
       },
+      tags: {
+        type: new GraphQLList(Tag),
+        args: {
+          id: {
+            type: GraphQLInt
+          },
+          title: {
+            type: GraphQLString
+          }
+        },
+        resolve (root, args, context) {
+          var tag = new TagClass()
+          return tag.tags(args);
+        }
+      },
+      tags_projects: {
+        type: new GraphQLList(Tags_project),
+        args: {
+          id: {
+            type: GraphQLInt
+          },
+          project_id: {
+            type: GraphQLInt
+          },
+          tag_id: {
+            type: GraphQLInt
+          }
+        },
+        resolve (root, args, context) {
+          var tags_project = new Tags_projectClass()
+          return tags_project.tags_projects(args);
+        }
+      },
       projects: {
         type: new GraphQLList(Project),
         args: {

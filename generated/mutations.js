@@ -54,6 +54,90 @@ const Mutation = new GraphQLObjectType({
           return user.deleteUser(args);
         }
       },
+      addTag: {
+        type: Tag,
+        args: {
+          title: {
+            type: GraphQLString
+          }
+        },
+        resolve (root, args, context) {
+          var tag = new TagClass()
+          return tag.createTag(args);
+        }
+      },
+      updateTag: {
+        type: Tag,
+        args: {
+          id: {
+            type: new GraphQLNonNull(GraphQLInt)
+          },
+          title: {
+            type: GraphQLString
+          }
+        },
+        resolve (root, args, context) {
+          var tag = new TagClass()
+          return tag.updateTag(args);
+        }
+      },
+      deleteTag: {
+        type: Tag,
+        args: {
+          id: {
+            type: new GraphQLNonNull(GraphQLInt)
+          }
+        },
+        resolve (root, args, context) {
+          var tag = new TagClass()
+          return tag.deleteTag(args);
+        }
+      },
+      addTags_project: {
+        type: Tags_project,
+        args: {
+          project_id: {
+            type: GraphQLInt
+          },
+          tag_id: {
+            type: GraphQLInt
+          }
+        },
+        resolve (root, args, context) {
+          var tags_project = new Tags_projectClass()
+          return tags_project.createTags_project(args);
+        }
+      },
+      updateTags_project: {
+        type: Tags_project,
+        args: {
+          id: {
+            type: new GraphQLNonNull(GraphQLInt)
+          },
+          project_id: {
+            type: GraphQLInt
+          },
+          tag_id: {
+            type: GraphQLInt
+          }
+        },
+        resolve (root, args, context) {
+          var tags_project = new Tags_projectClass()
+          return tags_project.updateTags_project(args);
+        }
+      },
+      deleteTags_project: {
+        type: Tags_project,
+        args: {
+          id: {
+            type: new GraphQLNonNull(GraphQLInt)
+          }
+        },
+        resolve (root, args, context) {
+          var tags_project = new Tags_projectClass()
+          return tags_project.deleteTags_project(args);
+        }
+      },
       addProject: {
         type: Project,
         args: {
