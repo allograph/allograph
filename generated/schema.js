@@ -18,41 +18,6 @@ import {
 var knex = require('../database/connection');
 var jwt = require('jsonwebtoken');
 
-import DataLoader from 'dataloader';
-
-const getProjectTagsUsingProjectId = (projectIds) => {
-  var tags = []
-  for (var projectId in projectIds) {
-    tags.push(
-      knex.select('*')
-      .from('projects')
-      .leftJoin('tags_projects', 'tags_projects.project_id', 'projects.id')
-      .leftJoin('tags', 'tags_projects.tag_id', 'tags.id')
-      .where({ 'tags_projects.project_id': projectId })
-      .then(function(tags){
-        return tags
-      })
-    );
-  }
-
-  return Promise.all(tags)
-};
-
-  const TagByProjectIdLoader = new DataLoader(getProjectTagsUsingProjectId);
-  // return Post
-  //   .collection(postIds.map((id) => {
-  //     return {
-  //       id
-  //     };
-  //   }))
-  //   .load('tags')
-  //   .call('toJSON')
-  //   .then((collection) => {
-  //     return collection.map((post) => {
-  //       return post.tags;
-  //     });
-  //   });
-
 const User = new GraphQLObjectType({
   name: 'User',
   description: 'This is a table called users',
@@ -189,14 +154,10 @@ const Project = new GraphQLObjectType({
       },
       user: {
         type: User,
-        resolve (project, args, context) {
+        resolve (project, args, {loaders}) {
           return knex('users').where({ id: project.user_id }).first();
-        }
-      },
-      tags: {
-        type: new GraphQLList(Tag),
-        resolve: (project) => {
-          return TagByProjectIdLoader.load(project.id);
+          // console.log(project.user_id)
+          // return loaders.person.load(project.user_id)
         }
       },
       users_projects: {
@@ -240,8 +201,10 @@ const Users_project = new GraphQLObjectType({
       },
       user: {
         type: User,
-        resolve (users_project, args, context) {
+        resolve (users_project, args, {loaders}) {
           return knex('users').where({ id: users_project.users_id }).first();
+          // console.log(users_project.users_id)
+          // return loaders.person.load(users_project.users_id)
         }
       },
       project: {
@@ -301,7 +264,7 @@ const Query = new GraphQLObjectType({
           },
           title: {
             type: GraphQLString
-          },
+          }
         },
         resolve (root, args, context) {
           var tag = new TagClass()
@@ -337,7 +300,7 @@ const Query = new GraphQLObjectType({
           },
           user_id: {
             type: GraphQLInt
-          },        
+          }
         },
         resolve (root, args, context) {
           var project = new ProjectClass()
