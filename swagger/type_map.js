@@ -125,6 +125,5 @@ function mapParametersToFields(parameters, endpointLocation, typeName) {
 
 module.exports = {
   createGQLObject,
-  mapParametersToFields,
-  getTypeFields
+  mapParametersToFields
 };

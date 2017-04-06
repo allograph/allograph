@@ -53,7 +53,7 @@ function getRequestOptions(endpoint, fixture, baseUrl) {
         break;
     }
   });
-console.log(reqOpts)
+
   return reqOpts;
 }
 

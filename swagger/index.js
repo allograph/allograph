@@ -25,6 +25,7 @@ function resolver(endpoint) {
       baseUrl: opts.GQLProxyBaseUrl
     });
     return rp(req).then(res => {
+      console.log(res);
       return JSON.parse(res);
     }).catch(e => {
       throw e;
