@@ -4,7 +4,7 @@ const mutationFields = require("../generated/schema.js").mutationFields;
 var fs = require('fs');
 
 const build = function() {
-  if (fs.statSync('./swagger/swagger.json').size < 2) {
+  if (fs.statSync('./swagger/swagger.json').size > 2) {
     const swaggerQuery = require('../swagger').queryFields('./swagger/swagger.json');
     const swaggerMutation = require('../swagger').mutationFields('./swagger/swagger.json');
 
