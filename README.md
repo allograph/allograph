@@ -1,37 +1,3 @@
-# allograph
-```
-.
-|
-├── build
-|   └── allo.js              # you can check commands here
-├── database
-|   ├── connection.js
-|   ├── data.js
-|   └── migration_generator.js
-├── examples
-├── generated
-|   ├── model.js
-|   ├── mutations.js
-|   ├── queries.js
-|   ├── schema.js
-|   ├── schema.json
-|   └── type_definition.js
-├── migrations
-├── schema
-|   ├── graphql_generator.js
-|   ├── mutations.js         # define your mutations in this file
-|   ├── queries.js           # define your queries in this file
-|   └── helper.js
-├── test
-├── index.js
-├── server.js
-├── knexfile.js
-├── package.json
-├── .gitignore
-├── .babelrc
-└── README.md
-```
-
 # Allograph
 
 *A GraphQL framework that automatically generates a GraphQL schema from inspecting a PostgreSQL database and allows for easy configuration and modification.*
