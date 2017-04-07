@@ -216,16 +216,16 @@ var closingBrackets = function() {
 }
 
 var writeTypesFile = function(dbMetadata) {
-  console.log(Object.keys(customTypes).includes('Trainer'));
   var data = graphQLData();
+  var notOverwrittenTableNames = []
   for (var table in dbMetadata.tables) {
 
     if (Object.keys(customTypes).includes(singularCapitalizedTableName(table))) {
       continue;
     }
     if (dbMetadata.tables.hasOwnProperty(table)) {
-
       var objTypeName = singularCapitalizedTableName(h.toCamelCase(table));
+      notOverwrittenTableNames.push(objTypeName)
       var description = dbMetadata.tables[table].description;
       data += objectDescription(objTypeName, description);
 
@@ -248,41 +248,33 @@ var writeTypesFile = function(dbMetadata) {
 
   data += '\n\n'
 
-  addTypeDefinitionExportStatement(data, dbMetadata, Object.keys(customTypes));
+  addTypeDefinitionExportStatement(data, dbMetadata, Object.keys(customTypes), notOverwrittenTableNames);
 
-  var importStatements = typeImportStatements() + customtypeImportStatements() + graphQLData() + "\n\n";
+  var importStatements = typeImportStatements(notOverwrittenTableNames) + customtypeImportStatements(Object.keys(customTypes)) + graphQLData() + "\n\n";
 
   fs.writeFileSync('./generated/schema.js', importStatements, 'utf-8');
 }
 
- var customtypeImportStatements = function() {
-  return "import { Trainer } from '../schema/custom_type_definitions'\n\n"
+ var customtypeImportStatements = function(customTypes) {
+  if (customTypes != 'default') {
+    return "import { " + customTypes.join(', ') + " } from '../schema/custom_type_definitions'\n\n";
+  } else {
+    return '';
+  }
  }
 
-var typeImportStatements = function() {
-  return "import { Pokemon } from './type_definitions'\n\n"
+var typeImportStatements = function(defaultTypes) {
+  if (defaultTypes != 'default') {
+    return "import { " + defaultTypes.join(', ') + " } from './type_definitions'\n\n";
+  } else {
+    return '';
+  }
 }
 
-var addTypeDefinitionExportStatement = function(data, dbMetadata, customTypes) {
+var addTypeDefinitionExportStatement = function(data, dbMetadata, customTypes, defaultTypes) {
   // var schema = fs.readFileSync('./generated/schema.js', 'utf-8')
-  var importCustomtoDefault = customtypeImportStatements();
-
-  var exportStatement = `\n\nexport {`;
-
-  for (var tableName in dbMetadata.tables) {
-    var singularLowercaseTableName = lingo.en.singularize(tableName);
-    var singularCapitalizedTableName = lingo.capitalize(singularLowercaseTableName);    
-
-    if (customTypes.includes(singularCapitalizedTableName)) {
-      continue;
-    }
-
-    exportStatement += ` ${singularCapitalizedTableName},`
-  }
-
-  exportStatement = exportStatement.slice(0, -1);
-  data += exportStatement + " }"
-
+  var importCustomtoDefault = customtypeImportStatements(customTypes);
+  data += "export { " + defaultTypes.join(', ') + " }"
   var toWrite = importCustomtoDefault + data
 
   fs.writeFileSync('./generated/type_definitions.js', toWrite, 'utf-8');
