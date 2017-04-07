@@ -42,6 +42,7 @@ function replaceOddChars(str) {
  * @returns Promise<T>
  */
 function getAllEndPoints(schema) {
+  console.log('retrieving schema');
   const allTypes = {};
   Object.keys(schema.paths).forEach(path => {
     const route = schema.paths[path];

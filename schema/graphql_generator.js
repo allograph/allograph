@@ -241,12 +241,20 @@ var writeTypesFile = function(dbMetadata) {
   };
 
   data += '\n\n'
-  fs.writeFileSync('./generated/schema.js', data, 'utf-8');
-  addTypeDefinitionExportStatement(dbMetadata);
+
+  addTypeDefinitionExportStatement(data, dbMetadata);
+
+  var importStatements = typeImportStatements() + graphQLData() + "\n\n";
+
+  fs.writeFileSync('./generated/schema.js', importStatements, 'utf-8');
 }
 
-var addTypeDefinitionExportStatement = function(dbMetadata) {
-  var schema = fs.readFileSync('./generated/schema.js', 'utf-8')
+var typeImportStatements = function() {
+  return "import { Trainer, Pokemon } from './type_definitions'\n\n"
+}
+
+var addTypeDefinitionExportStatement = function(data, dbMetadata) {
+  // var schema = fs.readFileSync('./generated/schema.js', 'utf-8')
   var exportStatement = `\n\nexport {`
 
   for (var tableName in dbMetadata.tables) {
@@ -256,9 +264,9 @@ var addTypeDefinitionExportStatement = function(dbMetadata) {
   }
 
   exportStatement = exportStatement.slice(0, -1);
-  schema = schema + exportStatement + " }"
+  data += exportStatement + " }"
 
-  fs.writeFileSync('./generated/type_definitions.js', schema, 'utf-8');
+  fs.writeFileSync('./generated/type_definitions.js', data, 'utf-8');
 }
 
 // Translating to GraphQL Type ends here
