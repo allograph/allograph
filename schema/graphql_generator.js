@@ -74,8 +74,8 @@ var knex = require('../database/connection');`
 
 var modelData = function(tableInfo) {
   var tableName = tableInfo.name,
-      pluralTableName = lingo.en.pluralize(h.toCamelCase(tableName)),
       singularTableName = lingo.en.singularize(h.toCamelCase(tableName)),
+      pluralTableName = lingo.en.pluralize(h.toCamelCase(singularTableName)),
       singularCapitalizedTableName = lingo.capitalize(singularTableName),
       validArgs = toArgs(tableInfo.fields);
 
@@ -275,6 +275,7 @@ var addTypeDefinitionExportStatement = function(data, dbMetadata, customTypes, d
   // var schema = fs.readFileSync('./generated/schema.js', 'utf-8')
   var importCustomtoDefault = customtypeImportStatements(customTypes);
   data += "export { " + defaultTypes.join(', ') + " }"
+
   var toWrite = importCustomtoDefault + data
 
   fs.writeFileSync('./generated/type_definitions.js', toWrite, 'utf-8');
