@@ -27,13 +27,8 @@
     "express-jwt": "^5.1.0",
     "graphiql": "^0.9.3",
     "graphql": "^0.9.1",
-<<<<<<< HEAD
     "graphql-errors": "^2.1.0",
-    "knex": "^0.12.8",
-    "lingo": "0.0.5",
-    "pg": "^4.5.6",
-    "xmlhttprequest": "^1.8.0",
-=======
+    "json-bigint": "^0.2.3",
     "json-schema-ref-parser": "^3.1.2",
     "knex": "^0.12.8",
     "lingo": "0.0.5",
@@ -43,7 +38,6 @@
     "xmlhttprequest": "^1.8.0"
   },
   "devDependencies": {
->>>>>>> swagger
     "babel-cli": "^6.24.0"
   }
 }

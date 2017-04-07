@@ -1,5 +1,6 @@
 'use strict';
 
+const JSONbig = require('json-bigint');
 const rp = require('request-promise');
 const {GraphQLSchema, GraphQLObjectType} = require('graphql');
 const {getAllEndPoints, loadSchema} = require('./swagger');
@@ -25,8 +26,7 @@ function resolver(endpoint) {
       baseUrl: opts.GQLProxyBaseUrl
     });
     return rp(req).then(res => {
-      console.log(res);
-      return JSON.parse(res);
+      return JSONbig.parse(res);
     }).catch(e => {
       throw e;
     });
