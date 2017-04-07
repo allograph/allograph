@@ -1,3 +1,5 @@
+import { Trainer } from '../schema/custom_type_definitions'
+
 import {
   GraphQLObjectType,
   GraphQLString,
@@ -10,33 +12,6 @@ import {
 
 var knex = require('../database/connection'),
     jwt = require('jsonwebtoken');
-
-const Trainer = new GraphQLObjectType({
-  name: 'Trainer',
-  description: 'This is a table called trainers',
-  fields: () => {
-    return {
-      id: {
-        type: new GraphQLNonNull(GraphQLString),
-        resolve (trainer, args, context) {
-          return trainer.id;
-        }
-      },
-      name: {
-        type: GraphQLString,
-        resolve (trainer, args, context) {
-          return trainer.name;
-        }
-      },
-      pokemons: {
-        type: new GraphQLList(Pokemon),
-        resolve (Trainer, args, context) {
-          return knex('pokemons').where({ trainer_id: Trainer.id });
-        }
-      },
-    };
-  }
-});
 
 const Pokemon = new GraphQLObjectType({
   name: 'Pokemon',
@@ -79,4 +54,4 @@ const Pokemon = new GraphQLObjectType({
 
 
 
-export { Trainer, Pokemon }
+export { Pokemon }

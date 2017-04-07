@@ -7,6 +7,8 @@ var fs = require('fs'),
     query = require('./queries.js').Query,
     mutation = require('./mutations.js').Mutation;
 
+import * as customTypes from './custom_type_definitions'
+
 import {
   GraphQLObjectType,
   GraphQLInputObjectType,
@@ -214,9 +216,13 @@ var closingBrackets = function() {
 }
 
 var writeTypesFile = function(dbMetadata) {
+  console.log(Object.keys(customTypes).includes('Trainer'));
   var data = graphQLData();
   for (var table in dbMetadata.tables) {
 
+    if (Object.keys(customTypes).includes(singularCapitalizedTableName(table))) {
+      continue;
+    }
     if (dbMetadata.tables.hasOwnProperty(table)) {
 
       var objTypeName = singularCapitalizedTableName(h.toCamelCase(table));
@@ -242,31 +248,44 @@ var writeTypesFile = function(dbMetadata) {
 
   data += '\n\n'
 
-  addTypeDefinitionExportStatement(data, dbMetadata);
+  addTypeDefinitionExportStatement(data, dbMetadata, Object.keys(customTypes));
 
-  var importStatements = typeImportStatements() + graphQLData() + "\n\n";
+  var importStatements = typeImportStatements() + customtypeImportStatements() + graphQLData() + "\n\n";
 
   fs.writeFileSync('./generated/schema.js', importStatements, 'utf-8');
 }
 
+ var customtypeImportStatements = function() {
+  return "import { Trainer } from '../schema/custom_type_definitions'\n\n"
+ }
+
 var typeImportStatements = function() {
-  return "import { Trainer, Pokemon } from './type_definitions'\n\n"
+  return "import { Pokemon } from './type_definitions'\n\n"
 }
 
-var addTypeDefinitionExportStatement = function(data, dbMetadata) {
+var addTypeDefinitionExportStatement = function(data, dbMetadata, customTypes) {
   // var schema = fs.readFileSync('./generated/schema.js', 'utf-8')
-  var exportStatement = `\n\nexport {`
+  var importCustomtoDefault = customtypeImportStatements();
+
+  var exportStatement = `\n\nexport {`;
 
   for (var tableName in dbMetadata.tables) {
     var singularLowercaseTableName = lingo.en.singularize(tableName);
-    var singularCapitalizedTableName = lingo.capitalize(singularLowercaseTableName);
+    var singularCapitalizedTableName = lingo.capitalize(singularLowercaseTableName);    
+
+    if (customTypes.includes(singularCapitalizedTableName)) {
+      continue;
+    }
+
     exportStatement += ` ${singularCapitalizedTableName},`
   }
 
   exportStatement = exportStatement.slice(0, -1);
   data += exportStatement + " }"
 
-  fs.writeFileSync('./generated/type_definitions.js', data, 'utf-8');
+  var toWrite = importCustomtoDefault + data
+
+  fs.writeFileSync('./generated/type_definitions.js', toWrite, 'utf-8');
 }
 
 // Translating to GraphQL Type ends here

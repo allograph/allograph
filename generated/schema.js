@@ -2,7 +2,9 @@
 
 import { Trainer as TrainerClass } from '../schema/models/trainer'
 import { Pokemon as PokemonClass } from '../schema/models/pokemon'
-import { Trainer, Pokemon } from './type_definitions'
+import { Pokemon } from './type_definitions'
+
+import { Trainer } from '../schema/custom_type_definitions'
 
 import {
   GraphQLObjectType,

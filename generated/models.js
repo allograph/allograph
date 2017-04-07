@@ -2,7 +2,7 @@
 var knex = require('../database/connection');
 
 export class BaseTrainer {
-  trainers(args) {
+  trainerses(args) {
     return knex('trainers').where(args);
   }
 

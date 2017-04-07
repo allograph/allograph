@@ -11,6 +11,8 @@ import {
 var knex = require('../database/connection');
 var jwt = require('jsonwebtoken');
 
+import { Pokemon } from '../generated/type_definitions'
+
 const Trainer = new GraphQLObjectType({
   name: 'Trainer',
   description: 'This is a table called trainers',
@@ -44,41 +46,4 @@ const Trainer = new GraphQLObjectType({
   }
 });
 
-const Pokemon = new GraphQLObjectType({
-  name: 'Pokemon',
-  description: 'This is a table called pokemons',
-  fields: () => {
-    return {
-      id: {
-        type: GraphQLString,
-        resolve (pokemon, args, context) {
-          return pokemon.id;
-        }
-      },
-      url: {
-        type: new GraphQLNonNull(GraphQLString),
-        resolve (pokemon, args, context) {
-          return pokemon.url;
-        }
-      },
-      name: {
-        type: new GraphQLNonNull(GraphQLString),
-        resolve (pokemon, args, context) {
-          return pokemon.name;
-        }
-      },
-      trainer_id: {
-        type: GraphQLString,
-        resolve (pokemon, args, context) {
-          return pokemon.trainer_id;
-        }
-      },
-      trainer: {
-        type: Trainer,
-        resolve (pokemon, args, context) {
-          return knex('trainers').where({ id: pokemon.trainer_id }).first();
-        }
-      },
-    };
-  }
-});
+export { Trainer }
