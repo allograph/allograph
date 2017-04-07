@@ -39,9 +39,6 @@ var Helper = {
     newData += `\n          args: {`
     return newData;
   },
-  helloWorld: function() {
-    console.log('Hello World')
-  },
   customArgsType: function(arg, type) {
     var typemap = {
       'Int': 'GraphQLInt',
@@ -68,9 +65,9 @@ var Helper = {
     return lingo.capitalize(singularName);
   },
   toCamelCase: function(str) {
-    return str.replace(/(?:^\w|[A-Z]|\b\w)/g, function(letter, index) {
+    return str.replace(/(?:^\w|[A-Z]|\b\w|[-_]\w)/g, function(letter, index) {
       return index === 0 ? letter.toLowerCase() : letter.toUpperCase();
-    }).replace(/\s+/g, '');
+    }).replace(/\s+|[-_]/g, '');
   }
 }
 

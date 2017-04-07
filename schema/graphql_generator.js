@@ -5,9 +5,7 @@ var fs = require('fs'),
     GraphqlGenerator = function () {},
     h = require('./helper.js'),
     query = require('./queries.js').Query,
-    mutation = require('./mutations.js').Mutation,
-    swaggerQuery = require('../swagger').queryFields('./swagger/swagger.json'),
-    swaggerMutation = require('../swagger').mutationFields('./swagger/swagger.json');
+    mutation = require('./mutations.js').Mutation;
 
 import {
   GraphQLObjectType,
@@ -34,7 +32,7 @@ GraphqlGenerator.prototype.printMetadata = function(dbMetadata) {
 var writeModelFiles = function(dbMetadata) {
   for (var property in dbMetadata.tables) {
     var singularLowercaseTableName = lingo.en.singularize(property).toLowerCase();
-    var singularCapitalizedTableName = lingo.capitalize(singularLowercaseTableName)
+    var singularCapitalizedTableName = lingo.capitalize(h.toCamelCase(singularLowercaseTableName))
 
     var data = `import { Base${singularCapitalizedTableName} } from '../../generated/models'
 var knex = require('../../database/connection');\n
@@ -73,11 +71,11 @@ var knex = require('../database/connection');`
 }
 
 var modelData = function(tableInfo) {
-  var tableName = tableInfo.name
-  var pluralTableName = lingo.en.pluralize(lingo.en.singularize(tableName))
-  var singularTableName = lingo.en.singularize(tableName)
-  var singularCapitalizedTableName = lingo.capitalize(singularTableName)
-  var validArgs = toArgs(tableInfo.fields);
+  var tableName = tableInfo.name,
+      pluralTableName = lingo.en.pluralize(h.toCamelCase(tableName)),
+      singularTableName = lingo.en.singularize(h.toCamelCase(tableName)),
+      singularCapitalizedTableName = lingo.capitalize(singularTableName),
+      validArgs = toArgs(tableInfo.fields);
 
   var data = `\n\nexport class Base${singularCapitalizedTableName} {
   ${pluralTableName}(args) {
@@ -172,23 +170,22 @@ var singularCapitalizedTableName = function(name) {
 }
 
 var foreignKeyColumnData = function(column, tableName, pk_column, fk_column, psqlType) {
-  var lowercaseTableName = tableName.toLowerCase(),
-      listType = psqlType.match(/\[(\w+)\]/),
+  var listType = psqlType.match(/\[(\w+)\]/),
       args,
       returnValue = `;`,
       fieldName = column;
 
   if (listType) {
-    args = `{ ${fk_column}: ${lowercaseTableName}.${pk_column} }`
+    args = `{ ${fk_column}: ${tableName}.${pk_column} }`
   } else {
-    args = `{ ${pk_column}: ${lowercaseTableName}.${fk_column} }`
+    args = `{ ${pk_column}: ${tableName}.${fk_column} }`
     returnValue = `.first();`
-    fieldName = lingo.en.singularize(column);
+    fieldName = lingo.en.singularize(h.toCamelCase(column));
   }
 
   return '\n      ' + fieldName + `: {
         type: ` + psqlTypeToGraphQLType(psqlType) + `,
-        resolve (` + lowercaseTableName + `, args, context) {
+        resolve (` + tableName + `, args, context) {
           return knex('${column}').where(` + args + `)` + returnValue + `
         }
       },`
@@ -202,7 +199,7 @@ var columnData = function(column, table, psqlType, is_nullable) {
     typeData += psqlTypeToGraphQLType(psqlType) + `,`
   }
 
-  return '\n      ' + column + `: {` + typeData +
+  return '\n      ' + h.toCamelCase(column) + `: {` + typeData +
 `\n        resolve (` + lingo.en.singularize(table) + `, args, context) {
           return ` + lingo.en.singularize(table) + '.' + column + `;
         }
@@ -222,7 +219,7 @@ var writeTypesFile = function(dbMetadata) {
 
     if (dbMetadata.tables.hasOwnProperty(table)) {
 
-      var objTypeName = singularCapitalizedTableName(table);
+      var objTypeName = singularCapitalizedTableName(h.toCamelCase(table));
       var description = dbMetadata.tables[table].description;
       data += objectDescription(objTypeName, description);
 
@@ -254,7 +251,7 @@ var addTypeDefinitionExportStatement = function(dbMetadata) {
 
   for (var tableName in dbMetadata.tables) {
     var singularLowercaseTableName = lingo.en.singularize(tableName);
-    var singularCapitalizedTableName = lingo.capitalize(singularLowercaseTableName)
+    var singularCapitalizedTableName = lingo.capitalize(singularLowercaseTableName);
     exportStatement += ` ${singularCapitalizedTableName},`
   }
 
@@ -318,16 +315,17 @@ var writeQueriesFile = function(dbMetadata) {
 }
 
 var queryTableArgs = function(column, psqlType) {
-  return `\n          ${column}: {
+  return `\n          ${h.toCamelCase(column)}: {
             type: ` + psqlTypeToGraphQLType(psqlType) + `
           },`
 }
 
 var queryTableHeader = function(tableName) {
-  var lowercasePluralTableName = lingo.en.pluralize(tableName.toLowerCase());
+  var camelCasePluralTableName = lingo.en.pluralize(h.toCamelCase(tableName)),
+      graphQLObjName = lingo.capitalize(h.toCamelCase(tableName));
 
-  return `\n      ${lowercasePluralTableName}: {
-        type: new GraphQLList(${tableName}),
+  return `\n      ${camelCasePluralTableName}: {
+        type: new GraphQLList(${graphQLObjName}),
         args: {`
 }
 
@@ -343,23 +341,25 @@ var psqlTypeToGraphQLType = function(psqlType) {
       }
 
   if (listType) {
-    return 'new GraphQLList(' + lingo.capitalize(lingo.en.singularize(listType[1])) + ')';
+    return 'new GraphQLList(' + lingo.capitalize(h.toCamelCase(listType[1])) + ')';
   } else if (typeMap[psqlType]) {
     return typeMap[psqlType];
   } else if (timestamp) {
     return 'GraphQLString';
   } else {
-    return lingo.en.singularize(psqlType);
+    return lingo.capitalize(lingo.en.singularize(h.toCamelCase(psqlType)));
   }
 }
 
 var queryResolveFunction = function(tableName) {
-  var lowercaseTableName = tableName.toLowerCase();
-  var pluralizedLowercaseTableName = lingo.en.pluralize(lowercaseTableName)
+  var capitalizeTableName = lingo.capitalize(h.toCamelCase(tableName)),
+      lowercaseTableName = h.toCamelCase(tableName),
+      pluralizedLowercaseTableName = lingo.en.pluralize(lowercaseTableName);
+
   return `
         },
         resolve (root, args, context) {
-          var ${lowercaseTableName} = new ${tableName}Class()
+          var ${lowercaseTableName} = new ${capitalizeTableName}Class()
           return ${lowercaseTableName}.${pluralizedLowercaseTableName}(args);
         }
       },`
@@ -400,14 +400,16 @@ var writeMutationsFile = function(dbMetadata) {
 
   for (var property in dbMetadata.tables) {
     if (dbMetadata.tables.hasOwnProperty(property)) {
-      if (!Object.keys(customMutations).includes("add" + h.singularCapitalizedTableName(property))) {
-        newData += mutationAdd(property, dbMetadata.tables[property]);
+      var propertyCamelCase = h.toCamelCase(property);
+
+      if (!Object.keys(customMutations).includes("add" + h.singularCapitalizedTableName(propertyCamelCase))) {
+        newData += mutationAdd(propertyCamelCase, dbMetadata.tables[property]);
       }
-      if (!Object.keys(customMutations).includes("update" + h.singularCapitalizedTableName(property))) {
-      newData += mutationUpdate(property, dbMetadata.tables[property]);
+      if (!Object.keys(customMutations).includes("update" + h.singularCapitalizedTableName(propertyCamelCase))) {
+      newData += mutationUpdate(propertyCamelCase, dbMetadata.tables[property]);
       }
-      if (!Object.keys(customMutations).includes("delete" + h.singularCapitalizedTableName(property))) {
-      newData += mutationDelete(property, dbMetadata.tables[property]);
+      if (!Object.keys(customMutations).includes("delete" + h.singularCapitalizedTableName(propertyCamelCase))) {
+      newData += mutationDelete(propertyCamelCase, dbMetadata.tables[property]);
       }
     };
   };
@@ -469,17 +471,17 @@ var mutationAdd = function(pluralLowercaseTableName, tableData) {
     if (validForMutation(psqlType) && column !== 'id') {
       var graphQLType = psqlTypeToGraphQLType(psqlType);
       if (!tableData.fields[column].is_nullable) {
-        newData += `\n          ${column}: {
+        newData += `\n          ${h.toCamelCase(column)}: {
             type: new GraphQLNonNull(${graphQLType})
           },`;
       } else {
-        newData += `\n          ${column}: {
+        newData += `\n          ${h.toCamelCase(column)}: {
             type: ${graphQLType}
           },`;
       }
     } else if (pk_datatype) {
       var pk_graphQLType = psqlTypeToGraphQLType(pk_datatype);
-      var fk_column = tableData.fields[column].fk_column;
+      var fk_column = h.toCamelCase(tableData.fields[column].fk_column);
 
       newData += `\n          ${fk_column}: {
             type: new GraphQLNonNull(${pk_graphQLType})
@@ -511,11 +513,11 @@ var mutationUpdate = function(pluralLowercaseTableName, tableData) {
     if (validForMutation(psqlType)) {
       var graphQLType = psqlTypeToGraphQLType(psqlType);
       if (!tableData.fields[column].is_nullable) {
-        newData += `\n          ${column}: {
+        newData += `\n          ${h.toCamelCase(column)}: {
             type: new GraphQLNonNull(${graphQLType})
           },`;
       } else {
-        newData += `\n          ${column}: {
+        newData += `\n          ${h.toCamelCase(column)}: {
             type: ${graphQLType}
           },`;
       }
@@ -545,14 +547,16 @@ var mutationDelete = function(pluralLowercaseTableName, tableData) {
     if (validForMutation(psqlType) && column === 'id') {
       var graphQLType = psqlTypeToGraphQLType(psqlType);
       if (!tableData.fields[column].is_nullable) {
-        newData += `\n          ${column}: {
+        newData += `\n          ${h.toCamelCase(column)}: {
             type: new GraphQLNonNull(${graphQLType})
           },`;
       } else {
-        newData += `\n          ${column}: {
+        newData += `\n          ${h.toCamelCase(column)}: {
             type: ${graphQLType}
           },`;
       }
+    } else {
+      return '';
     }
   }
   newData = newData.slice(0, -1);
@@ -584,7 +588,7 @@ var importModels = function(dbMetadata) {
 
   for (var tableName in dbMetadata.tables) {
     var singularLowercaseTableName = lingo.en.singularize(tableName);
-    var singularCapitalizedTableName = lingo.capitalize(singularLowercaseTableName)
+    var singularCapitalizedTableName = lingo.capitalize(h.toCamelCase(singularLowercaseTableName))
     importStatement += `import { ${singularCapitalizedTableName} as ${singularCapitalizedTableName}Class } from '../schema/models/${singularLowercaseTableName}'\n`
   }
 
