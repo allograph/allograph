@@ -153,6 +153,8 @@ var graphQLData = function() {
   GraphQLNonNull
 } from 'graphql';
 
+import {maskErrors, UserError} from 'graphql-errors';
+
 var knex = require('../database/connection'),
     jwt = require('jsonwebtoken');`
 }
@@ -219,8 +221,8 @@ var writeTypesFile = function(dbMetadata) {
   var data = graphQLData();
   var notOverwrittenTableNames = []
   for (var table in dbMetadata.tables) {
-
-    if (Object.keys(customTypes).includes(singularCapitalizedTableName(table))) {
+    var objTypeName = singularCapitalizedTableName(h.toCamelCase(table));
+    if (Object.keys(customTypes).includes(objTypeName)) {
       continue;
     }
     if (dbMetadata.tables.hasOwnProperty(table)) {
@@ -236,7 +238,7 @@ var writeTypesFile = function(dbMetadata) {
         if (dbMetadata.tables.hasOwnProperty(column)) {
           var fk_column = dbMetadata.tables[table].fields[column].fk_column
           var pk_column = dbMetadata.tables[table].fields[column].pk_column
-          data += foreignKeyColumnData(column, objTypeName, pk_column, fk_column, psqlType);
+          data += foreignKeyColumnData(column, table, pk_column, fk_column, psqlType);
         } else {
           data += columnData(column, table, psqlType, is_nullable);
         }

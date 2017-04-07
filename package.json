@@ -35,9 +35,10 @@
     "pg": "^4.5.6",
     "request": "^2.81.0",
     "request-promise": "^4.2.0",
-    "xmlhttprequest": "^1.8.0"
+    "xmlhttprequest": "^1.8.0",
+    "babel-cli": "^6.24.0"
   },
   "devDependencies": {
-    "babel-cli": "^6.24.0"
+    "knex-logger": "^0.1.0"
   }
 }

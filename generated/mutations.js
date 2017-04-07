@@ -1,167 +1,68 @@
 const mutationFields = {
-      addUser: {
-        type: User,
+      addTrainer: {
+        type: Trainer,
         args: {
-          firstName: {
-            type: new GraphQLNonNull(GraphQLString)
-          },
-          lastName: {
-            type: new GraphQLNonNull(GraphQLString)
-          },
-          email: {
-            type: new GraphQLNonNull(GraphQLString)
-          }
-        },
-        resolve (root, args, context) {
-          var user = new UserClass()
-          return user.createUser(args);
-        }
-      },
-      updateUser: {
-        type: User,
-        args: {
-          id: {
-            type: new GraphQLNonNull(GraphQLInt)
-          },
-          firstName: {
-            type: new GraphQLNonNull(GraphQLString)
-          },
-          lastName: {
-            type: new GraphQLNonNull(GraphQLString)
-          },
-          email: {
-            type: new GraphQLNonNull(GraphQLString)
-          }
-        },
-        resolve (root, args, context) {
-          var user = new UserClass()
-          return user.updateUser(args);
-        }
-      },
-      addTag: {
-        type: Tag,
-        args: {
-          title: {
+          name: {
             type: GraphQLString
           }
         },
         resolve (root, args, context) {
-          var tag = new TagClass()
-          return tag.createTag(args);
+          var trainer = new TrainerClass()
+          return trainer.createTrainer(args);
         }
       },
-      updateTag: {
-        type: Tag,
+      updateTrainer: {
+        type: Trainer,
         args: {
           id: {
-            type: new GraphQLNonNull(GraphQLInt)
+            type: new GraphQLNonNull(GraphQLString)
           },
-          title: {
+          name: {
             type: GraphQLString
           }
         },
         resolve (root, args, context) {
-          var tag = new TagClass()
-          return tag.updateTag(args);
+          var trainer = new TrainerClass()
+          return trainer.updateTrainer(args);
         }
       },
-      addTagsProject: {
-        type: TagsProject,
+      addPokemon: {
+        type: Pokemon,
         args: {
-          projectId: {
-            type: GraphQLInt
+          url: {
+            type: new GraphQLNonNull(GraphQLString)
           },
-          tagId: {
-            type: GraphQLInt
+          name: {
+            type: new GraphQLNonNull(GraphQLString)
+          },
+          trainerId: {
+            type: GraphQLString
           }
         },
         resolve (root, args, context) {
-          var tagsProject = new TagsProjectClass()
-          return tagsProject.createTagsProject(args);
+          var pokemon = new PokemonClass()
+          return pokemon.createPokemon(args);
         }
       },
-      updateTagsProject: {
-        type: TagsProject,
+      updatePokemon: {
+        type: Pokemon,
         args: {
           id: {
-            type: new GraphQLNonNull(GraphQLInt)
-          },
-          projectId: {
-            type: GraphQLInt
-          },
-          tagId: {
-            type: GraphQLInt
-          }
-        },
-        resolve (root, args, context) {
-          var tagsProject = new TagsProjectClass()
-          return tagsProject.updateTagsProject(args);
-        }
-      },
-      addProject: {
-        type: Project,
-        args: {
-          title: {
             type: GraphQLString
           },
-          userId: {
-            type: GraphQLInt
-          }
-        },
-        resolve (root, args, context) {
-          var project = new ProjectClass()
-          return project.createProject(args);
-        }
-      },
-      updateProject: {
-        type: Project,
-        args: {
-          id: {
-            type: new GraphQLNonNull(GraphQLInt)
+          url: {
+            type: new GraphQLNonNull(GraphQLString)
           },
-          title: {
+          name: {
+            type: new GraphQLNonNull(GraphQLString)
+          },
+          trainerId: {
             type: GraphQLString
-          },
-          userId: {
-            type: GraphQLInt
           }
         },
         resolve (root, args, context) {
-          var project = new ProjectClass()
-          return project.updateProject(args);
-        }
-      },
-      addUsersProject: {
-        type: UsersProject,
-        args: {
-          usersId: {
-            type: GraphQLInt
-          },
-          projectsId: {
-            type: GraphQLInt
-          }
-        },
-        resolve (root, args, context) {
-          var usersProject = new UsersProjectClass()
-          return usersProject.createUsersProject(args);
-        }
-      },
-      updateUsersProject: {
-        type: UsersProject,
-        args: {
-          id: {
-            type: new GraphQLNonNull(GraphQLInt)
-          },
-          usersId: {
-            type: GraphQLInt
-          },
-          projectsId: {
-            type: GraphQLInt
-          }
-        },
-        resolve (root, args, context) {
-          var usersProject = new UsersProjectClass()
-          return usersProject.updateUsersProject(args);
+          var pokemon = new PokemonClass()
+          return pokemon.updatePokemon(args);
         }
       }
     };

@@ -22,3 +22,17 @@ query ($first_name: String = "rachel", $includeLastName: Boolean = true) {
     last_name @include(if: $includeLastName)
   }
 }
+
+
+query {
+  projects {
+    user {
+      id
+      users_projects {
+        user {
+          id
+        }
+      }
+    }
+  }
+}
