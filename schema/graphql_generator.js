@@ -74,8 +74,8 @@ var knex = require('../database/connection');`
 
 var modelData = function(tableInfo) {
   var tableName = tableInfo.name,
-      pluralTableName = lingo.en.pluralize(h.toCamelCase(tableName)),
       singularTableName = lingo.en.singularize(h.toCamelCase(tableName)),
+      pluralTableName = lingo.en.pluralize(h.toCamelCase(singularTableName)),
       singularCapitalizedTableName = lingo.capitalize(singularTableName),
       validArgs = toArgs(tableInfo.fields);
 
@@ -216,7 +216,6 @@ var closingBrackets = function() {
 }
 
 var writeTypesFile = function(dbMetadata) {
-  console.log(Object.keys(customTypes).includes('Trainer'));
   var data = graphQLData();
   for (var table in dbMetadata.tables) {
 
@@ -271,7 +270,7 @@ var addTypeDefinitionExportStatement = function(data, dbMetadata, customTypes) {
 
   for (var tableName in dbMetadata.tables) {
     var singularLowercaseTableName = lingo.en.singularize(tableName);
-    var singularCapitalizedTableName = lingo.capitalize(singularLowercaseTableName);    
+    var singularCapitalizedTableName = lingo.capitalize(singularLowercaseTableName);
 
     if (customTypes.includes(singularCapitalizedTableName)) {
       continue;
