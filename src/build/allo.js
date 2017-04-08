@@ -1,8 +1,10 @@
 #!/usr/bin/env babel-node
+var fs = require('fs-extra');
+var pathname = process.cwd()
 const program = require('commander'); 
-const dbTranslator = require('../index.js').DBTranslator;
-const knex = require('../database/connection.js')
-const migrationGenerator = require('../database/migration_generator.js').MigrationGenerator
+const dbTranslator = require(pathname + '/index.js').DBTranslator;
+const knex = require(pathname + '/database/connection.js')
+const migrationGenerator = require(pathname + '/database/migration_generator.js').MigrationGenerator
 
 program
   .version('0.0.1')
@@ -13,7 +15,7 @@ program
   .command('server')
   .description('Start Allograph server')
   .action(function(req,optional){
-    const graphQLServer = require('../server.js').GraphQLServer;
+    const graphQLServer = require(pathname + '/server.js').GraphQLServer;
     graphQLServer.run()
   });
 
@@ -28,14 +30,14 @@ program
   .command('migrate')
   .description("Runs all migrations that have not yet been run.")
   .action(function(req,optional){
-    knex.migrate.latest({directory: "./migrations"});
+    knex.migrate.latest({directory: pathname + "/migrations"});
   });
 
 program
   .command('migrate:rollback')
   .description("Rolls back the latest migration group.")
   .action(function(req,optional){
-    knex.migrate.rollback({directory: "./migrations"});
+    knex.migrate.rollback({directory: pathname + "/migrations"});
   });
 
 program

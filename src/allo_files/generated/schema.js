@@ -22,6 +22,48 @@ var knex = require('../database/connection'),
     jwt = require('jsonwebtoken');
 
 const queryFields = {
+      pokemonsStartWithP: {
+          type: new GraphQLList(Pokemon),
+          args: {
+          id: {
+            type: GraphQLString
+          },
+          url: {
+            type: GraphQLString
+          },
+          name: {
+            type: GraphQLString
+          },
+          trainerId: {
+            type: GraphQLString
+          },
+        },
+        resolve(root, args, context) {
+          return knex('pokemons').where('name', 'like', 'P%');
+        }
+      },
+      Trainer: {
+          type: Trainer,
+          args: {
+          name: {
+            type: GraphQLString
+          },
+        },
+        resolve(root, args, context) {
+          return knex('trainers').where({ name: args.name }).first();
+        }
+      },
+      Pokemon: {
+          type: Pokemon,
+          args: {
+          id: {
+            type: GraphQLString
+          },
+        },
+        resolve(root, args, context) {
+          return knex('pokemons').where({ id: args.id }).first();
+        }
+      },
       trainers: {
         type: new GraphQLList(Trainer),
         args: {

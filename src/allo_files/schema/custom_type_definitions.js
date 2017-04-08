@@ -28,11 +28,11 @@ const Trainer = new GraphQLObjectType({
       name: {
         type: GraphQLString,
         resolve (trainer, args, context) {
-          // return trainer.name;
-          return knex('trainers').where({ some_id: args })
-          .on('query-error', function(error, obj) {
-            throw new UserError('Unable to fetch trainer name.');
-          })
+          return trainer.name;
+          // return knex('trainers').where({ some_id: args })
+          // .on('query-error', function(error, obj) {
+          //   throw new UserError('Unable to fetch trainer name.');
+          // })
         }
       },
       pokemons: {
@@ -40,8 +40,16 @@ const Trainer = new GraphQLObjectType({
         resolve (trainer, args, context) {
           // return knex('pokemons').where({ trainer_id: trainer.id });
           return context.loaders.pokemon.load(trainer.id)
-        }
+        }     
       },
+      activePokemons: {
+        type: new GraphQLList(Pokemon),
+        resolve (trainer, args, context) {
+          // return knex('pokemons').where({ trainer_id: trainer.id });
+          // return context.loaders.pokemon.load(trainer.id)
+          return knex('pokemons').where('name', 'like', 'P%');
+        }     
+      }      
     };
   }
 });

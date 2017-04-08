@@ -26,6 +26,7 @@ GraphqlGenerator.prototype.printMetadata = function(dbMetadata) {
   writeMutationsFile(dbMetadata);
   writeQueriesFile(dbMetadata);
   writeSchemaDefinition(dbMetadata);
+  // console.log(process._getActiveHandles()[0]);
   // process.exit()
 }
 

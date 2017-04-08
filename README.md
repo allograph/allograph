@@ -117,7 +117,9 @@ const User = new GraphQLObjectType({
 
 ### Command Line Tools
 
-'allo server': Start your Allograph server
+'allograph setup': Initialize the allograph framework for your application.
+
+'allo server': Start your Allograph server.
 
 'allo -h': List of all available commands and options.
 
