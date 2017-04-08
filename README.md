@@ -130,4 +130,3 @@ const User = new GraphQLObjectType({
 'allo create:migration <name>': Creates migration file in /migrations folder.
     Optional flag: '-c, --create_table <tableName>'. Creates migration file that for adding a table of the tableName provided. Automatically provides a column for an incrementing primary key; additional columns can be added in the migration file.
 
-
