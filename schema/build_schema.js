@@ -8,7 +8,7 @@ const build = function() {
     const swaggerQuery = require('../swagger').queryFields('./swagger/swagger.json');
     const swaggerMutation = require('../swagger').mutationFields('./swagger/swagger.json');
 
-    return Promise.all([swaggerQuery, queryFields, swaggerMutation, mutationFields]).then(function(fields) {
+    return Promise.all([swaggerQuery, queryFields, mutationFields]).then(function(fields) {
       const Query = new GraphQLObjectType({
         name: 'Query',
         description: 'Root query object',
@@ -21,7 +21,7 @@ const build = function() {
         name: 'Mutation',
         description: 'Functions to set stuff',
         fields: () => {
-          return Object.assign({}, fields[2], fields[3]);
+          return Object.assign({}, fields[2]);
         }
       });
 
