@@ -9,6 +9,17 @@
   },
   "author": "Ting Chou and Rachel Minto",
   "license": "ISC",
+  "homepage": "http://github.com/allograph/allograph",
+  "keywords": [
+    "allograph",
+    "allo",
+    "graphql",
+    "postgres",
+    "database",
+    "graphql-js",
+    "dataloader"
+  ],
+  "preferGlobal": "true",
   "bin": {
     "allo": "src/build/allo.js",
     "allograph": "src/build/initialize.js"
