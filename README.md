@@ -54,6 +54,12 @@ Example:
   }
 }
 
+## Conventions
+
+Allograph's Postgres reflection assumes the following:
+- Your tablenames are snake case and use the plural form (eg. trainer_clubs)
+- If you have an id column, it is an auto-incrementing integer
+- A junction table is only assumed when you have a table with three columns, two of which are foreign keys.
 
 ## Benefits
 
