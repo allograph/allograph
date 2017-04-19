@@ -15,43 +15,37 @@ import {maskErrors, UserError} from 'graphql-errors';
 var knex = require('../database/connection'),
     jwt = require('jsonwebtoken');
 
-const Pokemon = new GraphQLObjectType({
-  name: 'Pokemon',
-  description: 'This is a table called pokemons',
+const User = new GraphQLObjectType({
+  name: 'User',
+  description: 'This is a table called users',
   fields: () => {
     return {
       id: {
-        type: GraphQLString,
-        resolve (pokemon, args, context) {
-          return pokemon.id;
+        type: new GraphQLNonNull(GraphQLInt),
+        resolve (user, args, context) {
+          return user.id;
         }
       },
-      url: {
+      username: {
+        type: new GraphQLNonNull(Character),
+        resolve (user, args, context) {
+          return user.username;
+        }
+      },
+      enabled: {
+        type: GraphQLBoolean,
+        resolve (user, args, context) {
+          return user.enabled;
+        }
+      },
+      last_login: {
         type: new GraphQLNonNull(GraphQLString),
-        resolve (pokemon, args, context) {
-          return pokemon.url;
-        }
-      },
-      name: {
-        type: new GraphQLNonNull(GraphQLString),
-        resolve (pokemon, args, context) {
-          return pokemon.name;
-        }
-      },
-      trainerId: {
-        type: GraphQLString,
-        resolve (pokemon, args, context) {
-          return pokemon.trainer_id;
-        }
-      },
-      trainer: {
-        type: Trainer,
-        resolve (pokemons, args, context) {
-          return knex('trainers').where({ id: pokemons.trainer_id }).first();
+        resolve (user, args, context) {
+          return user.last_login;
         }
       },
     };
   }
 });
 
-export { Pokemon }
+export { User }

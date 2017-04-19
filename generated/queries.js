@@ -1,38 +1,39 @@
 const queryFields = {
-      trainers: {
-        type: new GraphQLList(Trainer),
-        args: {
-          id: {
-            type: GraphQLString
-          },
+      Trainer: {
+          type: Trainer,
+          args: {
           name: {
             type: GraphQLString
-          }
+          },
         },
-        resolve (root, args, context) {
-          var trainer = new TrainerClass()
-          return trainer.trainers(args);
+        resolve(root, args, context) {
+          return knex('trainers').where({ name: args.name }).first();
         }
       },
-      pokemons: {
-        type: new GraphQLList(Pokemon),
-        args: {
+      Pokemon: {
+          type: Pokemon,
+          args: {
           id: {
             type: GraphQLString
           },
-          url: {
-            type: GraphQLString
+        },
+        resolve(root, args, context) {
+          return knex('pokemons').where({ id: args.id }).first();
+        }
+      },
+      users: {
+        type: new GraphQLList(User),
+        args: {
+          id: {
+            type: GraphQLInt
           },
-          name: {
-            type: GraphQLString
-          },
-          trainerId: {
-            type: GraphQLString
+          enabled: {
+            type: GraphQLBoolean
           }
         },
         resolve (root, args, context) {
-          var pokemon = new PokemonClass()
-          return pokemon.pokemons(args);
+          var user = new UserClass()
+          return user.users(args);
         }
       },
     };

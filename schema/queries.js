@@ -11,7 +11,7 @@ module.exports.Query = {
   name: 'Query',
   description: 'Root query object',
   fields: () => {
-    return {
+    return {  
     }
   }
 };

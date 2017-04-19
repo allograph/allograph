@@ -1,68 +1,41 @@
 const mutationFields = {
-      addTrainer: {
-        type: Trainer,
+      addUser: {
+        type: User,
         args: {
-          name: {
-            type: GraphQLString
+          enabled: {
+            type: GraphQLBoolean
           }
         },
         resolve (root, args, context) {
-          var trainer = new TrainerClass()
-          return trainer.createTrainer(args);
+          var user = new UserClass()
+          return user.createUser(args);
         }
       },
-      updateTrainer: {
-        type: Trainer,
+      updateUser: {
+        type: User,
         args: {
           id: {
-            type: new GraphQLNonNull(GraphQLString)
+            type: new GraphQLNonNull(GraphQLInt)
           },
-          name: {
-            type: GraphQLString
+          enabled: {
+            type: GraphQLBoolean
           }
         },
         resolve (root, args, context) {
-          var trainer = new TrainerClass()
-          return trainer.updateTrainer(args);
+          var user = new UserClass()
+          return user.updateUser(args);
         }
       },
-      addPokemon: {
-        type: Pokemon,
-        args: {
-          url: {
-            type: new GraphQLNonNull(GraphQLString)
-          },
-          name: {
-            type: new GraphQLNonNull(GraphQLString)
-          },
-          trainerId: {
-            type: GraphQLString
-          }
-        },
-        resolve (root, args, context) {
-          var pokemon = new PokemonClass()
-          return pokemon.createPokemon(args);
-        }
-      },
-      updatePokemon: {
-        type: Pokemon,
+      deleteUser: {
+        type: User,
         args: {
           id: {
-            type: GraphQLString
-          },
-          url: {
-            type: new GraphQLNonNull(GraphQLString)
-          },
-          name: {
-            type: new GraphQLNonNull(GraphQLString)
-          },
-          trainerId: {
-            type: GraphQLString
+            type: new GraphQLNonNull(GraphQLInt)
           }
         },
         resolve (root, args, context) {
-          var pokemon = new PokemonClass()
-          return pokemon.updatePokemon(args);
+          var user = new UserClass()
+          return user.deleteUser(args);
         }
       }
     };

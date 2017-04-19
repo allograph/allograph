@@ -12,7 +12,7 @@ import {maskErrors, UserError} from 'graphql-errors';
 
 app.use(cors())
 
-app.use(knexLogger(knex));
+// app.use(knexLogger(knex));
 
 app.use('/graphql', expressJWT({
   secret: 'allograph-secret',
@@ -32,6 +32,13 @@ var getPokemon = function(id) {
   })
 }
 
+var getTrainer = function(id) {
+  return knex('trainers').where({ id: id })
+  .then(function(result) {
+    return result
+  })
+}
+
 var port = process.env.PORT || 4000;
 var GraphQLServer = function () {};
 
@@ -39,11 +46,15 @@ GraphQLServer.prototype.run = function() {
   const pokemonLoader = new DataLoader(
     keys => Promise.all(keys.map(getPokemon))
   )
+  const trainerLoader = new DataLoader(
+    keys => Promise.all(keys.map(getTrainer))
+  )
   const loaders = {
-    pokemon: pokemonLoader
+    pokemon: pokemonLoader,
+    trainer: trainerLoader
   }  
   buildSchema().then(function(schema) {
-    maskErrors(schema);
+    // maskErrors(schema);
     app.use('/graphql', graphqlHTTP((req) => ({
       schema: schema,
       pretty: true,

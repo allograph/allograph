@@ -31,7 +31,7 @@ var Helper = {
       var baseGraphQLObjectType = type.toString().replace(/[\[\]]/g, "")
       newData += `\n          type: new GraphQLList(${baseGraphQLObjectType}),`
     } else if (typemap[type]) {
-      newData += `\n          type: ${toGraphQLTypeFromJSType(type)},`
+      newData += `\n          type: ${this.toGraphQLTypeFromJSType(type)},`
     } else {
       newData += `\n          type: ${type},`
     }
