@@ -42,11 +42,11 @@ export class ${singularCapitalizedTableName} extends Base${singularCapitalizedTa
 
     var pathName = `./schema/models/${singularLowercaseTableName}.js`
     if (fs.existsSync(pathName)) {
-      console.log('Model file already exists and will not be overwritten.')
+      console.log(`Model ${singularLowercaseTableName} file already exists and will not be overwritten.`)
     } else {
       fs.writeFileSync(pathName, data, { flag: 'wx' }, function (err) {
         if (err) {
-          console.log('file already exists.')
+          console.log('Model file already exists and will not be overwritten')
         } else {
           console.log('created file.')
         }
@@ -133,7 +133,7 @@ var validArgsType = function(type) {
           'integer': 'Int',
           'text': 'String',
           'boolean': 'Boolean',
-          'timestamp with time zone': 'String'
+          'timestamp with time zone': 'String',
         };
 
   return typeMap[type]
@@ -320,7 +320,7 @@ var writeQueriesFile = function(dbMetadata) {
             'integer': 'GraphQLInt',
             'boolean': 'GraphQLBoolean',
             'text': 'GraphQLString',
-            'timestamp with time zone': 'GraphQLString'
+            'timestamp with time zone': 'GraphQLString',
           };
 
       if (typeMap[psqlType]) {
@@ -359,7 +359,27 @@ var psqlTypeToGraphQLType = function(psqlType) {
         'integer': 'GraphQLInt',
         'boolean': 'GraphQLBoolean',
         'text': 'GraphQLString',
-        'timestamp with time zone': 'GraphQLString'
+        'timestamp with time zone': 'GraphQLString',
+        'timestamp without time zone': 'GraphQLString',
+        'date': 'GraphQLString',
+        'time without time zone': 'GraphQLString',
+        'time with time zone': 'GraphQLString',
+        'interval': 'GraphQLString',
+        'bigint': 'GraphQLInt',
+        'oid': 'GraphQLInt',
+        'double precision': 'GraphQLInt',
+        'smallint': 'GraphQLInt',
+        'decimal': 'GraphQLInt',
+        'numeric': 'GraphQLInt',
+        'real': 'GraphQLInt',
+        'smallserial': 'GraphQLInt',
+        'serial': 'GraphQLInt',
+        'bigserial': 'GraphQLInt',
+        'money': 'GraphQLInt',
+        'bytea': 'GraphQLString',
+        'json': 'GraphQLString',
+        'jsonb': 'GraphQLString',
+        'ARRAY': 'GraphQLString'
       }
 
   if (listType) {
